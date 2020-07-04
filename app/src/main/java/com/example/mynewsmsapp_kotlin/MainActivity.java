@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivity inst;
 
-    //will be used as request code forrequestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
-    private static final int READ_SMS_PERMISSION_REQUEST = 27015;
+    //will be used as requestCode parameter in requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
+    private static final int REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
 
     @Override
     public void onStart() {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == READ_SMS_PERMISSION_REQUEST) {
+        if (requestCode == REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Read SMS permission granted", Toast.LENGTH_SHORT).show();
                 refreshSmsInbox();
@@ -80,13 +80,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
             }
             //and then let the system request permission from user for your app.
-            //results in callback toonRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-            requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
+            //results in callback to onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+            requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
         }
     }
 
     public  void refreshSmsInbox(){
-        ContentResolver content_resolver = getContentResolver();
+        ContentResolver content_resolver = getContentResolver(); // CONTINUE READING FROM HERE
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
         int index_body = sms_inbox_cursor.getColumnIndex("body");
         int index_address = sms_inbox_cursor.getColumnIndex("address");
