@@ -30,7 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivity inst;
 
-    private static final int READ_SMS_PERMISSION_REQUEST = 1;
+    //will be used as request code forrequestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
+    private static final int READ_SMS_PERMISSION_REQUEST = 27015;
 
     @Override
     public void onStart() {
@@ -49,12 +50,13 @@ public class MainActivity extends AppCompatActivity {
         messages.setAdapter(array_adapter);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             EditText input;
-           getPermissionToReadSms();   //will define later
+            getPermissionToReadSms();
         } else {
-           refreshSmsInbox();        //will define later
+           refreshSmsInbox();
         }
     }
 
+    // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == READ_SMS_PERMISSION_REQUEST) {
@@ -73,9 +75,12 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void getPermissionToReadSms(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED){
+            //if permission is not granted then show an education UI to give reason to user
             if(shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)){
                 Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
             }
+            //and then let the system request permission from user for your app.
+            //results in callback toonRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
             requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
         }
     }
