@@ -88,8 +88,15 @@ public class MainActivity extends AppCompatActivity {
     public  void refreshSmsInbox(){
         ContentResolver content_resolver = getContentResolver(); // CONTINUE READING FROM HERE
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        System.out.println("[DEBUG] all columns in sms/inbox : \n [DEBUG] \n");
+        for(String str_col : sms_inbox_cursor.getColumnNames()) {
+            System.out.print(" " + str_col);
+        }
+        System.out.println();
         int index_body = sms_inbox_cursor.getColumnIndex("body");
+        System.out.println("[DEBUG] Line 91 returns : " + index_body + "\n");
         int index_address = sms_inbox_cursor.getColumnIndex("address");
+        System.out.println("[DEBUG] Line 94 returns : " + index_address + "\n");
         if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
             return;
         }
@@ -105,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getPermissionToReadSms(); //will define later
         } else {
-            sms_manager.sendTextMessage("9999966666", null, input.getText().toString(), null, null);
+            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
             Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
     }
