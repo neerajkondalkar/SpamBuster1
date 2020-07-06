@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -22,12 +23,16 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getSimpleName(); //for debugging
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
     EditText input;
     SmsManager sms_manager = SmsManager.getDefault();
 
+    // store current instance in inst, will be used in SmsBroadCast receiver to  call
+    // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
     private static MainActivity inst;
 
     //will be used as requestCode parameter in requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
@@ -88,9 +93,11 @@ public class MainActivity extends AppCompatActivity {
     public  void refreshSmsInbox(){
         ContentResolver content_resolver = getContentResolver(); // CONTINUE READING FROM HERE
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
-        System.out.println("[DEBUG] all columns in sms/inbox : \n [DEBUG] \n");
+        System.out.print("[DEBUG] " + TAG + " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+        //Log.d(TAG, "refreshSmsInbox: All columns in sms/inbox are :");
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
             System.out.print(" " + str_col);
+            //Log.d(TAG, str_col);
         }
         System.out.println();
         int index_body = sms_inbox_cursor.getColumnIndex("body");
@@ -110,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickSendButton(View view) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            getPermissionToReadSms(); //will define later
+            getPermissionToReadSms();
         } else {
             sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
             Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
@@ -118,10 +125,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateInbox(final String sms_message){
+        //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
+        //notify the individual views in adapter view about the change
         array_adapter.notifyDataSetChanged();
     }
 
+    //just to preserve the current instance so that it is not lost when we return from SmsBroadcastReciever class
     public static MainActivity instance() {
         return inst;
     }
