@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -52,9 +53,22 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 Log.d(TAG, " onReceive(): sms_message_str = " + sms_message_str);
             }
 
-            //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
-            MainActivity inst = MainActivity.instance();
-            inst.updateInbox(sms_message_str);
+            Toast.makeText(context, "Message received from + " + "<will add later>", Toast.LENGTH_SHORT).show();
+
+            //if there is alread yan instance of MainActivy then don't create an instance
+            if(MainActivity.active) {
+                //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
+                MainActivity inst = MainActivity.instance();
+                //to update the current array adapter view so that the index 0 of list view will show the latest sms received
+                inst.updateInbox(sms_message_str);
+            }
+            //if no instance of MainActivity is running, then create an instance using intent
+            else{
+                Intent i = new Intent(context, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is launched so that it comes front
+                //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
+                context.startActivity(i);
+            }
         }
     }
 }

@@ -35,13 +35,21 @@ public class MainActivity extends AppCompatActivity {
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
     private static MainActivity inst;
 
+    public static boolean active = false;
+
     //will be used as requestCode parameter in requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
-    private static final int REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
+    private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
 
     @Override
     public void onStart() {
         super.onStart();
+        active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
         inst = this;
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        active = false; //indicate that activity is not live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -53,10 +61,13 @@ public class MainActivity extends AppCompatActivity {
         input = (EditText) findViewById(R.id.sms_text_input);
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            //if permission to READ_SMS is not granted
             EditText input;
-            getPermissionToReadSms();
+            getNecessaryPermissions();
         } else {
+            //if permission is already granted previously
            refreshSmsInbox();
         }
     }
@@ -64,12 +75,22 @@ public class MainActivity extends AppCompatActivity {
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Read SMS permission granted", Toast.LENGTH_SHORT).show();
+        if (requestCode == REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS) {
+            if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Read SMS and Read contacts permission granted", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, permissions[0] + " " + permissions[1] + " permissions granted");
                 refreshSmsInbox();
-            } else {
-                Toast.makeText(this, "Read SMS permission denied", Toast.LENGTH_SHORT).show();
+            } else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_DENIED){
+                Toast.makeText(this, "Read SMS and Read contacts permission denied", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, permissions[0] + " " + permissions[1] + " permissions denied");
+            }
+            else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED){
+                Toast.makeText(this, "Read SMS granted and Read contacts permission denied", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, permissions[0] + " permission granted " + permissions[1] + " permissions denied");
+            }
+            else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Read SMS denied and Read contacts permission granted", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, permissions[0] + " permission denied " + permissions[1] + " permissions granted");
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -77,8 +98,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //requesting permissions to read sms, read contacts
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void getPermissionToReadSms(){
+    public void getNecessaryPermissions(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED){
             //if permission is not granted then show an education UI to give reason to user
             if(shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)){
@@ -86,13 +108,15 @@ public class MainActivity extends AppCompatActivity {
             }
             //and then let the system request permission from user for your app.
             //results in callback to onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-            requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
+            requestPermissions(new String[]{Manifest.permission.READ_SMS, Manifest.permission.READ_CONTACTS}, REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS);
         }
     }
 
+    //reads all sms from database and display all the sms using the array_adapter
     public  void refreshSmsInbox(){
-        ContentResolver content_resolver = getContentResolver(); // CONTINUE READING FROM HERE
+        ContentResolver content_resolver = getContentResolver();
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        //[DEBUG] start
         System.out.print("[DEBUG] " + TAG + " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
         //Log.d(TAG, "refreshSmsInbox: All columns in sms/inbox are :");
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
@@ -100,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
             //Log.d(TAG, str_col);
         }
         System.out.println();
+        //[DEBUG] end
+
         int index_body = sms_inbox_cursor.getColumnIndex("body");
         System.out.println("[DEBUG] Line 91 returns : " + index_body + "\n");
         int index_address = sms_inbox_cursor.getColumnIndex("address");
@@ -117,13 +143,14 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickSendButton(View view) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            getPermissionToReadSms();
+            getNecessaryPermissions();
         } else {
             sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
             Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
     }
 
+    //to update the array adapter view so that the index 0 of list view will show the latest sms received
     public void updateInbox(final String sms_message){
         //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
