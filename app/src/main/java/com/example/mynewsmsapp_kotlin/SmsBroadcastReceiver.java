@@ -28,6 +28,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             Object[] sms = (Object[]) intent_extras.get(SMS_BUNDLE);
             System.out.println("[DEBUG] + " + TAG + " onReceive(): value of sms = " + sms);
             String sms_message_str = "";
+            String sender_number = "";
             Log.d(TAG, " onReceive(): sms_message_str = " + sms_message_str);
             for (int i=0; i<sms.length; i++){
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): sms_message_str = " + sms_message_str);
@@ -46,26 +47,29 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): sms_body = " + sms_body);
                 //toString() is redundant
                 String address = sms_message.getOriginatingAddress().toString();
+                sender_number = address;
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): address = " + address);
 
-                sms_message_str += "SMS from: " + address + "\n";
+                sms_message_str += "SMS from: " + MainActivity.getContactName(context, sender_number) + "\n";
                 sms_message_str += sms_body + "\n";
                 Log.d(TAG, " onReceive(): sms_message_str = " + sms_message_str);
             }
 
-            Toast.makeText(context, "Message received from + " + "<will add later>", Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(context, "Message received from + " + MainActivity.getContactName(context, sender_number), Toast.LENGTH_SHORT).show();
 
             //if there is alread yan instance of MainActivy then don't create an instance
             if(MainActivity.active) {
                 //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
                 MainActivity inst = MainActivity.instance();
+
                 //to update the current array adapter view so that the index 0 of list view will show the latest sms received
                 inst.updateInbox(sms_message_str);
             }
             //if no instance of MainActivity is running, then create an instance using intent
             else{
                 Intent i = new Intent(context, MainActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is launched so that it comes front
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is to be launched in a new task stack.
                 //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
                 context.startActivity(i);
             }

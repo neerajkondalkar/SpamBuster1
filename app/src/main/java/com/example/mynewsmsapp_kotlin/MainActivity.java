@@ -2,11 +2,13 @@ package com.example.mynewsmsapp_kotlin;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver content_resolver = getContentResolver();
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
         //[DEBUG] start
-        System.out.print("[DEBUG] " + TAG + " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+        System.out.print(TAG + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
         //Log.d(TAG, "refreshSmsInbox: All columns in sms/inbox are :");
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
             System.out.print(" " + str_col);
@@ -127,17 +129,43 @@ public class MainActivity extends AppCompatActivity {
         //[DEBUG] end
 
         int index_body = sms_inbox_cursor.getColumnIndex("body");
-        System.out.println("[DEBUG] Line 91 returns : " + index_body + "\n");
+//        System.out.println("[DEBUG] Line 91 returns : " + index_body + "\n");
+        Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index body = " + index_body + '\n');
         int index_address = sms_inbox_cursor.getColumnIndex("address");
-        System.out.println("[DEBUG] Line 94 returns : " + index_address + "\n");
+//        System.out.println("[DEBUG] Line 94 returns : " + index_address + "\n");
+        Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index_address = " + index_address + '\n');
         if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
             return;
         }
         array_adapter.clear();
         do{
-            String str = "SMS From: " + sms_inbox_cursor.getString(index_address) + "\n" + sms_inbox_cursor.getString(index_body);
+            String str = "SMS From: " + getContactName(this, sms_inbox_cursor.getString(index_address)) + "\n" + sms_inbox_cursor.getString(index_body);
+            Log.d(TAG, " [DEBUG] refreshInbox(): getContactName() returns = " + getContactName(this, sms_inbox_cursor.getString(index_address)));
+            /*
+            if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
+
+                array_adapter.add(str);
+            }
+            */
             array_adapter.add(str);
         }while (sms_inbox_cursor.moveToNext());
+    }
+
+    public  static  String getContactName(Context context, String phone_number){
+        ContentResolver content_resolver = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
+        Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+        if (cursor == null){
+            return phone_number;
+        }
+        String name = phone_number;
+        if(cursor.moveToNext()){
+            name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        }
+        if (cursor!=null && !cursor.isClosed()){
+            cursor.close();
+        }
+        return name;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
