@@ -17,20 +17,20 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public static final String SMS_BUNDLE = "pdus";
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void onReceive(Context context, Intent intent){
+    public void onReceive(Context context, Intent intent) {
         //since the SMS_RECEIVED_ACTION intent makes a callback with Context and Intent
         // and gives the pdus - which is what the sms message is these days SMS PDU mode - and format - which can be either "3gpp" or "3gpp2" - as extra values
         //so to get the handle to all the extras
         Bundle intent_extras = intent.getExtras();
 
-        if(intent_extras != null){
+        if (intent_extras != null) {
             //get only the raw pdus i.e the SMS
             Object[] sms = (Object[]) intent_extras.get(SMS_BUNDLE);
             System.out.println("[DEBUG] + " + TAG + " onReceive(): value of sms = " + sms);
             String sms_message_str = "";
             String sender_number = "";
             Log.d(TAG, " onReceive(): sms_message_str = " + sms_message_str);
-            for (int i=0; i<sms.length; i++){
+            for (int i = 0; i < sms.length; i++) {
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): sms_message_str = " + sms_message_str);
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): i = " + i);
 
@@ -59,7 +59,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             Toast.makeText(context, "Message received from + " + MainActivity.getContactName(context, sender_number), Toast.LENGTH_SHORT).show();
 
             //if there is alread yan instance of MainActivy then don't create an instance
-            if(MainActivity.active) {
+            if (MainActivity.active) {
                 //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
                 MainActivity inst = MainActivity.instance();
 
@@ -67,7 +67,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 inst.updateInbox(sms_message_str);
             }
             //if no instance of MainActivity is running, then create an instance using intent
-            else{
+            else {
                 Intent i = new Intent(context, MainActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is to be launched in a new task stack.
                 //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
