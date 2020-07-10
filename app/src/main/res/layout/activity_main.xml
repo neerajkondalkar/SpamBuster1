@@ -93,7 +93,7 @@
 
     <ToggleButton
         android:id="@+id/ham_sms_toggle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="150dp"
         android:layout_marginLeft="150dp"

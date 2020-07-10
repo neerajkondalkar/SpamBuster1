@@ -57,12 +57,6 @@ public class MainActivity extends AppCompatActivity {
         inst = this;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
-        inst = this;
-    }
 
     @Override
     public void onStop() {
