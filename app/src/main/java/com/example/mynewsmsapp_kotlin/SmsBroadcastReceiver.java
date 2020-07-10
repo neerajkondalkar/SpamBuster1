@@ -68,6 +68,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
                 //if there is alread yan instance of MainActivy then don't create an instance
                 if (MainActivity.active) {
+                    Log.d(TAG, "MainActivity= " + MainActivity.active);
                     //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
                     MainActivity inst = MainActivity.instance();
 
@@ -76,6 +77,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 }
                 //if no instance of MainActivity is running, then create an instance using intent
                 else {
+                    Log.d(TAG, "MainActivity= " + MainActivity.active);
                     Intent i = new Intent(context, MainActivity.class);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is to be launched in a new task stack.
                     //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.

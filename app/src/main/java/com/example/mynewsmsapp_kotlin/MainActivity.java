@@ -52,14 +52,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
+        TAG.concat(" onStart() ");
+        Log.d(TAG, " called ");
         super.onStart();
         active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
         inst = this;
     }
 
-
     @Override
     public void onStop() {
+        TAG.concat(" onStop() ");
+        Log.d(TAG, " called ");
         super.onStop();
         active = false; //indicate that activity is not live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
     }
@@ -67,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TAG.concat(" onCreate() ");
+        Log.d(TAG, " called ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (ListView) findViewById(R.id.messages);
@@ -127,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
     //reads all sms from database and display all the sms using the array_adapter
     public  void refreshSmsInbox() {
         TAG.concat(" refreshSmsInbox() : ");
+        Log.d(TAG, " called ");
         ContentResolver content_resolver = getContentResolver();
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
         //[DEBUG] start
@@ -201,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
     public void updateInbox(final String sms_message){
+        TAG.concat(" updateInbox() : ");
+        Log.d(TAG, " called ");
+
         //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
 
