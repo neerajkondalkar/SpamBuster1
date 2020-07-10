@@ -18,15 +18,23 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName(); //for debugging
+    private String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
@@ -48,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
         active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
         inst = this;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
+        inst = this;
+    }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -115,12 +131,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //reads all sms from database and display all the sms using the array_adapter
-    public  void refreshSmsInbox(){
+    public  void refreshSmsInbox() {
+        TAG.concat(" refreshSmsInbox() : ");
         ContentResolver content_resolver = getContentResolver();
-        Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
         //[DEBUG] start
         System.out.print(TAG + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
-        //Log.d(TAG, "refreshSmsInbox: All columns in sms/inbox are :");
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
             System.out.print(" " + str_col);
             //Log.d(TAG, str_col);
@@ -129,17 +145,28 @@ public class MainActivity extends AppCompatActivity {
         //[DEBUG] end
 
         int index_body = sms_inbox_cursor.getColumnIndex("body");
-//        System.out.println("[DEBUG] Line 91 returns : " + index_body + "\n");
+        int index_date = sms_inbox_cursor.getColumnIndex("date");
         Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index body = " + index_body + '\n');
         int index_address = sms_inbox_cursor.getColumnIndex("address");
-//        System.out.println("[DEBUG] Line 94 returns : " + index_address + "\n");
         Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index_address = " + index_address + '\n');
         if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
             return;
         }
         array_adapter.clear();
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+        String date_str="";
+        long milli_seconds=0;
+        Calendar calendar = Calendar.getInstance();
+        String printable_date;
         do{
-            String str = "SMS From: " + getContactName(this, sms_inbox_cursor.getString(index_address)) + "\n" + sms_inbox_cursor.getString(index_body);
+            date_str = sms_inbox_cursor.getString(index_date);
+            milli_seconds = Long.parseLong(date_str);
+            Log.d(TAG, "milli_seconds = " + Long.toString(milli_seconds));
+            calendar.setTimeInMillis(milli_seconds);
+            Log.d(TAG, "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
+            printable_date = formatter.format(calendar.getTime());
+            String str = "SMS From: " + getContactName(this, sms_inbox_cursor.getString(index_address)) + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
+
             Log.d(TAG, " [DEBUG] refreshInbox(): getContactName() returns = " + getContactName(this, sms_inbox_cursor.getString(index_address)));
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
@@ -182,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateInbox(final String sms_message){
         //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
+
         //notify the individual views in adapter view about the change
         array_adapter.notifyDataSetChanged();
     }
