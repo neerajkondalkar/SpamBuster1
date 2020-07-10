@@ -23,8 +23,8 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
         String intent_getAction = intent.getAction().toString();
         Log.d(TAG, "onRecieve() : Action that made the callback is " + intent_getAction);
 
+        //only take action on SMS_RECEIVE, so as to remove the double printing of each new sms because of SMS_DELIVER and SMS_RECEIVE
         if (intent.getAction().toString().matches(action_sms_received)) {
-
 
             //since the SMS_RECEIVED_ACTION intent makes a callback with Context and Intent
             // and gives the pdus - which is what the sms message is these days SMS PDU mode - and format - which can be either "3gpp" or "3gpp2" - as extra values
@@ -32,7 +32,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             Bundle intent_extras = intent.getExtras();
 
             if (intent_extras != null) {
-                //get only the raw pdus i.e the SMS
+                //get only the raw pdus i.e the SMS for now, later we will also extract the 'format' value
                 Object[] sms = (Object[]) intent_extras.get(SMS_BUNDLE);
                 System.out.println("[DEBUG] + " + TAG + " onReceive(): value of sms = " + sms);
                 String sms_message_str = "";
