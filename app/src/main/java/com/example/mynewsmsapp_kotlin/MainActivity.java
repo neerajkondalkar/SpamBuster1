@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onStop = " onDestroy(): ";
         Log.d(TAG, TAG_onStop + " called ");
         super.onDestroy();
-        active = false; //indicate that activity is killed so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
+        active = false; //indicate that activity is killed ,   check SmsBroadcastReceiver.onReceive() method
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -151,19 +151,22 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver content_resolver = getContentResolver();
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
         //[DEBUG] start
-        System.out.print(TAG + TAG_refreshSmsInbox + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+//        System.out.print(TAG + TAG_refreshSmsInbox + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+        Log.d(TAG, TAG_refreshSmsInbox + " all columns in sms/inbox : ");
+        int column_index=0;
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
-            System.out.print(" " + str_col);
-            //Log.d(TAG, str_col);
+            //System.out.print(" " + str_col);
+            Log.d(TAG, TAG_refreshSmsInbox + " [ " + column_index + " ] " + str_col);
+            column_index++;
         }
         System.out.println();
         //[DEBUG] end
 
         int index_body = sms_inbox_cursor.getColumnIndex("body");
         int index_date = sms_inbox_cursor.getColumnIndex("date");
-        Log.d(TAG, TAG_refreshSmsInbox+  " [DEBUG] refreshSmsInbox(): index body = " + index_body + '\n');
+        Log.d(TAG, TAG_refreshSmsInbox+  "index body = " + index_body + '\n');
         int index_address = sms_inbox_cursor.getColumnIndex("address");
-        Log.d(TAG, TAG_refreshSmsInbox+  " [DEBUG] refreshSmsInbox(): index_address = " + index_address + '\n');
+        Log.d(TAG, TAG_refreshSmsInbox+  "index_address = " + index_address + '\n');
         if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
             return;
         }
@@ -180,9 +183,10 @@ public class MainActivity extends AppCompatActivity {
             calendar.setTimeInMillis(milli_seconds);
             Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
-            String str = "SMS From: " + getContactName(this, sms_inbox_cursor.getString(index_address)) + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
+            String contact_name = getContactName(this, sms_inbox_cursor.getString(index_address));
+            String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
 
-            Log.d(TAG, TAG_refreshSmsInbox + " [DEBUG] refreshInbox(): getContactName() returns = " + getContactName(this, sms_inbox_cursor.getString(index_address)));
+            Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
@@ -197,14 +201,18 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_getContactName = " getContactName(): ";
         Log.d(TAG, TAG_getContactName + " called ");
         ContentResolver content_resolver = context.getContentResolver();
+        Log.d(TAG, TAG_getContactName + "content_resolver = " + content_resolver);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
+        Log.d(TAG, TAG_getContactName + "uri = " + uri);
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+        Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
         if (cursor == null){
             return phone_number;
         }
         String name = phone_number;
         if(cursor.moveToNext()){
             name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            Log.d(TAG, TAG_getContactName + "name = " + name);
         }
         if (cursor!=null && !cursor.isClosed()){
             cursor.close();

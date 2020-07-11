@@ -21,7 +21,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
         final String TAG_onReceive = " onReceive(): ";
         String action_sms_received = "android.provider.Telephony.SMS_RECEIVED";
         String intent_getAction = intent.getAction().toString();
-        Log.d(TAG, TAG_onReceive + "onRecieve() : Action that made the callback is " + intent_getAction);
+        Log.d(TAG, TAG_onReceive + "Action that made the callback is " + intent_getAction);
 
         //only take action on SMS_RECEIVE, so as to remove the double printing of each new sms because of SMS_DELIVER and SMS_RECEIVE
         if (intent.getAction().toString().matches(action_sms_received)) {
@@ -34,33 +34,39 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             if (intent_extras != null) {
                 //get only the raw pdus i.e the SMS for now, later we will also extract the 'format' value
                 Object[] sms = (Object[]) intent_extras.get(SMS_BUNDLE);
-                System.out.println("[DEBUG] + " + TAG + " onReceive(): value of sms = " + sms);
-                String sms_message_str = "";
-                String sender_number = "";
-                Log.d(TAG, TAG_onReceive + " onReceive(): sms_message_str = " + sms_message_str);
-                for (int i = 0; i < sms.length; i++) {
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): sms_message_str = " + sms_message_str);
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): i = " + i);
+                Log.d(TAG, TAG_onReceive + "Value of sms = " + sms + " which is of type " + sms.getClass());
 
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): sms[i] = " + sms[i]);
+                String sms_message_str = "";
+                String sender_number = ""; //for Toad.makeText()   to show sender number or name
+
+                Log.d(TAG, TAG_onReceive + " sms_message_str = " + sms_message_str);
+                for (int i = 0; i < sms.length; i++) {
+                    Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
+                    Log.d(TAG, TAG_onReceive + "i = " + i);
+
+                    Log.d(TAG, TAG_onReceive + "sms[i] = " + sms[i]);
+
                     //get the format (extra value) which is of String type
                     String format = intent_extras.getString("format");
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): format = " + format);
+                    Log.d(TAG, TAG_onReceive + "format = " + format);
+
                     //create an sms from raw pdu using the format given during the callback by the intent
                     SmsMessage sms_message = SmsMessage.createFromPdu((byte[]) sms[i], format);
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): sms_message = " + sms_message);
+                    Log.d(TAG, TAG_onReceive + " sms_message = " + sms_message);
 
                     //toString() is redundant
                     String sms_body = sms_message.getMessageBody().toString();
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): sms_body = " + sms_body);
+                    Log.d(TAG, TAG_onReceive + "sms_body = " + sms_body);
+
                     //toString() is redundant
                     String address = sms_message.getOriginatingAddress().toString();
-                    sender_number = address;
-                    System.out.println("[DEBUG] + " + TAG_onReceive + " onReceive(): address = " + address);
+                    Log.d(TAG, TAG_onReceive + "address = " + address);
 
                     sms_message_str += "SMS from: " + MainActivity.getContactName(context, sender_number) + "\n";
                     sms_message_str += sms_body + "\n";
-                    Log.d(TAG, TAG_onReceive + " onReceive(): sms_message_str = " + sms_message_str);
+                    Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
+
+                    sender_number = address; // for Toast.makeText()   to show sender number or name
                 }
 
 
@@ -68,7 +74,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
                 //if there is alread yan instance of MainActivy then don't create an instance
                 if (MainActivity.active) {
-                    Log.d(TAG, TAG_onReceive + "MainActivity= " + MainActivity.active);
+                    Log.d(TAG, TAG_onReceive + "MainActivity.active = " + MainActivity.active);
                     //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
                     MainActivity inst = MainActivity.instance();
 
@@ -77,7 +83,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 }
                 //if no instance of MainActivity is running, then create an instance using intent
                 else {
-                    Log.d(TAG, TAG_onReceive + "MainActivity= " + MainActivity.active);
+                    Log.d(TAG, TAG_onReceive + "MainActivity.active = " + MainActivity.active);
                     Intent i = new Intent(context, MainActivity.class);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is to be launched in a new task stack.
                     //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
