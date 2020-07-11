@@ -34,7 +34,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
+    private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
@@ -52,8 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
-        TAG.concat(" onStart() ");
-        Log.d(TAG, " called ");
+        String TAG_onstart;
+        TAG_onstart = TAG + " onStart(): ";
+        Log.d(TAG_onstart, " called ");
         super.onStart();
         active = true; //indicate that activity is live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
         inst = this;
@@ -61,17 +62,27 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
-        TAG.concat(" onStop() ");
-        Log.d(TAG, " called ");
+        final String TAG_onStop = TAG + " onStop(): ";
+        Log.d(TAG_onStop, " called ");
         super.onStop();
-        active = false; //indicate that activity is not live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
+        //active = false; //indicate that activity is not live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
+                            //                  creates problem because even if app is minimized it says not active resulting in no new message display
+                            // puting active = false in onDestroy;
+    }
+
+    @Override
+    protected void onDestroy() {
+        final String TAG_onStop = " onDestroy(): ";
+        Log.d(TAG, TAG_onStop + " called ");
+        super.onDestroy();
+        active = false; //indicate that activity is killed so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        TAG.concat(" onCreate() ");
-        Log.d(TAG, " called ");
+        final String TAG_onCreate = TAG + " onCreate() ";
+        Log.d(TAG_onCreate, " called ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (ListView) findViewById(R.id.messages);
@@ -92,22 +103,24 @@ public class MainActivity extends AppCompatActivity {
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+       final  String TAG_onRequestPermissionResult = "onReqestPermissionResult(): ";
+       Log.d(TAG, TAG_onRequestPermissionResult + " called ");
         if (requestCode == REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS) {
             if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Read SMS and Read contacts permission granted", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, permissions[0] + " " + permissions[1] + " permissions granted");
+                Log.d(TAG,  TAG_onRequestPermissionResult + permissions[0] + " " + permissions[1] + " permissions granted");
                 refreshSmsInbox();
             } else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_DENIED){
                 Toast.makeText(this, "Read SMS and Read contacts permission denied", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, permissions[0] + " " + permissions[1] + " permissions denied");
+                Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " " + permissions[1] + " permissions denied");
             }
             else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED){
                 Toast.makeText(this, "Read SMS granted and Read contacts permission denied", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, permissions[0] + " permission granted " + permissions[1] + " permissions denied");
+                Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " permission granted " + permissions[1] + " permissions denied");
             }
             else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
                 Toast.makeText(this, "Read SMS denied and Read contacts permission granted", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, permissions[0] + " permission denied " + permissions[1] + " permissions granted");
+                Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " permission denied " + permissions[1] + " permissions granted");
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -118,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
     //requesting permissions to read sms, read contacts
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void getNecessaryPermissions(){
+        final String TAG_getNecessaryPermissions = " getNecessartPermissions(): ";
+        Log.d(TAG, TAG_getNecessaryPermissions + " called");
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED){
             //if permission is not granted then show an education UI to give reason to user
             if(shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)){
@@ -131,12 +146,12 @@ public class MainActivity extends AppCompatActivity {
 
     //reads all sms from database and display all the sms using the array_adapter
     public  void refreshSmsInbox() {
-        TAG.concat(" refreshSmsInbox() : ");
-        Log.d(TAG, " called ");
+        final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
+        Log.d(TAG, TAG_refreshSmsInbox + " called ");
         ContentResolver content_resolver = getContentResolver();
         Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
         //[DEBUG] start
-        System.out.print(TAG + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+        System.out.print(TAG + TAG_refreshSmsInbox + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
         for(String str_col : sms_inbox_cursor.getColumnNames()) {
             System.out.print(" " + str_col);
             //Log.d(TAG, str_col);
@@ -146,9 +161,9 @@ public class MainActivity extends AppCompatActivity {
 
         int index_body = sms_inbox_cursor.getColumnIndex("body");
         int index_date = sms_inbox_cursor.getColumnIndex("date");
-        Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index body = " + index_body + '\n');
+        Log.d(TAG, TAG_refreshSmsInbox+  " [DEBUG] refreshSmsInbox(): index body = " + index_body + '\n');
         int index_address = sms_inbox_cursor.getColumnIndex("address");
-        Log.d(TAG,  " [DEBUG] refreshSmsInbox(): index_address = " + index_address + '\n');
+        Log.d(TAG, TAG_refreshSmsInbox+  " [DEBUG] refreshSmsInbox(): index_address = " + index_address + '\n');
         if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
             return;
         }
@@ -161,24 +176,26 @@ public class MainActivity extends AppCompatActivity {
         do{
             date_str = sms_inbox_cursor.getString(index_date);
             milli_seconds = Long.parseLong(date_str);
-            Log.d(TAG, "milli_seconds = " + Long.toString(milli_seconds));
+            Log.d(TAG, TAG_refreshSmsInbox+ "milli_seconds = " + Long.toString(milli_seconds));
             calendar.setTimeInMillis(milli_seconds);
-            Log.d(TAG, "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
+            Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
             String str = "SMS From: " + getContactName(this, sms_inbox_cursor.getString(index_address)) + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
 
-            Log.d(TAG, " [DEBUG] refreshInbox(): getContactName() returns = " + getContactName(this, sms_inbox_cursor.getString(index_address)));
+            Log.d(TAG, TAG_refreshSmsInbox + " [DEBUG] refreshInbox(): getContactName() returns = " + getContactName(this, sms_inbox_cursor.getString(index_address)));
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
                 array_adapter.add(str);
             }
             */
-            array_adapter.add(str);
+            array_adapter.add(str); //add the message to adapter list view
         }while (sms_inbox_cursor.moveToNext());
     }
 
     public  static  String getContactName(Context context, String phone_number){
+        final String TAG_getContactName = " getContactName(): ";
+        Log.d(TAG, TAG_getContactName + " called ");
         ContentResolver content_resolver = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
@@ -197,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickSendButton(View view) {
+        final String TAG_onClickSendButton = " onClickSendButton(): ";
+        Log.d(TAG, TAG_onClickSendButton  +" called ");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
         } else {
@@ -207,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
     public void updateInbox(final String sms_message){
-        TAG.concat(" updateInbox() : ");
-        Log.d(TAG, " called ");
+        final String TAG_updateInbox = " updateInbox(): ";
+        Log.d(TAG, TAG_updateInbox  +" called ");
 
         //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
