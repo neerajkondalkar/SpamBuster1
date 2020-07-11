@@ -184,9 +184,10 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
             String contact_name = getContactName(this, sms_inbox_cursor.getString(index_address));
+            Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
+
             String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
 
-            Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
@@ -200,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
     public  static  String getContactName(Context context, String phone_number){
         final String TAG_getContactName = " getContactName(): ";
         Log.d(TAG, TAG_getContactName + " called ");
+        Log.d(TAG, TAG_getContactName + " phone_number = " + phone_number);
         ContentResolver content_resolver = context.getContentResolver();
         Log.d(TAG, TAG_getContactName + "content_resolver = " + content_resolver);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));

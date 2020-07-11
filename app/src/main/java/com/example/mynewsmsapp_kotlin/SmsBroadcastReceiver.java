@@ -62,7 +62,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     String address = sms_message.getOriginatingAddress().toString();
                     Log.d(TAG, TAG_onReceive + "address = " + address);
 
-                    sms_message_str += "SMS from: " + MainActivity.getContactName(context, sender_number) + "\n";
+                    sms_message_str += "SMS from: " + MainActivity.getContactName(context, address) + "\n";
                     sms_message_str += sms_body + "\n";
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
 
