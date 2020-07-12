@@ -31,10 +31,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
+    private static final String KEY_LIST_CONTENTS = "ListContent";
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
@@ -97,7 +100,24 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //if permission is already granted previously
            refreshSmsInbox();
+//            getSmsFromInbox();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        final String TAG_onSaveInstanceState = " onSaveInstanceState(): ";
+        Log.d(TAG, TAG_onSaveInstanceState + "called");
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        final String TAG_onRestoreInstanceState = " onRestoreInstanceState(): ";
+        Log.d(TAG, TAG_onRestoreInstanceState + "called");
+        super.onRestoreInstanceState(savedInstanceState);
+        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
     }
 
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
@@ -146,6 +166,8 @@ public class MainActivity extends AppCompatActivity {
 
     //reads all sms from database and display all the sms using the array_adapter
     public  void refreshSmsInbox() {
+//        ArrayList<String> sms_list = new ArrayList<String>();
+
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
         ContentResolver content_resolver = getContentResolver();
@@ -195,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
             }
             */
             array_adapter.add(str); //add the message to adapter list view
+//            sms_list.add(str);
         }while (sms_inbox_cursor.moveToNext());
     }
 
