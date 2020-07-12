@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity"
             android:launchMode="singleInstance" >
 
@@ -38,27 +39,32 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
+
         </activity>
 
         <receiver android:name=".SmsBroadcastReceiver"
             android:exported="true"
             android:enabled="true"
             android:permission="android.permission.BROADCAST_SMS">
+
             <intent-filter android:priority="999" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
                 <action android:name="android.provider.Telephony.SMS_DELIVER_ACTION" />
             </intent-filter>
+
         </receiver>
 
         <receiver android:name=".MmsBroadcastReceiver"
             android:exported="true"
             android:permission="android.permission.BROADCAST_WAP_PUSH">
+
             <intent-filter android:priority="999" >
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
                 <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
+
         </receiver>
 
         <service
@@ -66,6 +72,7 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
+
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
@@ -74,6 +81,7 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
+
         </service>
 
     </application>
