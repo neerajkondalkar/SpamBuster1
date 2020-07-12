@@ -3,6 +3,7 @@ package com.example.mynewsmsapp_kotlin;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -252,8 +253,10 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
         } else {
-            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
-            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
+            Intent intent_to_send_new_sms = new Intent(this, ComposeNewSms.class);
+            
+//            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
+//            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
     }
 
