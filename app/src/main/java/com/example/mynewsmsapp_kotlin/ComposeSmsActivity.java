@@ -27,7 +27,7 @@ public class ComposeSmsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_compose_sms);
 
         input_contact = (EditText) findViewById(R.id.edit_text_phone_or_name);
-        input_sms = (EditText) findViewById(R.id.sms_text_input);
+        input_sms = (EditText) findViewById(R.id.edit_text_input_message);
 
         checkNecessaryPermissions();
 //        Button button_send_sms = findViewById(R.id.button_send_sms);
@@ -48,8 +48,6 @@ public class ComposeSmsActivity extends AppCompatActivity {
     public void onClickSendSms(View view){
         String TAG_onClickSendSms = " onClickSendSms(): ";
         Log.d(TAG, TAG_onClickSendSms + " called");
-        input_contact  = findViewById(R.id.edit_text_phone_or_name);
-        input_sms = findViewById(R.id.edit_text_input_message);
 
         try {
             String str_input_contact = input_contact.getText().toString();
@@ -69,7 +67,6 @@ public class ComposeSmsActivity extends AppCompatActivity {
         //null pointer exception sometimes
         catch (Exception e){
             Log.d(TAG, TAG_onClickSendSms + "Exception : " + e);
-            Toast.makeText(this, "Empty phone/message!", Toast.LENGTH_SHORT).show();
         }
 
     }
