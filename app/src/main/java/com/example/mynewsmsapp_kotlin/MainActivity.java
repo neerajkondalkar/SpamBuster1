@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
             getNecessaryPermissions();
         } else {
             Intent intent_to_send_new_sms = new Intent(this, ComposeSmsActivity.class);
-            startActivity(intent_to_send_new_sms);
+            this.startActivity(intent_to_send_new_sms);
 //            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
 //            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }

@@ -64,7 +64,7 @@ public class ComposeSmsActivity extends AppCompatActivity {
 //        if(input_contact.toString() !> ) {
 //        }
         }
-        //null pointer exception sometimes
+        //null pointer exception sometimes when View is not properly referenced.
         catch (Exception e){
             Log.d(TAG, TAG_onClickSendSms + "Exception : " + e);
         }
