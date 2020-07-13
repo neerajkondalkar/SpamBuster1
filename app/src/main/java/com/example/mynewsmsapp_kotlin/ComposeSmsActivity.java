@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,11 +15,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class ComposeSmsActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + ComposeSmsActivity.class.getSimpleName();
     EditText input_contact;
     EditText input_sms;
+    SmsManager sms_manager = SmsManager.getDefault();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         String TAG_onCreate = " onCreate(): ";
@@ -48,6 +54,25 @@ public class ComposeSmsActivity extends AppCompatActivity {
     public void onClickSendSms(View view){
         String TAG_onClickSendSms = " onClickSendSms(): ";
         Log.d(TAG, TAG_onClickSendSms + " called");
+//        String phone_regex = "(0/91)?[7-9][0-9]{9}";
+
+//        ---------EDITED start---------------
+
+        String phone_pattern = "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$";
+        Matcher matcher;
+        Pattern r = Pattern.compile(phone_pattern);
+        if (!input_contact.getText().toString().isEmpty()) {
+            matcher = r.matcher(input_contact.getText().toString().trim());
+            if (matcher.find()) {
+                Toast.makeText(this, "MATCH", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "NO MATCH", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Please enter mobile number ", Toast.LENGTH_LONG).show();
+        }
+
+//        ----------EDITED end--------------
 
         try {
             String str_input_contact = input_contact.getText().toString();
@@ -55,11 +80,25 @@ public class ComposeSmsActivity extends AppCompatActivity {
 
             if(str_input_contact.equals("") || str_input_sms.equals("")) {
                 Toast.makeText(this, "Empty phone/message!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, TAG_onClickSendSms + "str_input_contact = " + str_input_contact);
+                Log.d(TAG, TAG_onClickSendSms + "str_input_sms  = " + str_input_sms);
             }
             else {
                 Toast.makeText(this, "Input accepted", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, TAG_onClickSendSms + "str_input_contact = " + str_input_contact);
                 Log.d(TAG, TAG_onClickSendSms + "str_input_sms  = " + str_input_sms);
+
+//                Boolean valid_phone = android.util.Patterns.PHONE.matcher(str_input_contact).matches() && str_input_contact.matches(phone_regex);
+//                Boolean valid_phone = str_input_contact.matches(regex);
+//                if (valid_phone) {
+////                    sms_manager.sendTextMessage(str_input_contact, null, str_input_sms, null, null);
+//                    Toast.makeText(this, "Valid number", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
+//                }
+//                else{
+//                    Toast.makeText(this, "Invalid number", Toast.LENGTH_SHORT).show();
+//                }
+
             }
 //        if(input_contact.toString() !> ) {
 //        }

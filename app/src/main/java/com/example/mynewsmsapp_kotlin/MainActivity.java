@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ListView messages;
     ArrayAdapter array_adapter;
     EditText input;
-    SmsManager sms_manager = SmsManager.getDefault();
+    //SmsManager sms_manager = SmsManager.getDefault();
 
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
