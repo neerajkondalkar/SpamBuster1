@@ -11,7 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_above="@+id/sms_text_input"
-        android:layout_alignRight="@+id/send_sms_button"
+        android:layout_alignRight="@+id/button_compose_sms"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentEnd="true"
@@ -32,7 +32,7 @@
         app:layout_constraintVertical_bias="0.525" />
 
     <Button
-        android:id="@+id/send_sms_button"
+        android:id="@+id/button_compose_sms"
         android:layout_width="128dp"
         android:layout_height="50dp"
         android:layout_alignTop="@+id/sms_text_input"
@@ -54,7 +54,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.95"
-        android:onClick="onClickSendButton"
+        android:onClick="onClickComposeSms"
         />
 
 
@@ -72,8 +72,8 @@
         android:background="#d0d3ee"
         android:gravity="top"
         android:hint="Enter message here..."
-        app:layout_constraintBaseline_toBaselineOf="@+id/send_sms_button"
-        app:layout_constraintEnd_toStartOf="@+id/send_sms_button"
+        app:layout_constraintBaseline_toBaselineOf="@+id/button_compose_sms"
+        app:layout_constraintEnd_toStartOf="@+id/button_compose_sms"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ToggleButton

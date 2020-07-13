@@ -55,7 +55,8 @@
         android:text="Send"
         app:layout_constraintBaseline_toBaselineOf="@+id/button_back_to_activity_main"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button_back_to_activity_main" />
+        app:layout_constraintStart_toEndOf="@+id/button_back_to_activity_main"
+        android:onClick="onClickSendSms" />
 
     <Button
         android:id="@+id/button_back_to_activity_main"
@@ -73,5 +74,6 @@
         app:layout_constraintHorizontal_bias="0.263"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.84000003" />
+        app:layout_constraintVertical_bias="0.84000003"
+        android:onClick="onClickBackToMainActivity"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

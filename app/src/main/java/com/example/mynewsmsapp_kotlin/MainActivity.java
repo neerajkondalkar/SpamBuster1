@@ -19,26 +19,20 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParseException;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
-    private static final String KEY_LIST_CONTENTS = "ListContent";
+    private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
@@ -247,14 +241,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void onClickSendButton(View view) {
+    public void onClickComposeSms(View view) {
         final String TAG_onClickSendButton = " onClickSendButton(): ";
         Log.d(TAG, TAG_onClickSendButton  +" called ");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
         } else {
-            Intent intent_to_send_new_sms = new Intent(this, ComposeNewSms.class);
-            
+            Intent intent_to_send_new_sms = new Intent(this, ComposeSmsActivity.class);
+            startActivity(intent_to_send_new_sms);
 //            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
 //            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
