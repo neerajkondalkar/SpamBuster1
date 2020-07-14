@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onSaveInstanceState = " onSaveInstanceState(): ";
         Log.d(TAG, TAG_onSaveInstanceState + "called");
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);
+//        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);   //<------------TOO LARGE, causes error
     }
 
     @Override
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onRestoreInstanceState = " onRestoreInstanceState(): ";
         Log.d(TAG, TAG_onRestoreInstanceState + "called");
         super.onRestoreInstanceState(savedInstanceState);
-        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
+//        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
     }
 
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
         } else {
-            Intent intent_to_send_new_sms = new Intent(this, ComposeSmsActivity.class);
+            Intent intent_to_send_new_sms = new Intent(MainActivity.this, ComposeSmsActivity.class);
             startActivity(intent_to_send_new_sms);
 //            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
 //            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();

@@ -118,16 +118,6 @@ public class ComposeSmsActivity extends AppCompatActivity {
         String TAG_onClickBackToMainActivity = " onClickBackToMainActivity(): ";
         Log.d(TAG, TAG_onClickBackToMainActivity + " called");
         Log.d(TAG, TAG_onClickBackToMainActivity + "MainActivity.active = " + MainActivity.active);
-//        if (MainActivity.active) {
-//            //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
-//            MainActivity inst = MainActivity.instance();
-//
-//            //to update the current array adapter view so that the index 0 of list view will show the latest sms received
-//            inst.backToMainActivity();
-//        }else {
-//            Intent intent_go_back_to_main_activity = new Intent(this, MainActivity.class);
-//            this.startActivity(intent_go_back_to_main_activity);
-//        }
         finish();
     }
 }
