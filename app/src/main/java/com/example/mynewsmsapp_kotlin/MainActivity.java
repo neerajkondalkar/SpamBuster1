@@ -36,8 +36,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
-    EditText input;
-    //SmsManager sms_manager = SmsManager.getDefault();
+//    EditText input;
 
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (ListView) findViewById(R.id.messages);
-        input = (EditText) findViewById(R.id.sms_text_input);
+//        input = (EditText) findViewById(R.id.sms_text_input);
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
 
@@ -250,8 +249,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Intent intent_to_send_new_sms = new Intent(MainActivity.this, ComposeSmsActivity.class);
             startActivity(intent_to_send_new_sms);
-//            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
-//            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
     }
 
