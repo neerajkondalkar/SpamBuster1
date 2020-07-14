@@ -225,13 +225,14 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
         Log.d(TAG, TAG_getContactName + "uri = " + uri);
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+        final int index_displayname = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
         Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
         if (cursor == null){
             return phone_number;
         }
         String name = phone_number;
         if(cursor.moveToNext()){
-            name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            name = cursor.getString(index_displayname);
             Log.d(TAG, TAG_getContactName + "name = " + name);
         }
         if (cursor!=null && !cursor.isClosed()){
@@ -248,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             getNecessaryPermissions();
         } else {
             Intent intent_to_send_new_sms = new Intent(this, ComposeSmsActivity.class);
-            this.startActivity(intent_to_send_new_sms);
+            startActivity(intent_to_send_new_sms);
 //            sms_manager.sendTextMessage("+919320969783", null, input.getText().toString(), null, null);
 //            Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
         }
@@ -269,6 +270,11 @@ public class MainActivity extends AppCompatActivity {
     //just to preserve the current instance so that it is not lost when we return from SmsBroadcastReciever class
     public static MainActivity instance() {
         return inst;
+    }
+
+    public void backToMainActivity(){
+        //do nothing
+        Log.d(TAG, "backToMainActivity(): called");
     }
 }
 

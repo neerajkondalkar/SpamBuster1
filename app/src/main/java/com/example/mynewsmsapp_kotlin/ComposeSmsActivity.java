@@ -26,6 +26,27 @@ public class ComposeSmsActivity extends AppCompatActivity {
     SmsManager sms_manager = SmsManager.getDefault();
 
     @Override
+    protected void onStart() {
+        String TAG_onStart = " onStart(): ";
+        Log.d(TAG, TAG_onStart + " called ");
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        String TAG_onStop = " onStop(): ";
+        Log.d(TAG, TAG_onStop + " called ");
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        String TAG_onResume = " onResume(): ";
+        Log.d(TAG, TAG_onResume + " called ");
+        super.onResume();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         String TAG_onCreate = " onCreate(): ";
         Log.d(TAG, TAG_onCreate + " called");
@@ -36,9 +57,6 @@ public class ComposeSmsActivity extends AppCompatActivity {
         input_sms = (EditText) findViewById(R.id.edit_text_input_message);
 
         checkNecessaryPermissions();
-//        Button button_send_sms = findViewById(R.id.button_send_sms);
-//        Button button_back = findViewById(R.id.button_back_to_activity_main);
-
     }
 
     public void checkNecessaryPermissions() {
@@ -54,56 +72,42 @@ public class ComposeSmsActivity extends AppCompatActivity {
     public void onClickSendSms(View view){
         String TAG_onClickSendSms = " onClickSendSms(): ";
         Log.d(TAG, TAG_onClickSendSms + " called");
-//        String phone_regex = "(0/91)?[7-9][0-9]{9}";
 
-//        ---------EDITED start---------------
+        String str_input_contact = input_contact.getText().toString();
+        String str_input_sms = input_sms.getText().toString();
 
-        String phone_pattern = "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$";
-        Matcher matcher;
-        Pattern r = Pattern.compile(phone_pattern);
-        if (!input_contact.getText().toString().isEmpty()) {
-            matcher = r.matcher(input_contact.getText().toString().trim());
-            if (matcher.find()) {
-                Toast.makeText(this, "MATCH", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "NO MATCH", Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, "Please enter mobile number ", Toast.LENGTH_LONG).show();
-        }
+        Log.d(TAG, TAG_onClickSendSms + "str_input_contact = " + str_input_contact);
+        Log.d(TAG, TAG_onClickSendSms + "str_input_sms  = " + str_input_sms);
 
-//        ----------EDITED end--------------
 
         try {
-            String str_input_contact = input_contact.getText().toString();
-            String str_input_sms = input_sms.getText().toString();
-
-            if(str_input_contact.equals("") || str_input_sms.equals("")) {
-                Toast.makeText(this, "Empty phone/message!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, TAG_onClickSendSms + "str_input_contact = " + str_input_contact);
-                Log.d(TAG, TAG_onClickSendSms + "str_input_sms  = " + str_input_sms);
+            String phone_pattern = "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$";
+            Matcher matcher;
+            Pattern r = Pattern.compile(phone_pattern);
+            if (!str_input_contact.isEmpty()) {
+                matcher = r.matcher(str_input_contact.trim());
+                if (matcher.find()) {
+                    if(!str_input_sms.isEmpty()) {
+                        Log.d(TAG, TAG_onClickSendSms + "valid phone number and message");
+                        sms_manager.sendTextMessage(str_input_contact, null, str_input_sms, null, null);
+                        Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        Log.d(TAG, TAG_onClickSendSms + "Error: message empty");
+                        Toast.makeText(this, "Error: Message cannot be empty! ", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Log.d(TAG, TAG_onClickSendSms + "Error: invalid phone number");
+                    Toast.makeText(this, "Error: Invalid phone number", Toast.LENGTH_LONG).show();
+                }
             }
             else {
-                Toast.makeText(this, "Input accepted", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, TAG_onClickSendSms + "str_input_contact = " + str_input_contact);
-                Log.d(TAG, TAG_onClickSendSms + "str_input_sms  = " + str_input_sms);
-
-//                Boolean valid_phone = android.util.Patterns.PHONE.matcher(str_input_contact).matches() && str_input_contact.matches(phone_regex);
-//                Boolean valid_phone = str_input_contact.matches(regex);
-//                if (valid_phone) {
-////                    sms_manager.sendTextMessage(str_input_contact, null, str_input_sms, null, null);
-//                    Toast.makeText(this, "Valid number", Toast.LENGTH_SHORT).show();
-//                    Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
-//                }
-//                else{
-//                    Toast.makeText(this, "Invalid number", Toast.LENGTH_SHORT).show();
-//                }
-
+                Log.d(TAG, TAG_onClickSendSms + "Error: phone number empty");
+                Toast.makeText(this, "Error: Please enter mobile number ", Toast.LENGTH_LONG).show();
             }
-//        if(input_contact.toString() !> ) {
-//        }
         }
-        //null pointer exception sometimes when View is not properly referenced.
+
+        //null pointer exception sometimes when View is not present
         catch (Exception e){
             Log.d(TAG, TAG_onClickSendSms + "Exception : " + e);
         }
@@ -113,7 +117,17 @@ public class ComposeSmsActivity extends AppCompatActivity {
     public void onClickBackToMainActivity(View view){
         String TAG_onClickBackToMainActivity = " onClickBackToMainActivity(): ";
         Log.d(TAG, TAG_onClickBackToMainActivity + " called");
-        Intent intent_go_back_to_main_activity = new Intent(this, MainActivity.class);
-        startActivity(intent_go_back_to_main_activity);
+        Log.d(TAG, TAG_onClickBackToMainActivity + "MainActivity.active = " + MainActivity.active);
+//        if (MainActivity.active) {
+//            //calling MainActivity.updateInbox() with the same instance as MainActivity's current instance
+//            MainActivity inst = MainActivity.instance();
+//
+//            //to update the current array adapter view so that the index 0 of list view will show the latest sms received
+//            inst.backToMainActivity();
+//        }else {
+//            Intent intent_go_back_to_main_activity = new Intent(this, MainActivity.class);
+//            this.startActivity(intent_go_back_to_main_activity);
+//        }
+        finish();
     }
 }
