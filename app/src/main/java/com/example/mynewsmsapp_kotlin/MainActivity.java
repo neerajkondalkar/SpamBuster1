@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_getContactName + "uri = " + uri);
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
         final int index_displayname = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
+        Log.d(TAG, TAG_getContactName + "index_displayname = " + index_displayname);
         Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
         if (cursor == null){
             return phone_number;
