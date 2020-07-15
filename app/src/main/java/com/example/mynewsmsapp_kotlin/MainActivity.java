@@ -68,11 +68,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        String TAG_onResume = " onResume(): ";
+        Log.d(TAG, TAG_onResume + " called ");
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         final String TAG_onStop = " onDestroy(): ";
         Log.d(TAG, TAG_onStop + " called ");
         super.onDestroy();
         active = false; //indicate that activity is killed ,   check SmsBroadcastReceiver.onReceive() method
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        final String TAG_onSaveInstanceState = " onSaveInstanceState(): ";
+        Log.d(TAG, TAG_onSaveInstanceState + "called");
+        super.onSaveInstanceState(outState);
+//        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);   //<------------TOO LARGE, causes error
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        final String TAG_onRestoreInstanceState = " onRestoreInstanceState(): ";
+        Log.d(TAG, TAG_onRestoreInstanceState + "called");
+        super.onRestoreInstanceState(savedInstanceState);
+//        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -98,21 +121,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        final String TAG_onSaveInstanceState = " onSaveInstanceState(): ";
-        Log.d(TAG, TAG_onSaveInstanceState + "called");
-        super.onSaveInstanceState(outState);
-//        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);   //<------------TOO LARGE, causes error
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        final String TAG_onRestoreInstanceState = " onRestoreInstanceState(): ";
-        Log.d(TAG, TAG_onRestoreInstanceState + "called");
-        super.onRestoreInstanceState(savedInstanceState);
-//        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
-    }
 
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override

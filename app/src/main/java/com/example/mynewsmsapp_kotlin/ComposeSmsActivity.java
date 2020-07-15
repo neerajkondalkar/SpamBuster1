@@ -47,6 +47,13 @@ public class ComposeSmsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        String TAG_onDestroy = " onResume(): ";
+        Log.d(TAG, TAG_onDestroy + " called ");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         String TAG_onCreate = " onCreate(): ";
         Log.d(TAG, TAG_onCreate + " called");
