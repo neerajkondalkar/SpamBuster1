@@ -2,13 +2,16 @@ package com.example.mynewsmsapp_kotlin;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -27,6 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ListView messages;
     ArrayAdapter array_adapter;
 //    EditText input;
+
 
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
@@ -112,17 +117,18 @@ public class MainActivity extends AppCompatActivity {
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
 
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
             getNecessaryPermissions();
         } else {
             //if permission is already granted previously
-           refreshSmsInbox();
+
+            refreshSmsInbox();
 //            getSmsFromInbox();
         }
     }
-
 
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
@@ -202,6 +208,11 @@ public class MainActivity extends AppCompatActivity {
         long milli_seconds=0;
         Calendar calendar = Calendar.getInstance();
         String printable_date;
+
+        SpamBusterdbHelper db_helper = new SpamBusterdbHelper(this);
+        // Gets the data repository in write mode
+        SQLiteDatabase db = db_helper.getWritableDatabase();
+
         do{
             date_str = sms_inbox_cursor.getString(index_date);
             milli_seconds = Long.parseLong(date_str);
@@ -214,6 +225,14 @@ public class MainActivity extends AppCompatActivity {
 
             String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
 
+            // Create a new map of values, where column names are the keys
+            ContentValues values = new ContentValues();
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, str);
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, contact_name);
+
+            // Insert the new row, returning the primary key value of the new row
+            long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
+
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
@@ -223,6 +242,50 @@ public class MainActivity extends AppCompatActivity {
             array_adapter.add(str); //add the message to adapter list view
 //            sms_list.add(str);
         }while (sms_inbox_cursor.moveToNext());
+
+        SpamBusterdbHelper read_dbHelper = new SpamBusterdbHelper(this);
+        SQLiteDatabase db_read = db_helper.getReadableDatabase();
+
+        // Define a projection that specifies which columns from the database
+// you will actually use after this query.
+        String[] projection = {
+                BaseColumns._ID,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS
+        };
+
+// Filter results WHERE "title" = 'My Title'
+//        String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " = ? "
+//                + SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " = ? ";
+//        String[] selectionArgs = { "*, *" };
+        String selection = null;
+        String[] selectionArgs = null;
+
+// How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                SpamBusterContract.TABLE_ALL._ID + " DESC";
+
+        Cursor cursor = db_read.query(
+                SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                selection,              // The columns for the WHERE clause
+                selectionArgs,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+
+        List itemIds = new ArrayList<>();
+        while(cursor.moveToNext()) {
+            long itemId = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+            itemIds.add(itemId);
+            String sms_body = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
+            Log.d(TAG, TAG_refreshSmsInbox + " itemId = " + itemId);
+            Log.d(TAG, TAG_refreshSmsInbox + " ");      // EDIT HERE
+        }
+        cursor.close();
+
     }
 
     public  static  String getContactName(Context context, String phone_number){
@@ -286,5 +349,6 @@ public class MainActivity extends AppCompatActivity {
         //do nothing
         Log.d(TAG, "backToMainActivity(): called");
     }
+
 }
 
