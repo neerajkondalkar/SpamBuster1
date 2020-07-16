@@ -18,6 +18,8 @@ import androidx.core.content.ContextCompat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// This activity is used for :
+// 1. Composing a new sms and send it to a specific phone number
 public class ComposeSmsActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + ComposeSmsActivity.class.getSimpleName();

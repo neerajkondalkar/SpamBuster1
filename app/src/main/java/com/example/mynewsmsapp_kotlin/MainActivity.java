@@ -28,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-
+// This activity is used for:
+// 1. Showing all messages to user
+// 2. A button to take user to ComposeSmsActivity to compose a new sms
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onStop = " onDestroy(): ";
         Log.d(TAG, TAG_onStop + " called ");
         super.onDestroy();
-        active = false; //indicate that activity is killed ,   check SmsBroadcastReceiver.onReceive() method
+        active = false; //indicate that activity is killed, check bottom of SmsBroadcastReceiver.onReceive() method
     }
 
     @Override
@@ -255,7 +257,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_onClickSendButton  +" called ");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
-        } else {
+        }
+        else {
             Intent intent_to_send_new_sms = new Intent(MainActivity.this, ComposeSmsActivity.class);
             startActivity(intent_to_send_new_sms);
         }
@@ -275,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
 
     //just to preserve the current instance so that it is not lost when we return from SmsBroadcastReciever class
     public static MainActivity instance() {
+        Log.d(TAG, " instance(): called");
         return inst;
     }
 
