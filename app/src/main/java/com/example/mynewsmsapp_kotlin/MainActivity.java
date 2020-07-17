@@ -117,6 +117,12 @@ public class MainActivity extends AppCompatActivity {
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
 
+//        try {
+//            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
+//        }
+//        catch (Exception e){
+//            Log.d(TAG, TAG_onCreate + " Exception : " + e);
+//        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
@@ -315,7 +321,6 @@ public class MainActivity extends AppCompatActivity {
         db_read.endTransaction();
         db_read.close();
         db_helper.close();
-
     }
 
     public  static  String getContactName(Context context, String phone_number){
