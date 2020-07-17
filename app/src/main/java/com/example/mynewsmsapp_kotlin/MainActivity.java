@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         SpamBusterdbHelper db_helper = new SpamBusterdbHelper(this);
         // Gets the data repository in write mode
         SQLiteDatabase db = db_helper.getWritableDatabase();
+        db.beginTransaction();
 
         do{
             date_str = sms_inbox_cursor.getString(index_date);
@@ -220,19 +221,30 @@ public class MainActivity extends AppCompatActivity {
             calendar.setTimeInMillis(milli_seconds);
             Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
-            String contact_name = getContactName(this, sms_inbox_cursor.getString(index_address));
+            String address = sms_inbox_cursor.getString(index_address); //actual phone number
+            String contact_name = getContactName(this, address); //contact name retirved from phonelookup
             Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
+            String sms_body = sms_inbox_cursor.getString(index_body);
 
-            String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_inbox_cursor.getString(index_body);
+            String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_body;
 
             // Create a new map of values, where column names are the keys
             ContentValues values = new ContentValues();
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, str);
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, contact_name);
+            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
+            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
+            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
 
             // Insert the new row, returning the primary key value of the new row
             long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
-
+            if(newRowId == -1) {
+                Log.d(TAG, TAG_refreshSmsInbox + " insert failed\n\n");
+            }
+            else {
+                Log.d(TAG, TAG_refreshSmsInbox + " Insert Complete! returned newRowId = " + newRowId + "\n\n");
+            }
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
@@ -243,15 +255,22 @@ public class MainActivity extends AppCompatActivity {
 //            sms_list.add(str);
         }while (sms_inbox_cursor.moveToNext());
 
-        SpamBusterdbHelper read_dbHelper = new SpamBusterdbHelper(this);
-        SQLiteDatabase db_read = db_helper.getReadableDatabase();
+        Log.d(TAG, TAG_refreshSmsInbox + " Done inserting value! \n");
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        db.close();
 
+        Log.d(TAG, TAG_refreshSmsInbox + " reading values from database");
+//        SpamBusterdbHelper read_dbHelper = new SpamBusterdbHelper(this);
+        SQLiteDatabase db_read = db_helper.getReadableDatabase();
+        db_read.beginTransaction();
         // Define a projection that specifies which columns from the database
 // you will actually use after this query.
         String[] projection = {
                 BaseColumns._ID,
                 SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
-                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
         };
 
 // Filter results WHERE "title" = 'My Title'
@@ -263,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                SpamBusterContract.TABLE_ALL._ID + " DESC";
+                SpamBusterContract.TABLE_ALL._ID;
 
         Cursor cursor = db_read.query(
                 SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
@@ -275,16 +294,27 @@ public class MainActivity extends AppCompatActivity {
                 sortOrder               // The sort order
         );
 
-        List itemIds = new ArrayList<>();
+//        List itemIds = new ArrayList<>();
         while(cursor.moveToNext()) {
             long itemId = cursor.getLong(
                     cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-            itemIds.add(itemId);
+//            itemIds.add(itemId);
             String sms_body = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
+            String sms_address = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
+            String epoch_date = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
             Log.d(TAG, TAG_refreshSmsInbox + " itemId = " + itemId);
-            Log.d(TAG, TAG_refreshSmsInbox + " ");      // EDIT HERE
+            Log.d(TAG, TAG_refreshSmsInbox + " sms_body = " + sms_body);      // EDIT HERE
+            Log.d(TAG, TAG_refreshSmsInbox + " sms_address = " + sms_address);      // EDIT HERE
+            milli_seconds = Long.parseLong(epoch_date);
+            calendar.setTimeInMillis(milli_seconds);
+            printable_date = formatter.format(calendar.getTime());
+            Log.d(TAG, TAG_refreshSmsInbox + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
         }
         cursor.close();
+        db_read.setTransactionSuccessful();
+        db_read.endTransaction();
+        db_read.close();
+        db_helper.close();
 
     }
 

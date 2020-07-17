@@ -15,6 +15,7 @@ public final class SpamBusterContract {
         public static final String TABLE_NAME = "table_all";
         public static final String COLUMN_SMS_BODY = "column_body";
         public static final String COLUMN_SMS_ADDRESS = "column_address";
+        public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date";
     }
 
 
