@@ -34,6 +34,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_ENTRIES);
         db.execSQL(SQL_CREATE_TABLE_ALL);
 
+        //to delete database tables and entries everytime a new database is created
         int deleted_rows = db.delete(SpamBusterContract.TABLE_ALL.TABLE_NAME, selection_for_delete, selection_args_for_delete);
         db.execSQL(SQL_DELETE_ENTRIES_ROWS);
     }
@@ -43,10 +44,10 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         super.onOpen(db);
 
         //for testing purposes, we will always create a new table and delete all entries just to be sure
-        db.execSQL(SQL_DELETE_ENTRIES);
-        db.execSQL(SQL_CREATE_TABLE_ALL);
-        int deleted_rows = db.delete(SpamBusterContract.TABLE_ALL.TABLE_NAME, selection_for_delete, selection_args_for_delete);
-        db.execSQL(SQL_DELETE_ENTRIES_ROWS);
+//        db.execSQL(SQL_DELETE_ENTRIES);
+//        db.execSQL(SQL_CREATE_TABLE_ALL);
+//        int deleted_rows = db.delete(SpamBusterContract.TABLE_ALL.TABLE_NAME, selection_for_delete, selection_args_for_delete);
+//        db.execSQL(SQL_DELETE_ENTRIES_ROWS);
     }
 
     @Override

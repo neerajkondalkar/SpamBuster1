@@ -15,6 +15,7 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -117,12 +118,13 @@ public class MainActivity extends AppCompatActivity {
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
 
-//        try {
-//            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
-//        }
-//        catch (Exception e){
-//            Log.d(TAG, TAG_onCreate + " Exception : " + e);
-//        }
+//        //to delete the database. so that everytime a new database is created
+        try {
+            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
+        }
+        catch (Exception e){
+            Log.d(TAG, TAG_onCreate + " Exception : " + e);
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
@@ -186,92 +188,181 @@ public class MainActivity extends AppCompatActivity {
 
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
-        ContentResolver content_resolver = getContentResolver();
-        Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
-        //[DEBUG] start
-//        System.out.print(TAG + TAG_refreshSmsInbox + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
-        Log.d(TAG, TAG_refreshSmsInbox + " all columns in sms/inbox : ");
-        int column_index=0;
-        for(String str_col : sms_inbox_cursor.getColumnNames()) {
-            //System.out.print(" " + str_col);
-            Log.d(TAG, TAG_refreshSmsInbox + " [ " + column_index + " ] " + str_col);
-            column_index++;
-        }
-        System.out.println();
-        //[DEBUG] end
 
-        int index_body = sms_inbox_cursor.getColumnIndex("body");
-        int index_date = sms_inbox_cursor.getColumnIndex("date");
-        Log.d(TAG, TAG_refreshSmsInbox+  "index body = " + index_body + '\n');
-        int index_address = sms_inbox_cursor.getColumnIndex("address");
-        Log.d(TAG, TAG_refreshSmsInbox+  "index_address = " + index_address + '\n');
-        if (index_body < 0 || !sms_inbox_cursor.moveToFirst()){
-            return;
-        }
-        array_adapter.clear();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-        String date_str="";
-        long milli_seconds=0;
-        Calendar calendar = Calendar.getInstance();
-        String printable_date;
+
+        // ------------------------------------       READING from database         -----------------------------
 
         SpamBusterdbHelper db_helper = new SpamBusterdbHelper(this);
+
+        Log.d(TAG, TAG_refreshSmsInbox + " reading the table before inserting anything ... ");
+
+        // start here - only to read _ID to determine whether we want to insert into table or not, so that we dont get duplicates
+        SQLiteDatabase db_read_for_id = db_helper.getReadableDatabase();
+
+        String[] projection_id = { BaseColumns._ID};
+        String selection_id = null;
+        String[] selection_args = null;
+        String sort_order = SpamBusterContract.TABLE_ALL._ID + " DESC";
+        Cursor cursor_read_id = db_read_for_id.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                projection_id,             // The array of columns to return (pass null to get all)
+                selection_id,              // The columns for the WHERE clause
+                selection_args,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sort_order               // The sort order
+        );
+
+        List item_ids = new ArrayList();
+        item_ids.clear();
+        // topmost is largest/latest _ID
+        while (cursor_read_id.moveToNext()){
+            String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+            Log.d(TAG, TAG_refreshSmsInbox + " _ID = " + temp_id_holder);
+            item_ids.add(temp_id_holder);
+        }
+
+        try {
+            Log.d(TAG, TAG_refreshSmsInbox + " item_ids[0] = " + item_ids.get(0).toString());
+        }
+        catch (Exception e) {
+            Log.d(TAG, TAG_refreshSmsInbox + " fresh db so could not read _ID from our TABLE_ALL ! ");
+            Log.d(TAG, TAG_refreshSmsInbox + " Exception : " + e);
+        }
+            //so now we have a list of all IDs that are already present in the table, i.e we know what sms are already present in the table
+        // end READING from db here
+
+
+
+        String date_str = "";
+        long milli_seconds = 0;
+        Calendar calendar = Calendar.getInstance();
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+        String printable_date;
+
+        ContentResolver content_resolver = getContentResolver();
+
+//         ------------- READING the topmost _ID in sms/inbox ------------------
+
+        Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
+        String latest_sms_id = "";
+        if (!cursor_check_sms_id.moveToFirst()) {
+            int index_id = cursor_check_sms_id.getColumnIndex("_id");
+            latest_sms_id = cursor_check_sms_id.getString(index_id);
+            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id = " + latest_sms_id);
+        }
+        boolean inbox_sync = false;
+
+
+//      ------------------ CHECKING IF INBOX IS IN SYNC, so as to prevent duplicate sms -----------------
+
+        try {
+            if (item_ids.get(0).toString().equals(latest_sms_id)) {
+                //this means that the inbuilt sms inbox and our ALL table is alread yin sync, so no need to insert values
+                Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is in sync  with sms/inbox ! ");
+                inbox_sync = true;
+            }
+        }
+        catch (Exception e){
+            Log.d(TAG, TAG_refreshSmsInbox + " database is brand new, so can't read anything from our TABLE_ALL for now.");
+            Log.d(TAG, TAG_refreshSmsInbox + " Exception : " + e);
+        }
         // Gets the data repository in write mode
         SQLiteDatabase db = db_helper.getWritableDatabase();
         db.beginTransaction();
 
-        do{
+//     -------------------------- inbox is not  IS NOT IN SYNC, therefore INSERT all the new messages in our db table TABLE_ALL -----------------------
+
+        if (!inbox_sync) {
+
+            Log.d(TAG, TAG_refreshSmsInbox + "TABLE_ALL  is not in sync  with sms/inbox ! Hence insert new messages in our db ");
+
+            Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
+            //[DEBUG] start
+//        System.out.print(TAG + TAG_refreshSmsInbox + " [DEBUG] "+ " refreshSmsInbox() :  all columns in sms/inbox : \n [DEBUG]");
+            Log.d(TAG, TAG_refreshSmsInbox + " all columns in sms/inbox : ");
+            int column_index = 0;
+            for (String str_col : sms_inbox_cursor.getColumnNames()) {
+                //System.out.print(" " + str_col);
+                Log.d(TAG, TAG_refreshSmsInbox + " [ " + column_index + " ] " + str_col);
+                column_index++;
+            }
+            System.out.println();
+            //[DEBUG] end
+
+
+            int index_body = sms_inbox_cursor.getColumnIndex("body");
+            int index_date = sms_inbox_cursor.getColumnIndex("date");
+            Log.d(TAG, TAG_refreshSmsInbox + "index body = " + index_body + '\n');
+            int index_address = sms_inbox_cursor.getColumnIndex("address");
+            Log.d(TAG, TAG_refreshSmsInbox + "index_address = " + index_address + '\n');
+            if (index_body < 0 || !sms_inbox_cursor.moveToFirst()) {
+                return;
+            }
+
+            array_adapter.clear();
+
             date_str = sms_inbox_cursor.getString(index_date);
             milli_seconds = Long.parseLong(date_str);
-            Log.d(TAG, TAG_refreshSmsInbox+ "milli_seconds = " + Long.toString(milli_seconds));
+            Log.d(TAG, TAG_refreshSmsInbox + "milli_seconds = " + Long.toString(milli_seconds));
             calendar.setTimeInMillis(milli_seconds);
             Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
-            String address = sms_inbox_cursor.getString(index_address); //actual phone number
-            String contact_name = getContactName(this, address); //contact name retirved from phonelookup
-            Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
-            String sms_body = sms_inbox_cursor.getString(index_body);
 
-            String str = "SMS From: "  + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_body;
 
-            // Create a new map of values, where column names are the keys
-            ContentValues values = new ContentValues();
-            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
-            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
-            Log.d(TAG, TAG_refreshSmsInbox + " inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
+            do {
 
-            // Insert the new row, returning the primary key value of the new row
-            long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
-            if(newRowId == -1) {
-                Log.d(TAG, TAG_refreshSmsInbox + " insert failed\n\n");
-            }
-            else {
-                Log.d(TAG, TAG_refreshSmsInbox + " Insert Complete! returned newRowId = " + newRowId + "\n\n");
-            }
+                String address = sms_inbox_cursor.getString(index_address); //actual phone number
+                String contact_name = getContactName(this, address); //contact name retirved from phonelookup
+                Log.d(TAG, TAG_refreshSmsInbox + "getContactName() returns = " + contact_name);
+                String sms_body = sms_inbox_cursor.getString(index_body);
+
+                String str = "SMS From: " + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_body;
+
+                // Create a new map of values, where column names are the keys
+                ContentValues values = new ContentValues();
+                Log.d(TAG, TAG_refreshSmsInbox + " inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
+                values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
+                Log.d(TAG, TAG_refreshSmsInbox + " inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
+                values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
+                Log.d(TAG, TAG_refreshSmsInbox + " inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
+                values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
+
+                // Insert the new row, returning the primary key value of the new row
+                long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
+                if (newRowId == -1) {
+                    Log.d(TAG, TAG_refreshSmsInbox + " insert failed\n\n");
+                } else {
+                    Log.d(TAG, TAG_refreshSmsInbox + " Insert Complete! returned newRowId = " + newRowId + "\n\n");
+                }
             /*
             if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
 
                 array_adapter.add(str);
             }
             */
-            array_adapter.add(str); //add the message to adapter list view
+                array_adapter.add(str); //add the message to adapter list view
 //            sms_list.add(str);
-        }while (sms_inbox_cursor.moveToNext());
+            } while (sms_inbox_cursor.moveToNext());
 
-        Log.d(TAG, TAG_refreshSmsInbox + " Done inserting value! \n");
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        db.close();
+            Log.d(TAG, TAG_refreshSmsInbox + " Done inserting value! \n");
+            db.setTransactionSuccessful();
+            db.endTransaction();
+            db.close();
 
+            //end of inserting into db
+        }
+
+//   -----------------------         READING from table ------------------------
+
+        Log.d(TAG, TAG_refreshSmsInbox + "\n\n");
         Log.d(TAG, TAG_refreshSmsInbox + " reading values from database");
 //        SpamBusterdbHelper read_dbHelper = new SpamBusterdbHelper(this);
         SQLiteDatabase db_read = db_helper.getReadableDatabase();
         db_read.beginTransaction();
         // Define a projection that specifies which columns from the database
 // you will actually use after this query.
+
+
         String[] projection = {
                 BaseColumns._ID,
                 SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
@@ -321,6 +412,11 @@ public class MainActivity extends AppCompatActivity {
         db_read.endTransaction();
         db_read.close();
         db_helper.close();
+
+
+        //end of READING from table
+
+        //end of all DATABASE operations
     }
 
     public  static  String getContactName(Context context, String phone_number){
