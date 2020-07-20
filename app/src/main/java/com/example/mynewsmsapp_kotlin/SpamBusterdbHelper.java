@@ -17,7 +17,8 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_TABLE_ALL =
             "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_ALL.TABLE_NAME + " (" +
-                    SpamBusterContract.TABLE_ALL._ID + " INTEGER PRIMARY KEY," +
+                    SpamBusterContract.TABLE_ALL._ID + " INTEGER PRIMARY KEY, " +
+                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " TEXT, " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " TEXT," +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " TEXT, " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
