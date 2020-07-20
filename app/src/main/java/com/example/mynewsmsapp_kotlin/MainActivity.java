@@ -296,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
             Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
+            Log.d(TAG, TAG_refreshSmsInbox + "");
             do {
                 id_inbox = cursor_check_sms_id.getString(index_id);
                 threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
@@ -537,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
 
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID;
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
 
         Cursor cursor = db_read.query(
                 SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
@@ -592,15 +593,15 @@ public class MainActivity extends AppCompatActivity {
     public  static  String getContactName(Context context, String phone_number){
         final String TAG_getContactName = " getContactName(): ";
         Log.d(TAG, TAG_getContactName + " called ");
-        Log.d(TAG, TAG_getContactName + " phone_number = " + phone_number);
+//        Log.d(TAG, TAG_getContactName + " phone_number = " + phone_number);
         ContentResolver content_resolver = context.getContentResolver();
-        Log.d(TAG, TAG_getContactName + "content_resolver = " + content_resolver);
+//        Log.d(TAG, TAG_getContactName + "content_resolver = " + content_resolver);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
-        Log.d(TAG, TAG_getContactName + "uri = " + uri);
+//        Log.d(TAG, TAG_getContactName + "uri = " + uri);
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
         final int index_displayname = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
-        Log.d(TAG, TAG_getContactName + "index_displayname = " + index_displayname);
-        Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
+//        Log.d(TAG, TAG_getContactName + "index_displayname = " + index_displayname);
+//        Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
         if (cursor == null){
             return phone_number;
         }
@@ -629,6 +630,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
+
+
     public void updateInbox(final String sms_message){
         final String TAG_updateInbox = " updateInbox(): ";
         Log.d(TAG, TAG_updateInbox  +" called ");
