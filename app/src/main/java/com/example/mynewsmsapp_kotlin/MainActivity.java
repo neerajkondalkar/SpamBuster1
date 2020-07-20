@@ -13,9 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
-import android.telephony.SmsManager;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -31,7 +29,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
+import java.util.ListIterator;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
+
+    private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
+
     ArrayList<String> sms_messages_list = new ArrayList<>();
     ListView messages;
     ArrayAdapter array_adapter;
@@ -118,7 +121,12 @@ public class MainActivity extends AppCompatActivity {
         array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
         messages.setAdapter(array_adapter);
 
+
+
+//        ----------------------- DELETE DATABASE --------------------
+
 //        //to delete the database. so that everytime a new database is created
+
         try {
             this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
         }
@@ -126,15 +134,15 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, TAG_onCreate + " Exception : " + e);
         }
 
+
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
             getNecessaryPermissions();
         } else {
             //if permission is already granted previously
-
             refreshSmsInbox();
-//            getSmsFromInbox();
         }
     }
 
@@ -212,20 +220,32 @@ public class MainActivity extends AppCompatActivity {
                 sort_order               // The sort order
         );
 
-        List item_ids = new ArrayList();
-        item_ids.clear();
-        // topmost is largest/latest _ID
-        while (cursor_read_id.moveToNext()){
-            String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-            Log.d(TAG, TAG_refreshSmsInbox + " _ID = " + temp_id_holder);
-            item_ids.add(temp_id_holder);
+        List item_ids_tableall = new ArrayList();
+        item_ids_tableall.clear();
+
+        if (!cursor_read_id.moveToFirst()){
+            Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is empty! ");
         }
 
+
+        else {
+            do {
+                String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+                Log.d(TAG, TAG_refreshSmsInbox + " _ID = " + temp_id_holder);
+                item_ids_tableall.add(temp_id_holder);
+            } while (cursor_read_id.moveToNext());
+            // topmost is largest/latest _ID
+        }
+
+        String latest_sms_id_in_table_all = "";
+
         try {
-            Log.d(TAG, TAG_refreshSmsInbox + " item_ids[0] = " + item_ids.get(0).toString());
+            Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall[0] = " + item_ids_tableall.get(0).toString());
+            latest_sms_id_in_table_all = item_ids_tableall.get(0).toString();
+            Log.d(TAG, TAG_refreshSmsInbox + " This means: latest_sms_id_in_table_all = " + latest_sms_id_in_table_all);
         }
         catch (Exception e) {
-            Log.d(TAG, TAG_refreshSmsInbox + " fresh db so could not read _ID from our TABLE_ALL ! ");
+            Log.d(TAG, TAG_refreshSmsInbox + " fresh db so could not read _ID column from our TABLE_ALL !  i.e could not set latest_sms_id_in_table_all");
             Log.d(TAG, TAG_refreshSmsInbox + " Exception : " + e);
         }
             //so now we have a list of all IDs that are already present in the table, i.e we know what sms are already present in the table
@@ -241,25 +261,124 @@ public class MainActivity extends AppCompatActivity {
 
         ContentResolver content_resolver = getContentResolver();
 
-//         ------------- READING the topmost _ID in sms/inbox ------------------
 
+
+//         ------------- READING the topmost _id in sms/inbox ------------------
+//          ------------------ PRINTING THE WHOLE sms/inbox ------------------
         Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
-        String latest_sms_id = "";
-        if (!cursor_check_sms_id.moveToFirst()) {
+        String latest_sms_id_in_inbuilt_sms_inbox = "";
+        String latest_sms_thread_id_in_inbuilt_sms_inbox = "";
+        String id_inbox = "";
+        String threadid_inbox = "";
+        String address_inbox = "";
+        String body_inbox = "";
+        List item_ids_inbox = new ArrayList();
+
+        if (cursor_check_sms_id.moveToFirst()) {
+            Log.d(TAG, TAG_refreshSmsInbox + "");
+            Log.d(TAG, TAG_refreshSmsInbox + " dumping the whole sms/inbox : ");
+            Log.d(TAG, TAG_refreshSmsInbox + "");
             int index_id = cursor_check_sms_id.getColumnIndex("_id");
-            latest_sms_id = cursor_check_sms_id.getString(index_id);
-            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id = " + latest_sms_id);
+            int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
+            int index_address = cursor_check_sms_id.getColumnIndex("address");
+            int index_body = cursor_check_sms_id.getColumnIndex("body");
+
+            latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
+            latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
+
+            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
+            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
+            do {
+                id_inbox = cursor_check_sms_id.getString(index_id);
+                threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
+                address_inbox = cursor_check_sms_id.getString(index_address);
+                body_inbox = cursor_check_sms_id.getString(index_body);
+
+                item_ids_inbox.add(id_inbox);
+                Log.d(TAG, TAG_refreshSmsInbox + " id_inbox = " + id_inbox);
+                Log.d(TAG, TAG_refreshSmsInbox + " threadid_inbox = " + threadid_inbox);
+                Log.d(TAG, TAG_refreshSmsInbox +  " address_inbox = " + address_inbox);
+                Log.d(TAG, TAG_refreshSmsInbox + " body_inbox = " + body_inbox);
+                Log.d(TAG, TAG_refreshSmsInbox + "");
+            }while (cursor_check_sms_id.moveToNext());
         }
-        boolean inbox_sync = false;
+        else{
+            Log.d(TAG, TAG_refreshSmsInbox + "  inbuilt sms/inbox empty! ");
+        }
+        Log.d(TAG, TAG_refreshSmsInbox + "");
+
+
+//        Log.d(TAG, TAG_refreshSmsInbox + " printing the lists     item_ids_tableall[]    and         item_ids_inbox  ");
+
+        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall.size() = " + item_ids_tableall.size());
+        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_inbox.size() = " + item_ids_inbox.size());
+        Log.d(TAG, TAG_refreshSmsInbox + "");
+
+        //iterating through item_ids_inbox
+        ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
+        String current_list_item_ids_inbox;
+        if(!iterator_item_ids_inbox.hasNext()){
+            Log.d(TAG, TAG_refreshSmsInbox + " List item_ids_inbox is empty ! ");
+        }
+        else{
+            for (int i=0; i<item_ids_inbox.size(); i++){
+                current_list_item_ids_inbox = iterator_item_ids_inbox.next().toString();
+                Log.d(TAG, TAG_refreshSmsInbox + " iterating using iterator_item_ids_inbox.next().toString() = " + current_list_item_ids_inbox);
+                try {
+                    if (item_ids_tableall.contains(current_list_item_ids_inbox)) {
+                        Log.d(TAG, TAG_refreshSmsInbox + " present in items_ids_tableall");
+                        Log.d(TAG, TAG_refreshSmsInbox + " -----------");
+                    }
+                    else{
+                        Log.d(TAG, TAG_refreshSmsInbox + " not present in items_ids_tableall ");
+                        Log.d(TAG, TAG_refreshSmsInbox + " -----------");
+                    }
+                }
+                catch (Exception e){
+                    Log.d(TAG, TAG_refreshSmsInbox + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e );
+                }
+//            Log.d(TAG, TAG_refreshSmsInbox + " " + item_ids_tableall.conta)
+            }
+        }
+        Log.d(TAG, TAG_refreshSmsInbox + "");
+
+        // iterating through item_ids_tableall
+        ListIterator iterator_item_ids_tableall = item_ids_tableall.listIterator();
+        String current_list_item_tableall;
+        if(!iterator_item_ids_tableall.hasNext()){
+            Log.d(TAG, TAG_refreshSmsInbox + " List item_ids_tableall is empty ! ");
+        }
+        else {
+            for (int i = 0; i < item_ids_tableall.size(); i++) {
+                current_list_item_tableall = iterator_item_ids_tableall.next().toString();
+                Log.d(TAG, TAG_refreshSmsInbox + " iterating using iterator_item_ids_tableall.next().toString() = " + current_list_item_tableall);
+//            Log.d(TAG, TAG_refreshSmsInbox + " " + item_ids_tableall.conta)
+            }
+        }
+        Log.d(TAG, TAG_refreshSmsInbox + "");
+
+        //is item_ids_tableall a subset of item_ids_inbox
+        // check if all elements in item_ids_tableall are a part of  item_ids_inbox
+        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_inbox.containsAll(item_ids_tableall) = " + item_ids_inbox.containsAll(item_ids_tableall));
+        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall.containsAll(item_ids_inbox) = " + item_ids_tableall.containsAll(item_ids_inbox));
+        Log.d(TAG, TAG_refreshSmsInbox + "");
+
+
 
 
 //      ------------------ CHECKING IF INBOX IS IN SYNC, so as to prevent duplicate sms -----------------
 
         try {
-            if (item_ids.get(0).toString().equals(latest_sms_id)) {
+            //if topmost _ID of TABLE_ALL (whose value is in item_ids_tableall[0]) == latest_sms_id_in_inbuilt_sms_inbox of sms/inbox
+            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id_in_table_all.equals(latest_sms_id_in_inbuilt_sms_inbox)   =   " + latest_sms_id_in_table_all.equals(latest_sms_id_in_inbuilt_sms_inbox));
+            Log.d(TAG, TAG_refreshSmsInbox + " latest_sms_id_in_table_all.equals(latest_sms_thread_id_in_inbuilt_sms_inbox)   =   " + latest_sms_id_in_table_all.equals(latest_sms_thread_id_in_inbuilt_sms_inbox));
+            if (latest_sms_id_in_table_all.equals(latest_sms_id_in_inbuilt_sms_inbox)) {
                 //this means that the inbuilt sms inbox and our ALL table is alread yin sync, so no need to insert values
                 Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is in sync  with sms/inbox ! ");
-                inbox_sync = true;
+                table_all_sync_inbox = true;
+            }
+            else{
+                table_all_sync_inbox = false; //TABLE_ALL not in sync with inbuilt sms/inbox
             }
         }
         catch (Exception e){
@@ -270,9 +389,11 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase db = db_helper.getWritableDatabase();
         db.beginTransaction();
 
+
+
 //     -------------------------- inbox is not  IS NOT IN SYNC, therefore INSERT all the new messages in our db table TABLE_ALL -----------------------
 
-        if (!inbox_sync) {
+        if (!table_all_sync_inbox) {
 
             Log.d(TAG, TAG_refreshSmsInbox + "TABLE_ALL  is not in sync  with sms/inbox ! Hence insert new messages in our db ");
 
@@ -292,9 +413,9 @@ public class MainActivity extends AppCompatActivity {
 
             int index_body = sms_inbox_cursor.getColumnIndex("body");
             int index_date = sms_inbox_cursor.getColumnIndex("date");
-            Log.d(TAG, TAG_refreshSmsInbox + "index body = " + index_body + '\n');
+//            Log.d(TAG, TAG_refreshSmsInbox + "index body = " + index_body + '\n');
             int index_address = sms_inbox_cursor.getColumnIndex("address");
-            Log.d(TAG, TAG_refreshSmsInbox + "index_address = " + index_address + '\n');
+//            Log.d(TAG, TAG_refreshSmsInbox + "index_address = " + index_address + '\n');
             if (index_body < 0 || !sms_inbox_cursor.moveToFirst()) {
                 return;
             }
@@ -303,9 +424,9 @@ public class MainActivity extends AppCompatActivity {
 
             date_str = sms_inbox_cursor.getString(index_date);
             milli_seconds = Long.parseLong(date_str);
-            Log.d(TAG, TAG_refreshSmsInbox + "milli_seconds = " + Long.toString(milli_seconds));
+//            Log.d(TAG, TAG_refreshSmsInbox + "milli_seconds = " + Long.toString(milli_seconds));
             calendar.setTimeInMillis(milli_seconds);
-            Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
+//            Log.d(TAG, TAG_refreshSmsInbox + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
             printable_date = formatter.format(calendar.getTime());
 
 
@@ -332,19 +453,16 @@ public class MainActivity extends AppCompatActivity {
                 if (newRowId == -1) {
                     Log.d(TAG, TAG_refreshSmsInbox + " insert failed\n\n");
                 } else {
-                    Log.d(TAG, TAG_refreshSmsInbox + " Insert Complete! returned newRowId = " + newRowId + "\n\n");
+                    Log.d(TAG, TAG_refreshSmsInbox + " Insert Complete! returned newRowId = " + newRowId);
+                    Log.d(TAG, TAG_refreshSmsInbox + " ");
                 }
-            /*
-            if(sms_inbox_cursor.getString(index_address).equals("9999988888")) {
-
-                array_adapter.add(str);
-            }
-            */
                 array_adapter.add(str); //add the message to adapter list view
 //            sms_list.add(str);
             } while (sms_inbox_cursor.moveToNext());
 
-            Log.d(TAG, TAG_refreshSmsInbox + " Done inserting value! \n");
+            Log.d(TAG, TAG_refreshSmsInbox + " Done inserting values! \n");
+            Log.d(TAG, TAG_refreshSmsInbox + " ");
+            Log.d(TAG, TAG_refreshSmsInbox + " ");
             db.setTransactionSuccessful();
             db.endTransaction();
             db.close();
@@ -352,16 +470,18 @@ public class MainActivity extends AppCompatActivity {
             //end of inserting into db
         }
 
-//   -----------------------         READING from table ------------------------
 
-        Log.d(TAG, TAG_refreshSmsInbox + "\n\n");
-        Log.d(TAG, TAG_refreshSmsInbox + " reading values from database");
+
+//   -----------------------         READING all entried from TABLE_ALL ------------------------
+
+        Log.d(TAG, TAG_refreshSmsInbox + " ");
+        Log.d(TAG, TAG_refreshSmsInbox + " Now reading values from TABLE_ALL ");
+        Log.d(TAG, TAG_refreshSmsInbox + " ");
 //        SpamBusterdbHelper read_dbHelper = new SpamBusterdbHelper(this);
         SQLiteDatabase db_read = db_helper.getReadableDatabase();
         db_read.beginTransaction();
         // Define a projection that specifies which columns from the database
 // you will actually use after this query.
-
 
         String[] projection = {
                 BaseColumns._ID,
@@ -406,6 +526,7 @@ public class MainActivity extends AppCompatActivity {
             calendar.setTimeInMillis(milli_seconds);
             printable_date = formatter.format(calendar.getTime());
             Log.d(TAG, TAG_refreshSmsInbox + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
+            Log.d(TAG, TAG_refreshSmsInbox + " ");
         }
         cursor.close();
         db_read.setTransactionSuccessful();
