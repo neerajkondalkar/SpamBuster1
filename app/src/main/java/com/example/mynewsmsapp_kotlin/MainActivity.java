@@ -394,8 +394,9 @@ public class MainActivity extends AppCompatActivity {
             String selection_sms_inbox = null;
             String[] selection_args_sms_inbox = null;
             String sort_order_sms_inbox = " _id DESC ";
+
             Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
-            
+
             //[DEBUG] start
 
             //print all columns of sms/inbox
