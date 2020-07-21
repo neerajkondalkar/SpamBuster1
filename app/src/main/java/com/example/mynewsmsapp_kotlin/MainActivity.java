@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
+    private static final int TABLE_ALL = 1;
+    private static final int TABLE_INBOX = 2;
+    private static final int TABLE_SPAM = 3;
+    private static final int TABLE_CONTENT_SMS_INBOX = 4;
 
     private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
@@ -206,42 +210,49 @@ public class MainActivity extends AppCompatActivity {
 
         // start here - only to read _ID to determine whether we want to insert into table or not, so that we dont get duplicates
         SQLiteDatabase db_read_for_id = db_helper.getReadableDatabase();
-
-        String[] projection_id = {
-                BaseColumns._ID,
-                SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
-        };
-
-        String selection_id = null;
-        String[] selection_args = null;
-        String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
-        Cursor cursor_read_id = db_read_for_id.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-                projection_id,             // The array of columns to return (pass null to get all)
-                selection_id,              // The columns for the WHERE clause
-                selection_args,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                sort_order               // The sort order
-        );
-
         List item_ids_tableall = new ArrayList();
         item_ids_tableall.clear();
-
-        if (!cursor_read_id.moveToFirst()){
-            Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is empty! ");
-        }
+        item_ids_tableall = getAllIdsFromDbTable(db_read_for_id, TABLE_ALL);
 
 
-        else {
-            do {
-                String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-                Log.d(TAG, TAG_refreshSmsInbox + " _id = " + temp_id_holder);
-                String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
-                Log.d(TAG, TAG_refreshSmsInbox + " corress_inbox_id = " + temp_corres_inbox_id_holder);
-                item_ids_tableall.add(temp_corres_inbox_id_holder);
-            } while (cursor_read_id.moveToNext());
-            // topmost is largest/latest _ID
-        }
+
+//        -------------------------------- the below goes into function getAllIdsFromDbTable() -------------------------------------
+//
+//        String[] projection_id = {
+//                BaseColumns._ID,
+//                SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
+//        };
+//
+//        String selection_id = null;
+//        String[] selection_args = null;
+//        String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+//        Cursor cursor_read_id = db_read_for_id.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+//                projection_id,             // The array of columns to return (pass null to get all)
+//                selection_id,              // The columns for the WHERE clause
+//                selection_args,          // The values for the WHERE clause
+//                null,                   // don't group the rows
+//                null,                   // don't filter by row groups
+//                sort_order               // The sort order
+//        );
+//
+//
+//        if (!cursor_read_id.moveToFirst()){
+//            Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is empty! ");
+//        }
+//
+//
+//        else {
+//            do {
+//                String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+//                Log.d(TAG, TAG_refreshSmsInbox + " _id = " + temp_id_holder);
+//                String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+//                Log.d(TAG, TAG_refreshSmsInbox + " corress_inbox_id = " + temp_corres_inbox_id_holder);
+//                item_ids_tableall.add(temp_corres_inbox_id_holder);
+//            } while (cursor_read_id.moveToNext());
+//            // topmost is largest/latest _ID
+//        }
+
+//        ------------------------------- the above goes into function getAllIdsFromDbTable() -----------------------------------
 
         String latest_sms_id_in_table_all = "";
 
@@ -266,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
         String printable_date;
 
         ContentResolver content_resolver = getContentResolver();
+
 
 
 
@@ -588,6 +600,74 @@ public class MainActivity extends AppCompatActivity {
         //end of READING from table
 
         //end of all DATABASE operations
+    }
+
+
+    // this fucntion returns a list of ids i.e the COLUMN_CORRES_INBOX_ID
+    public List getAllIdsFromDbTable(SQLiteDatabase db, int table){
+        final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
+        List item_ids_table = new ArrayList();
+        item_ids_table.clear();
+
+        switch (table){
+
+//            ------------for TABLE_ALL ----------------
+
+            case TABLE_ALL:
+                String[] projection_id = {
+                        BaseColumns._ID,
+                        SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
+                };
+
+                String selection_id = null;
+                String[] selection_args = null;
+                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+                Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                        projection_id,             // The array of columns to return (pass null to get all)
+                        selection_id,              // The columns for the WHERE clause
+                        selection_args,          // The values for the WHERE clause
+                        null,                   // don't group the rows
+                        null,                   // don't filter by row groups
+                        sort_order               // The sort order
+                );
+                if (!cursor_read_id.moveToFirst()){
+                    Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
+                }
+
+                else {
+                    do {
+                        String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+                        Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
+                        String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+                        Log.d(TAG, TAG_getAllIdsFromDbTable + " corress_inbox_id = " + temp_corres_inbox_id_holder);
+                        item_ids_table.add(temp_corres_inbox_id_holder);
+                    } while (cursor_read_id.moveToNext());
+                    // topmost is largest/latest _ID
+                }
+                break;
+
+//                -------------- for TABLE_INBOX -------------------
+
+            case TABLE_INBOX:
+                //do nothing for now
+                break;
+
+//                -------------  for TABLE_SPAM --------------------
+
+            case TABLE_SPAM:
+                //do nothing for now
+                break;
+
+            case TABLE_CONTENT_SMS_INBOX:
+                //
+                break;
+
+
+            default:
+                Log.d(TAG, TAG_getAllIdsFromDbTable + " invalid table selection");
+        }
+
+        return item_ids_table;
     }
 
     public  static  String getContactName(Context context, String phone_number){
