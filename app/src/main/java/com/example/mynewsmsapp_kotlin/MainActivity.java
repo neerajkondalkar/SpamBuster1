@@ -63,9 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     @Override
@@ -88,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG_onStop, " called ");
         super.onStop();
         //active = false; //indicate that activity is not live so as to refreshInbox //check in the overriden SmsBroadcastReceiver.onReceive() method
-                            //                  creates problem because even if app is minimized it says not active resulting in no new message display
-                            // puting active = false in onDestroy;
+        //                  creates problem because even if app is minimized it says not active resulting in no new message display
+        // puting active = false in onDestroy;
     }
 
 
@@ -104,9 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     @Override
@@ -118,9 +114,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     @Override
@@ -132,9 +126,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     @Override
@@ -146,9 +138,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -164,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
         messages.setAdapter(array_adapter);
 
 
-
 //        ----------------------- DELETE DATABASE --------------------
 
 //        //to delete the database. so that everytime a new database is created
@@ -175,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
 //        catch (Exception e){
 //            Log.d(TAG, TAG_onCreate + " Exception : " + e);
 //        }
-
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -189,30 +177,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     // this is a callback from requestPermissions(new String[]{Manifest.permission.READ_SMS}, READ_SMS_PERMISSION_REQUEST);
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-       final  String TAG_onRequestPermissionResult = "onReqestPermissionResult(): ";
-       Log.d(TAG, TAG_onRequestPermissionResult + " called ");
+        final String TAG_onRequestPermissionResult = "onReqestPermissionResult(): ";
+        Log.d(TAG, TAG_onRequestPermissionResult + " called ");
         if (requestCode == REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS) {
             if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Read SMS and Read contacts permission granted", Toast.LENGTH_SHORT).show();
-                Log.d(TAG,  TAG_onRequestPermissionResult + permissions[0] + " " + permissions[1] + " permissions granted");
+                Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " " + permissions[1] + " permissions granted");
                 refreshSmsInbox();
-            } else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_DENIED){
+            } else if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_DENIED) {
                 Toast.makeText(this, "Read SMS and Read contacts permission denied", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " " + permissions[1] + " permissions denied");
-            }
-            else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED){
+            } else if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED) {
                 Toast.makeText(this, "Read SMS granted and Read contacts permission denied", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " permission granted " + permissions[1] + " permissions denied");
-            }
-            else if(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+            } else if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Read SMS denied and Read contacts permission granted", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, TAG_onRequestPermissionResult + permissions[0] + " permission denied " + permissions[1] + " permissions granted");
             }
@@ -223,19 +207,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     //requesting permissions to read sms, read contacts
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void getNecessaryPermissions(){
+    public void getNecessaryPermissions() {
         final String TAG_getNecessaryPermissions = " getNecessartPermissions(): ";
         Log.d(TAG, TAG_getNecessaryPermissions + " called");
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission is not granted then show an education UI to give reason to user
-            if(shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)){
+            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)) {
                 Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
             }
             //and then let the system request permission from user for your app.
@@ -245,13 +227,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
 //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
     //reads all sms from database and display all the sms using the array_adapter
-    public  void refreshSmsInbox() {
+    public void refreshSmsInbox() {
 //        ArrayList<String> sms_list = new ArrayList<String>();
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
@@ -269,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
         List item_ids_tableall = new ArrayList();
         item_ids_tableall.clear();
         item_ids_tableall = getAllIdsFromDbTable(db_read_for_id, TABLE_ALL);
-
 
 
 //        -------------------- DELETE database ---------------------------
@@ -304,14 +283,12 @@ public class MainActivity extends AppCompatActivity {
         //checking if all the  ids present in item_ids_inbox are also present in item_ids_tableall
         //if not, the ids present in items_ids_inbox but not in items_ids_tableall , will be added to list missing_item_ids
         missing_item_ids = compareSmsIdsInLists(TABLE_ALL, TABLE_CONTENT_SMS_INBOX, item_ids_tableall, item_ids_inbox);
-        if (missing_item_ids.isEmpty()){
+        if (missing_item_ids.isEmpty()) {
             table_all_sync_inbox = true;
-        }
-        else{
+        } else {
             table_all_sync_inbox = false;
         }
         Log.d(TAG, TAG_refreshSmsInbox + "");
-
 
 
         // Gets the data repository in write mode
@@ -329,9 +306,7 @@ public class MainActivity extends AppCompatActivity {
             // update the TABLE_ALL according to SMS/INBOX
             updateMissingValuesInDbTable(db, TABLE_ALL, TABLE_CONTENT_SMS_INBOX, missing_item_ids);
             //end of inserting into db
-        }
-
-        else{
+        } else {
             Log.d(TAG, TAG_refreshSmsInbox + " ");
             Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is in sync with SMS/INBOX. So no need to update  TABLE_ALL ");
             Log.d(TAG, TAG_refreshSmsInbox + " ");
@@ -360,21 +335,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
 //    ---------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-
-
     // this fucntion returns a list of ids i.e the COLUMN_CORRES_INBOX_ID
-    public List getAllIdsFromDbTable(SQLiteDatabase db, int table){
+    public List getAllIdsFromDbTable(SQLiteDatabase db, int table) {
         final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
         List item_ids = new ArrayList();
         item_ids.clear();
 
-        switch (table){
+        switch (table) {
 
 //            ------------for TABLE_ALL ----------------
 
@@ -395,11 +365,9 @@ public class MainActivity extends AppCompatActivity {
                         null,                   // don't filter by row groups
                         sort_order               // The sort order
                 );
-                if (!cursor_read_id.moveToFirst()){
+                if (!cursor_read_id.moveToFirst()) {
                     Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
-                }
-
-                else {
+                } else {
                     do {
                         String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
                         Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
@@ -460,12 +428,11 @@ public class MainActivity extends AppCompatActivity {
                         item_ids.add(id_inbox);
                         Log.d(TAG, TAG_getAllIdsFromDbTable + " id_inbox = " + id_inbox);
                         Log.d(TAG, TAG_getAllIdsFromDbTable + " threadid_inbox = " + threadid_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable +  " address_inbox = " + address_inbox);
+                        Log.d(TAG, TAG_getAllIdsFromDbTable + " address_inbox = " + address_inbox);
                         Log.d(TAG, TAG_getAllIdsFromDbTable + " body_inbox = " + body_inbox);
                         Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                    }while (cursor_check_sms_id.moveToNext());
-                }
-                else{
+                    } while (cursor_check_sms_id.moveToNext());
+                } else {
                     Log.d(TAG, TAG_getAllIdsFromDbTable + "  inbuilt sms/inbox empty! ");
                 }
                 Log.d(TAG, TAG_getAllIdsFromDbTable + "");
@@ -480,9 +447,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
 //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     //checking whether table1 has all the items that are present in table2
@@ -490,43 +455,40 @@ public class MainActivity extends AppCompatActivity {
     //checking whether list1 has all items that are present in list2
     //any item that is present in list2 but not in list1, must be put in missing_item_ids list;
 
-    public List compareSmsIdsInLists(int Table1, int Table2, List list1, List list2){
+    public List compareSmsIdsInLists(int Table1, int Table2, List list1, List list2) {
         final String TAG_compareSmsIdsInLists = " compareSmsIdsInLists(): ";
         List missing_item_ids = new ArrayList();
         missing_item_ids.clear();
 
         // check if TABLE_ALL has all messages that are present in SMS/INBOX
         // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
-        if(Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX){
+        if (Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX) {
             List item_ids_tableall = list1;
             List item_ids_inbox = list2;
             ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
             String current_list_item_ids_inbox;
-            if(!iterator_item_ids_inbox.hasNext()){
+            if (!iterator_item_ids_inbox.hasNext()) {
                 Log.d(TAG, TAG_compareSmsIdsInLists + " List item_ids_inbox is empty ! ");
-            }
-            else{
+            } else {
                 Log.d(TAG, TAG_compareSmsIdsInLists + " ");
                 Log.d(TAG, TAG_compareSmsIdsInLists + " first element in item_ids_tableall = " + item_ids_tableall.get(0).toString());
                 Log.d(TAG, TAG_compareSmsIdsInLists + " ");
                 Log.d(TAG, TAG_compareSmsIdsInLists + " iterating in item_ids_inbox ");
                 Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-                for (int i=0; i<item_ids_inbox.size(); i++){
+                for (int i = 0; i < item_ids_inbox.size(); i++) {
                     current_list_item_ids_inbox = iterator_item_ids_inbox.next().toString();
                     Log.d(TAG, TAG_compareSmsIdsInLists + " iterator_item_ids_inbox.next().toString() = " + current_list_item_ids_inbox);
                     try {
                         if (item_ids_tableall.contains(current_list_item_ids_inbox)) {
                             Log.d(TAG, TAG_compareSmsIdsInLists + " present in items_ids_tableall");
                             Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
-                        }
-                        else{
+                        } else {
                             Log.d(TAG, TAG_compareSmsIdsInLists + " not present in items_ids_tableall ");
                             Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
                             missing_item_ids.add(current_list_item_ids_inbox);
                         }
-                    }
-                    catch (Exception e){
-                        Log.d(TAG, TAG_compareSmsIdsInLists + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e );
+                    } catch (Exception e) {
+                        Log.d(TAG, TAG_compareSmsIdsInLists + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e);
                     }
 //            Log.d(TAG, TAG_compareSmsIdsInLists + " " + item_ids_tableall.conta)
                 }
@@ -539,14 +501,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
 //    ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
     //table1 will be updated with values present in table2 if table1 elemets < table2 elements
-    public void updateMissingValuesInDbTable(SQLiteDatabase db, int table1, int table2, List missing_item_ids){
+    public void updateMissingValuesInDbTable(SQLiteDatabase db, int table1, int table2, List missing_item_ids) {
         final String TAG_updateMissingValuesInDbTable = " updateMissingValuesInDbTable(): ";
         Log.d(TAG, TAG_updateMissingValuesInDbTable + " called ");
 
@@ -556,7 +515,7 @@ public class MainActivity extends AppCompatActivity {
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
         String printable_date;
 
-        if(table1 == TABLE_ALL && table2 == TABLE_CONTENT_SMS_INBOX) {
+        if (table1 == TABLE_ALL && table2 == TABLE_CONTENT_SMS_INBOX) {
             ContentResolver content_resolver = getContentResolver();
             String[] projection_sms_inbox = null;
             String selection_sms_inbox = null;
@@ -660,11 +619,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
 //    -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public List readMessagesFromDbTable(SQLiteDatabase db, int table){
+    public List readMessagesFromDbTable(SQLiteDatabase db, int table) {
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
         Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
 
@@ -706,13 +664,11 @@ public class MainActivity extends AppCompatActivity {
                 sortOrder               // The sort order
         );
 
-        if(!cursor_read_from_table_all.moveToFirst()){
+        if (!cursor_read_from_table_all.moveToFirst()) {
             Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
-        }
-
-        else {
+        } else {
 //       List itemIds = new ArrayList<>();
-            do{
+            do {
                 long itemId = cursor_read_from_table_all.getLong(
                         cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
 //            itemIds.add(itemId);
@@ -732,18 +688,18 @@ public class MainActivity extends AppCompatActivity {
 
                 String str = "SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
                 messages_list.add(str);
-            }while (cursor_read_from_table_all.moveToNext());
+            } while (cursor_read_from_table_all.moveToNext());
         }
         cursor_read_from_table_all.close();
         db.setTransactionSuccessful();
         db.endTransaction();
 
-        return  messages_list;
+        return messages_list;
     }
 
 
-//    -------------------------------------------------------------------------------------------------------------------------------------------------
-    public  static  String getContactName(Context context, String phone_number){
+    //    -------------------------------------------------------------------------------------------------------------------------------------------------
+    public static String getContactName(Context context, String phone_number) {
         final String TAG_getContactName = " getContactName(): ";
         Log.d(TAG, TAG_getContactName + " called ");
 //        Log.d(TAG, TAG_getContactName + " phone_number = " + phone_number);
@@ -755,15 +711,15 @@ public class MainActivity extends AppCompatActivity {
         final int index_displayname = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
 //        Log.d(TAG, TAG_getContactName + "index_displayname = " + index_displayname);
 //        Log.d(TAG, TAG_getContactName + "cursor = " + cursor);
-        if (cursor == null){
+        if (cursor == null) {
             return phone_number;
         }
         String name = phone_number;
-        if(cursor.moveToNext()){
+        if (cursor.moveToNext()) {
             name = cursor.getString(index_displayname);
             Log.d(TAG, TAG_getContactName + "name = " + name);
         }
-        if (cursor!=null && !cursor.isClosed()){
+        if (cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
         return name;
@@ -776,11 +732,10 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickComposeSms(View view) {
         final String TAG_onClickSendButton = " onClickSendButton(): ";
-        Log.d(TAG, TAG_onClickSendButton  +" called ");
+        Log.d(TAG, TAG_onClickSendButton + " called ");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             getNecessaryPermissions();
-        }
-        else {
+        } else {
             Intent intent_to_send_new_sms = new Intent(MainActivity.this, ComposeSmsActivity.class);
             startActivity(intent_to_send_new_sms);
         }
@@ -791,9 +746,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
-    public void updateInbox(final String sms_message){
+    public void updateInbox(final String sms_message) {
         final String TAG_updateInbox = " updateInbox(): ";
-        Log.d(TAG, TAG_updateInbox  +" called ");
+        Log.d(TAG, TAG_updateInbox + " called ");
 
         //always place new sms at top i.e index 0
         array_adapter.insert(sms_message, 0);
@@ -803,9 +758,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
     //just to preserve the current instance so that it is not lost when we return from SmsBroadcastReciever class
@@ -818,8 +771,7 @@ public class MainActivity extends AppCompatActivity {
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-    public void backToMainActivity(){
+    public void backToMainActivity() {
         //do nothing
         Log.d(TAG, "backToMainActivity(): called");
     }
