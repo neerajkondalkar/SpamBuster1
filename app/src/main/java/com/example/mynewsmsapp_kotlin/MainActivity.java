@@ -25,6 +25,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -48,9 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
     ArrayList<String> sms_messages_list = new ArrayList<>();
-    ListView messages;
+//    ListView messages;
+    RecyclerView messages;
     ArrayAdapter array_adapter;
 //    EditText input;
+    SmsAdapter sms_adapter;
 
 
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
@@ -148,10 +152,11 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG_onCreate, " called ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        messages = (ListView) findViewById(R.id.messages);
+        messages = (RecyclerView) findViewById(R.id.messages);
+//        messages = (ListView) findViewById(R.id.messages);
 //        input = (EditText) findViewById(R.id.sms_text_input);
-        array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
-        messages.setAdapter(array_adapter);
+//        array_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sms_messages_list);
+//        messages.setAdapter(array_adapter);
 
 
 //        ----------------------- DELETE DATABASE --------------------
@@ -298,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
 
 //     -------------------------- inbox is not  IS NOT IN SYNC, therefore INSERT all the new messages in our db table TABLE_ALL -----------------------
 
-        array_adapter.clear();
+//        array_adapter.clear();
 
         if (!table_all_sync_inbox) {
 
@@ -324,8 +329,13 @@ public class MainActivity extends AppCompatActivity {
         db.beginTransaction();
 
         // read Messages from TABLE_ALL and return a list having List of string messages from table_all
-        List messages_list = readMessagesFromDbTable(db, TABLE_ALL);
-        array_adapter.addAll(messages_list);
+//        List messages_list = readMessagesFromDbTable(db, TABLE_ALL);
+        sms_messages_list = readMessagesFromDbTable(db, TABLE_ALL);
+
+        sms_adapter = new SmsAdapter(this, sms_messages_list);
+        messages.setAdapter(sms_adapter);
+        messages.setLayoutManager(new LinearLayoutManager(this));
+//        array_adapter.addAll(messages_list);
 
         db.close();
         db_helper.close();
@@ -333,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
         //end of READING from table
         //end of all DATABASE operations
     }
-
 
 //    ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -622,11 +631,11 @@ public class MainActivity extends AppCompatActivity {
 //    -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public List readMessagesFromDbTable(SQLiteDatabase db, int table) {
+    public ArrayList readMessagesFromDbTable(SQLiteDatabase db, int table) {
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
         Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
 
-        List messages_list = new ArrayList();
+        ArrayList messages_list = new ArrayList();
         messages_list.clear();
 
         String date_str = "";
@@ -751,10 +760,14 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_updateInbox + " called ");
 
         //always place new sms at top i.e index 0
-        array_adapter.insert(sms_message, 0);
+//        array_adapter.insert(sms_message, 0);
+//        sms_messages_list.add(0, sms_message);
+        sms_adapter.insert(0, sms_message);
+        sms_adapter.notifyDataSetChanged();
 
         //notify the individual views in adapter view about the change
-        array_adapter.notifyDataSetChanged();
+//        array_adapter.notifyDataSetChanged();
+//        sms_messages_list.notifyDataSetChanged();
     }
 
 
