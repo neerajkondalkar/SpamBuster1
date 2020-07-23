@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -587,7 +588,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, TAG_updateMissingValuesInDbTable + " missing_item_ids.contains(corress_inbox_id) =  " + missing_item_ids.contains(corress_inbox_id));
 
                 //insert only the messages which are not already present in the TABLE_ALL i.e insert only the new sms i.e sms which which new _ID
-//                if(!item_ids_tableall.contains(corress_inbox_id)) {
 
                 if (missing_item_ids.contains(corress_inbox_id)) {
                     Log.d(TAG, TAG_updateMissingValuesInDbTable + " new sms confirmed!    _ID = " + corress_inbox_id);
@@ -676,11 +676,9 @@ public class MainActivity extends AppCompatActivity {
         if (!cursor_read_from_table_all.moveToFirst()) {
             Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
         } else {
-//       List itemIds = new ArrayList<>();
             do {
                 long itemId = cursor_read_from_table_all.getLong(
                         cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-//            itemIds.add(itemId);
                 String corress_inbox_id = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
                 String sms_body = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
                 String sms_address = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
@@ -755,19 +753,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
-    public void updateInbox(final String sms_message) {
+    public void updateInbox(final String sms_message_str, SmsMessage sms_message) {
         final String TAG_updateInbox = " updateInbox(): ";
         Log.d(TAG, TAG_updateInbox + " called ");
 
         //always place new sms at top i.e index 0
-//        array_adapter.insert(sms_message, 0);
-//        sms_messages_list.add(0, sms_message);
-        sms_adapter.insert(0, sms_message);
+        sms_adapter.insert(0, sms_message_str);
         sms_adapter.notifyDataSetChanged();
 
-        //notify the individual views in adapter view about the change
-//        array_adapter.notifyDataSetChanged();
-//        sms_messages_list.notifyDataSetChanged();
+
+        //add code to store sms_message inside the sms/inbox and database table
+
     }
 
 

@@ -17,11 +17,12 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public static final String SMS_BUNDLE = "pdus";
 
 
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onReceive(Context context, Intent intent) {
         final String TAG_onReceive = " onReceive(): ";
-        String action_sms_received = "android.provider.Telephony.SMS_RECEIVED";
+        final String action_sms_received = "android.provider.Telephony.SMS_RECEIVED";
+        SmsMessage sms_message = null;   // sms_message will be passsed to the MainActivity.updateInbox()
+
         String intent_getAction = intent.getAction().toString();
         Log.d(TAG, TAG_onReceive + "Action that made the callback is " + intent_getAction);
 
@@ -46,14 +47,17 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
                     Log.d(TAG, TAG_onReceive + "i = " + i);
 
-                    Log.d(TAG, TAG_onReceive + "sms[i] = " + sms[i]);
+                    Log.d(TAG, TAG_onReceive + "sms[i] = " + sms[i].toString());
+
+//                    Log.d(TAG, TAG_onReceive + " All fields in intent_extras:  ");
+
 
                     //get the format (extra value) which is of String type
                     String format = intent_extras.getString("format");
                     Log.d(TAG, TAG_onReceive + "format = " + format);
 
                     //create an sms from raw pdu using the format given during the callback by the intent
-                    SmsMessage sms_message = SmsMessage.createFromPdu((byte[]) sms[i], format);
+                    sms_message = SmsMessage.createFromPdu((byte[]) sms[i], format);
                     Log.d(TAG, TAG_onReceive + " sms_message = " + sms_message);
 
                     //toString() is redundant
@@ -63,6 +67,10 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     //toString() is redundant
                     String address = sms_message.getOriginatingAddress().toString();
                     Log.d(TAG, TAG_onReceive + "address = " + address);
+
+                    long date = sms_message.getTimestampMillis();
+                    Log.d(TAG, TAG_onReceive + " timestampmillis = " + date);
+
 
                     sms_message_str += "SMS from: " + MainActivity.getContactName(context, address) + "\n";
                     sms_message_str += sms_body + "\n";
@@ -81,7 +89,13 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     MainActivity inst = MainActivity.instance();
 
                     //to update the current array adapter view so that the index 0 of list view will show the latest sms received
-                    inst.updateInbox(sms_message_str);
+//                    inst.updateInbox(sms_message_str);
+                    try {
+                        inst.updateInbox(sms_message_str, sms_message);
+                    }
+                    catch(Exception e){
+                        Log.d(TAG, TAG_onReceive + " exception : " + e);
+                    }
                 }
                 //if no instance of MainActivity is running, then create an instance using intent
                 else {
