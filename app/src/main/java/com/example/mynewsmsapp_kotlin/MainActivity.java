@@ -552,6 +552,7 @@ public class MainActivity extends AppCompatActivity {
             int index_id = sms_inbox_cursor.getColumnIndex("_id");
             int index_body = sms_inbox_cursor.getColumnIndex("body");
             int index_date = sms_inbox_cursor.getColumnIndex("date");
+            int index_date_sent = sms_inbox_cursor.getColumnIndexOrThrow("date_sent");
 //            Log.d(TAG, TAG_updateMissingValuesInDbTable + "index body = " + index_body + '\n');
             int index_address = sms_inbox_cursor.getColumnIndex("address");
 //            Log.d(TAG, TAG_updateMissingValuesInDbTable + "index_address = " + index_address + '\n');
@@ -577,6 +578,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, TAG_updateMissingValuesInDbTable + "getContactName() returns = " + contact_name);
                 String sms_body = sms_inbox_cursor.getString(index_body);
                 date_str = sms_inbox_cursor.getString(index_date);
+                String date_sent = sms_inbox_cursor.getString(index_date_sent);
 
 //                String str = "SMS From: " + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_body;
 
@@ -598,6 +600,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
                     Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
+                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " value of date_sent = " + date_sent);
                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
 
                     // Insert the new row, returning the primary key value of the new row
@@ -676,13 +679,17 @@ public class MainActivity extends AppCompatActivity {
         if (!cursor_read_from_table_all.moveToFirst()) {
             Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
         } else {
+            int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
+            int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
+            int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
+            int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
+            int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
             do {
-                long itemId = cursor_read_from_table_all.getLong(
-                        cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-                String corress_inbox_id = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
-                String sms_body = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
-                String sms_address = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
-                String epoch_date = cursor_read_from_table_all.getString(cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
+                long itemId = cursor_read_from_table_all.getLong(index_id);
+                String corress_inbox_id = cursor_read_from_table_all.getString(index_corres_id);
+                String sms_body = cursor_read_from_table_all.getString(index_sms_body);
+                String sms_address = cursor_read_from_table_all.getString(index_sms_address);
+                String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
                 Log.d(TAG, TAG_readMessagesFromDbTable + " itemId = " + itemId);
                 Log.d(TAG, TAG_readMessagesFromDbTable + " corress_inbox_id = " + corress_inbox_id);
                 Log.d(TAG, TAG_readMessagesFromDbTable + " sms_body = " + sms_body);      // EDIT HERE
@@ -769,7 +776,7 @@ public class MainActivity extends AppCompatActivity {
         //add code to store sms_message inside the sms/inbox and database table
         String sms_body = sms_message.getMessageBody().toString();
         String address = sms_message.getOriginatingAddress().toString();
-        long date = sms_message.getTimestampMillis();
+        long date_sent = sms_message.getTimestampMillis();
     }
 
 
