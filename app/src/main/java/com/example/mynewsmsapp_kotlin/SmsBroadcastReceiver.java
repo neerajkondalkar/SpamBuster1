@@ -11,6 +11,10 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 public class SmsBroadcastReceiver extends BroadcastReceiver {
 
     private String TAG = "[MY_DEBUG]" + SmsBroadcastReceiver.class.getSimpleName();
@@ -68,12 +72,18 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     String address = sms_message.getOriginatingAddress().toString();
                     Log.d(TAG, TAG_onReceive + "address = " + address);
 
-                    long date = sms_message.getTimestampMillis();
-                    Log.d(TAG, TAG_onReceive + " timestampmillis = " + date);
+                    long timestampMillis = sms_message.getTimestampMillis();
+                    Log.d(TAG, TAG_onReceive + " timestampmillis = " + timestampMillis);
 
 
+                    Calendar calendar = Calendar.getInstance();
+                    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+                    String printable_date = "";
+                    calendar.setTimeInMillis(timestampMillis);
+                    printable_date = formatter.format(calendar.getTime());
                     sms_message_str += "SMS from: " + MainActivity.getContactName(context, address) + "\n";
-                    sms_message_str += sms_body + "\n";
+                    sms_message_str += "Received at : " + printable_date + "\n";
+                    sms_message_str += sms_body;
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
 
                     sender_number = address; // for Toast.makeText()   to show sender number or name

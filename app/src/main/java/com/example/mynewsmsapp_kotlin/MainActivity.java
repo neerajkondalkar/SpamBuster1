@@ -757,13 +757,19 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_updateInbox = " updateInbox(): ";
         Log.d(TAG, TAG_updateInbox + " called ");
 
-        //always place new sms at top i.e index 0
-        sms_adapter.insert(0, sms_message_str);
-        sms_adapter.notifyDataSetChanged();
-
+        try {
+            //always place new sms at top i.e index 0
+            sms_adapter.insert(0, sms_message_str);
+            sms_adapter.notifyDataSetChanged();
+        }
+        catch(Exception e){
+            Log.d(TAG, TAG_updateInbox + " Exception : " + e );
+        }
 
         //add code to store sms_message inside the sms/inbox and database table
-
+        String sms_body = sms_message.getMessageBody().toString();
+        String address = sms_message.getOriginatingAddress().toString();
+        long date = sms_message.getTimestampMillis();
     }
 
 
