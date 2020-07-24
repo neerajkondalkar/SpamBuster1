@@ -9,9 +9,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.nfc.Tag;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
@@ -19,7 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int TABLE_INBOX = 2;
     private static final int TABLE_SPAM = 3;
     private static final int TABLE_CONTENT_SMS_INBOX = 4;
+
+    Handler handler_main = new Handler();
 
     private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
@@ -331,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
 
         // read Messages from TABLE_ALL and return a list having List of string messages from table_all
 //        List messages_list = readMessagesFromDbTable(db, TABLE_ALL);
+//        sms_messages_list = readMessagesFromDbTable(db, TABLE_ALL);
         sms_messages_list = readMessagesFromDbTable(db, TABLE_ALL);
 
         sms_adapter = new SmsAdapter(this, sms_messages_list);
@@ -636,75 +640,90 @@ public class MainActivity extends AppCompatActivity {
 
     public ArrayList readMessagesFromDbTable(SQLiteDatabase db, int table) {
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
+        int i=0;
         Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
 
-        ArrayList messages_list = new ArrayList();
-        messages_list.clear();
+            ArrayList messages_list = new ArrayList();
+            messages_list.clear();
 
-        String date_str = "";
-        long milli_seconds = 0;
-        Calendar calendar = Calendar.getInstance();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-        String printable_date;
+            String date_str = "";
+            long milli_seconds = 0;
+            Calendar calendar = Calendar.getInstance();
+            DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+            String printable_date;
 
-        String[] projection = {
-                BaseColumns._ID,
-                SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
-                SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
-                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
-        };
+        switch (table) {
+
+            case TABLE_ALL:
+            String[] projection = {
+                    BaseColumns._ID,
+                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
+            };
 
 // Filter results WHERE "title" = 'My Title'
 //        String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " = ? "
 //                + SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " = ? ";
 //        String[] selectionArgs = { "*, *" };
-        String selection = null;
-        String[] selectionArgs = null;
+            String selection = null;
+            String[] selectionArgs = null;
 
 // How you want the results sorted in the resulting Cursor
-        String sortOrder =
-                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
+            String sortOrder =
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
 
-        Cursor cursor_read_from_table_all = db.query(
-                SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-                projection,             // The array of columns to return (pass null to get all)
-                selection,              // The columns for the WHERE clause
-                selectionArgs,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                sortOrder               // The sort order
-        );
 
-        if (!cursor_read_from_table_all.moveToFirst()) {
-            Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
-        } else {
-            int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
-            int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
-            int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
-            int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
-            int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
-            do {
-                long itemId = cursor_read_from_table_all.getLong(index_id);
-                String corress_inbox_id = cursor_read_from_table_all.getString(index_corres_id);
-                String sms_body = cursor_read_from_table_all.getString(index_sms_body);
-                String sms_address = cursor_read_from_table_all.getString(index_sms_address);
-                String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
-                Log.d(TAG, TAG_readMessagesFromDbTable + " itemId = " + itemId);
-                Log.d(TAG, TAG_readMessagesFromDbTable + " corress_inbox_id = " + corress_inbox_id);
-                Log.d(TAG, TAG_readMessagesFromDbTable + " sms_body = " + sms_body);      // EDIT HERE
-                Log.d(TAG, TAG_readMessagesFromDbTable + " sms_address = " + sms_address);      // EDIT HERE
-                milli_seconds = Long.parseLong(epoch_date);
-                calendar.setTimeInMillis(milli_seconds);
-                printable_date = formatter.format(calendar.getTime());
-                Log.d(TAG, TAG_readMessagesFromDbTable + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
-                Log.d(TAG, TAG_readMessagesFromDbTable + " ");
+            Cursor cursor_read_from_table_all = db.query(
+                    SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                    projection,             // The array of columns to return (pass null to get all)
+                    selection,              // The columns for the WHERE clause
+                    selectionArgs,          // The values for the WHERE clause
+                    null,                   // don't group the rows
+                    null,                   // don't filter by row groups
+                    sortOrder               // The sort order
+            );
 
-                String str = "SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
-                messages_list.add(str);
-            } while (cursor_read_from_table_all.moveToNext());
+            if (!cursor_read_from_table_all.moveToFirst()) {
+                Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
+            } else {
+                int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
+                int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
+                int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
+                int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
+                int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
+                do {
+                    long itemId = cursor_read_from_table_all.getLong(index_id);
+                    String corress_inbox_id = cursor_read_from_table_all.getString(index_corres_id);
+                    String sms_body = cursor_read_from_table_all.getString(index_sms_body);
+                    String sms_address = cursor_read_from_table_all.getString(index_sms_address);
+                    String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " itemId = " + itemId);
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " corress_inbox_id = " + corress_inbox_id);
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " sms_body = " + sms_body);      // EDIT HERE
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " sms_address = " + sms_address);      // EDIT HERE
+                    milli_seconds = Long.parseLong(epoch_date);
+                    calendar.setTimeInMillis(milli_seconds);
+                    printable_date = formatter.format(calendar.getTime());
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
+                    Log.d(TAG, TAG_readMessagesFromDbTable + " ");
+
+                    String str = "SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+                    messages_list.add(str);
+                    i++;
+                } while (cursor_read_from_table_all.moveToNext() && i<=10);
+                //only load first 10 messages inside mainthread
+                //above 10 will be in ReadDbTableALlAsyncTask
+            }
+            if(i>10) {
+                cursor_read_from_table_all.close();
+                ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db);
+                readDbTableAllAsyncTask.execute();
+            }
+            break;
         }
-        cursor_read_from_table_all.close();
+
         db.setTransactionSuccessful();
         db.endTransaction();
 
@@ -798,5 +817,142 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "backToMainActivity(): called");
     }
 
+
+
+//  ----------------------------------------------------------------------------------------------------------------------------------------
+
+
+    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Integer, ArrayList>{
+        private static final String TAG = "[MY_DEBUG]";
+
+        private WeakReference<MainActivity> activityWeakReference;
+        private SQLiteDatabase db;
+        private String date_str = "";
+        private long milli_seconds = 0;
+        private Calendar calendar = Calendar.getInstance();
+        private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+        private String printable_date;
+        private int i;
+        private  ArrayList messages_list;
+
+        ReadDbTableAllAsyncTask(MainActivity activity, SQLiteDatabase db1){
+            activityWeakReference = new WeakReference<MainActivity>(activity);
+            db = db1;
+            i = 11;//since we start thread only if no. of messages is greater than 10
+        }
+
+        @Override
+        protected ArrayList doInBackground(ArrayList... arrayLists) {
+            messages_list = arrayLists[0];
+            final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
+            String[] projection = {
+                    BaseColumns._ID,
+                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
+            };
+
+// Filter results WHERE "title" = 'My Title'
+//        String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " = ? "
+//                + SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " = ? ";
+//        String[] selectionArgs = { "*, *" };
+            String selection = null;
+            String[] selectionArgs = null;
+
+// How you want the results sorted in the resulting Cursor
+            String sortOrder =
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
+
+
+            Cursor cursor_read_from_table_all = db.query(
+                    SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                    projection,             // The array of columns to return (pass null to get all)
+                    selection,              // The columns for the WHERE clause
+                    selectionArgs,          // The values for the WHERE clause
+                    null,                   // don't group the rows
+                    null,                   // don't filter by row groups
+                    sortOrder               // The sort order
+            );
+
+            if (!cursor_read_from_table_all.moveToFirst()) {
+                Log.d(TAG, TAG_doInBackground + " TABLE_ALL is empty ! ");
+            } else {
+                int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
+                int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
+                int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
+                int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
+                int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
+                do {
+                    long itemId = cursor_read_from_table_all.getLong(index_id);
+                    String corress_inbox_id = cursor_read_from_table_all.getString(index_corres_id);
+                    String sms_body = cursor_read_from_table_all.getString(index_sms_body);
+                    String sms_address = cursor_read_from_table_all.getString(index_sms_address);
+                    String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
+                    Log.d(TAG, TAG_doInBackground + " itemId = " + itemId);
+                    Log.d(TAG, TAG_doInBackground + " corress_inbox_id = " + corress_inbox_id);
+                    Log.d(TAG, TAG_doInBackground + " sms_body = " + sms_body);      // EDIT HERE
+                    Log.d(TAG, TAG_doInBackground + " sms_address = " + sms_address);      // EDIT HERE
+                    milli_seconds = Long.parseLong(epoch_date);
+                    calendar.setTimeInMillis(milli_seconds);
+                    printable_date = formatter.format(calendar.getTime());
+                    Log.d(TAG, TAG_doInBackground + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
+                    Log.d(TAG, TAG_doInBackground + " ");
+
+                    String str = "SMS From: " + getContactName(MainActivity.instance(), sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+                    messages_list.add(str);
+                    publishProgress(i);
+                    i++;
+                } while (cursor_read_from_table_all.moveToNext());
+            }
+            cursor_read_from_table_all.close();
+            return messages_list;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList arrayList) {
+            super.onPostExecute(arrayList);
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
+            super.onProgressUpdate(values);
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            if(values[0] <= 25 ) {
+                Log.d(TAG, TAG_onProgressUpdate + " value[0] <= 25");
+                Log.d(TAG, TAG_onProgressUpdate + " messages_list.get(values[0]).toString() = " +
+                        messages_list.get(values[0]).toString());
+                activity.sms_adapter.insert(values[0], messages_list.get(values[0]).toString());
+            }
+            if (values[0] > 25){
+                Log.d(TAG, TAG_onProgressUpdate + " value[0] > 25");
+                if(values[0] % 25 == 0){
+                    Log.d(TAG, TAG_onProgressUpdate + " value[0] % 25 == 0         TRUE");
+                    Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with messages_list values index " +
+                            values[0] + " to " + messages_list.size());
+                    activity.sms_adapter.append(messages_list.subList(values[0], messages_list.size()));
+                }
+            }
+        }
+    }
 }
+
 

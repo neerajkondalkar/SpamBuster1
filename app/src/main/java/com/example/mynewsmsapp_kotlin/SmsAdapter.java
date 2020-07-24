@@ -1,6 +1,7 @@
 package com.example.mynewsmsapp_kotlin;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
+    private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
 
     ArrayList<String> sms_messages_list;
     Context context;
@@ -24,8 +27,17 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     }
 
     public void insert(int position, String new_sms) {
+        final String TAG_insert = " insert(): ";
+        Log.d(TAG, TAG_insert + " called ");
         sms_messages_list.add(position, new_sms);
         notifyItemInserted(position);
+    }
+
+    public void append(Collection new_messages){
+        final String TAG_append = " append(): ";
+        Log.d(TAG, TAG_append + " called ");
+        sms_messages_list.addAll(new_messages);
+        notifyDataSetChanged();
     }
 
     @NonNull
