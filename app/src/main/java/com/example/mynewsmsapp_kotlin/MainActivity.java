@@ -839,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
 //  ----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, ReadDbTableAllAsyncTask.ProgressObject, ReadDbTableAllAsyncTask.ProgressObject>{
+    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Integer, ReadDbTableAllAsyncTask.ProgressObject>{
         private static final String TAG = "[MY_DEBUG]";
 
         private WeakReference<MainActivity> activityWeakReference;
@@ -852,59 +852,22 @@ public class MainActivity extends AppCompatActivity {
         private int i=0;
         private  ArrayList messages_list;
         private ProgressObject progressObject = new ProgressObject();
-        private int progress_iterator;
-
+//        private int progress_iterator;
+        private Integer progress_iterator;
         private  Cursor cursor_read_from_table_all;
 
         ReadDbTableAllAsyncTask(MainActivity activity, Cursor cursor_read_from_table_all){
             activityWeakReference = new WeakReference<MainActivity>(activity);
 //            db = db1;
             this.cursor_read_from_table_all = cursor_read_from_table_all;
-            i = 11;//since we start thread only if no. of messages is greater than 10
+            progress_iterator = 11;//since we start thread only if no. of messages is greater than 10
+            i=11;
         }
 
         @Override
         protected ProgressObject doInBackground(ArrayList... arrayLists) {
             messages_list = arrayLists[0];
             final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
-//            String[] projection = {
-//                    BaseColumns._ID,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
-//            };
-//
-// Filter results WHERE "title" = 'My Title'
-//        String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " = ? "
-//                + SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " = ? ";
-//        String[] selectionArgs = { "*, *" };
-//            String selection = null;
-//            String[] selectionArgs = null;
-//
-//// How you want the results sorted in the resulting Cursor
-//            String sortOrder =
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
-
-
-/*           Cursor cursor_read_from_table_all = db.query(
-                    SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-                    projection,             // The array of columns to return (pass null to get all)
-                    selection,              // The columns for the WHERE clause
-                    selectionArgs,          // The values for the WHERE clause
-                    null,                   // don't group the rows
-                    null,                   // don't filter by row groups
-                    sortOrder               // The sort order
-            );
-*/
-
-//            if (!cursor_read_from_table_all.moveToFirst()) {
-//                Log.d(TAG, TAG_doInBackground + " TABLE_ALL is empty ! ");
-//            }
-//            if(!cursor_read_from_table_all.moveToNext()){
-//                Log.d(TAG, "doInBackground: no more values in TABLE_ALL ");
-//            }
-//            else {
             Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: interator i = " + i);
                 int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
                 int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
@@ -933,7 +896,7 @@ public class MainActivity extends AppCompatActivity {
                     progressObject.i = i;
                     Log.d(TAG, "doInBackground: progress_iterator = " + progress_iterator);
                     Log.d(TAG, "doInBackground: i = " + i);
-                    publishProgress(progressObject);
+                    publishProgress(progress_iterator);
 //                    i++;
                     Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
                 } while (cursor_read_from_table_all.moveToNext());
@@ -970,15 +933,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onProgressUpdate(ProgressObject... values) {
+        protected void onProgressUpdate(Integer... values) {
                 final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
                 super.onProgressUpdate(values);
             Log.d(TAG, "onProgressUpdate: progress_iterator = " + progress_iterator++);
 
+            Log.d(TAG, "onProgressUpdate: values[0] = " + values[0]);
             Log.d(TAG, "onProgressUpdate: values.length = "  + values.length);
             Log.d(TAG, "onProgressUpdate:  values.getClass = " + values.getClass());
 
-            Log.d(TAG, "onProgressUpdate:  values[values.length - 1].i = " + values[values.length - 1].i);
+            Log.d(TAG, "onProgressUpdate:  values[values.length - 1] = " + values[values.length - 1]);
                 MainActivity activity = activityWeakReference.get();
                 if (activity == null || activity.isFinishing()) {
                     return;
@@ -1004,18 +968,21 @@ public class MainActivity extends AppCompatActivity {
 //            for(int j=values[0].i; j < values[values.length-1].i; j++) {
 
 
-                int j = values.length - 1;  //latest index
-                ArrayList message_list1 = values[j].message_list;
-                int k = values[j].i;
-                Log.d(TAG, "onProgressUpdate: iterator = " + j);
+//                int j = values.length - 1;  //latest index
+//                ArrayList message_list1 = values[j].message_list;
+//                int k = values[j].i;
+//                Log.d(TAG, "onProgressUpdate: iterator = " + j);
 
-            Log.d(TAG, "onProgressUpdate: values[j].i = " + k);
+//            Log.d(TAG, "onProgressUpdate: values[j].i = " + k);
 //                if (j <= 25) {
 //                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
-                    Log.d(TAG, "onProgressUpdate:    now inserting at index " + j);
-                    Log.d(TAG, TAG_onProgressUpdate + " message_list1.get(values[0]).toString() = " +
-                            message_list1.get(j).toString());
-//                    activity.sms_adapter.insert(j, message_list1.get(j).toString());
+            Log.d(TAG, "onProgressUpdate:  progress_iterator < messages_list.size()  is  " + (progress_iterator < messages_list.size()));
+                    if (progress_iterator < messages_list.size()) {
+                        Log.d(TAG, "onProgressUpdate:    now inserting at index progress_iterator = " + progress_iterator);
+                        Log.d(TAG, TAG_onProgressUpdate + " messages_list.get(progress_iterator).toString() = " +
+                                messages_list.get(progress_iterator).toString());
+                    }
+//                    activity.sms_adapter.insert(progress_iterator, messages_list.get(progress_iterator).toString());
 //                }
 
 //                if ( j > 25) {
