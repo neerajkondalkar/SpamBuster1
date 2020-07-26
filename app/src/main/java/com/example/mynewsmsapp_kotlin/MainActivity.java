@@ -30,12 +30,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Stream;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -641,6 +644,8 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList readMessagesFromDbTable(SQLiteDatabase db, int table) {
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
         int i=0;
+        boolean cursor_first = false;
+        boolean cursor_next = false;
         Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
 
             ArrayList messages_list = new ArrayList();
@@ -685,9 +690,12 @@ public class MainActivity extends AppCompatActivity {
                     sortOrder               // The sort order
             );
 
-            if (!cursor_read_from_table_all.moveToFirst()) {
+            i = 0;
+            cursor_first = cursor_read_from_table_all.moveToFirst();
+            if (!cursor_first) {
                 Log.d(TAG, TAG_readMessagesFromDbTable + " TABLE_ALL is empty ! ");
             } else {
+                Log.d(TAG, "readMessagesFromDbTable: iterator i = " + i);
                 int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
                 int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
                 int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
@@ -709,25 +717,34 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, TAG_readMessagesFromDbTable + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
                     Log.d(TAG, TAG_readMessagesFromDbTable + " ");
 
-                    String str = "SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+//                    String str = "SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+                    String str = "ItemID = " + itemId + "\ncorres_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(this, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
                     messages_list.add(str);
-                    i++;
-                } while (cursor_read_from_table_all.moveToNext() && i<=10);
+                    Log.d(TAG, "readMessagesFromDbTable: incrementing iterator i = "  + ++i);
+                    Log.d(TAG, "readMessagesFromDbTable: i<10 ? " + (boolean)(i<10));
+                    cursor_next = cursor_read_from_table_all.moveToNext();
+                } while ( cursor_next && i<=10);
                 //only load first 10 messages inside mainthread
                 //above 10 will be in ReadDbTableALlAsyncTask
             }
-            if(i>10) {
-                cursor_read_from_table_all.close();
-                ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db);
-                readDbTableAllAsyncTask.execute();
+
+
+            if(cursor_next && i>10) {
+                Log.d(TAG, "readMessagesFromDbTable: cursor_next is valid and i > 10 ");
+//                cursor_read_from_table_all.close();
+//                ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db);
+                ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, cursor_read_from_table_all);
+                Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
+                readDbTableAllAsyncTask.execute(messages_list);
             }
+
             break;
         }
 
         db.setTransactionSuccessful();
         db.endTransaction();
+        return  messages_list;
 
-        return messages_list;
     }
 
 
@@ -822,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
 //  ----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Integer, ArrayList>{
+    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, ReadDbTableAllAsyncTask.ProgressObject, ReadDbTableAllAsyncTask.ProgressObject>{
         private static final String TAG = "[MY_DEBUG]";
 
         private WeakReference<MainActivity> activityWeakReference;
@@ -832,40 +849,45 @@ public class MainActivity extends AppCompatActivity {
         private Calendar calendar = Calendar.getInstance();
         private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
         private String printable_date;
-        private int i;
+        private int i=0;
         private  ArrayList messages_list;
+        private ProgressObject progressObject = new ProgressObject();
+        private int progress_iterator;
 
-        ReadDbTableAllAsyncTask(MainActivity activity, SQLiteDatabase db1){
+        private  Cursor cursor_read_from_table_all;
+
+        ReadDbTableAllAsyncTask(MainActivity activity, Cursor cursor_read_from_table_all){
             activityWeakReference = new WeakReference<MainActivity>(activity);
-            db = db1;
+//            db = db1;
+            this.cursor_read_from_table_all = cursor_read_from_table_all;
             i = 11;//since we start thread only if no. of messages is greater than 10
         }
 
         @Override
-        protected ArrayList doInBackground(ArrayList... arrayLists) {
+        protected ProgressObject doInBackground(ArrayList... arrayLists) {
             messages_list = arrayLists[0];
             final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
-            String[] projection = {
-                    BaseColumns._ID,
-                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
-            };
-
+//            String[] projection = {
+//                    BaseColumns._ID,
+//                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
+//            };
+//
 // Filter results WHERE "title" = 'My Title'
 //        String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " = ? "
 //                + SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " = ? ";
 //        String[] selectionArgs = { "*, *" };
-            String selection = null;
-            String[] selectionArgs = null;
+//            String selection = null;
+//            String[] selectionArgs = null;
+//
+//// How you want the results sorted in the resulting Cursor
+//            String sortOrder =
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
 
-// How you want the results sorted in the resulting Cursor
-            String sortOrder =
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
 
-
-            Cursor cursor_read_from_table_all = db.query(
+/*           Cursor cursor_read_from_table_all = db.query(
                     SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                     projection,             // The array of columns to return (pass null to get all)
                     selection,              // The columns for the WHERE clause
@@ -874,10 +896,16 @@ public class MainActivity extends AppCompatActivity {
                     null,                   // don't filter by row groups
                     sortOrder               // The sort order
             );
+*/
 
-            if (!cursor_read_from_table_all.moveToFirst()) {
-                Log.d(TAG, TAG_doInBackground + " TABLE_ALL is empty ! ");
-            } else {
+//            if (!cursor_read_from_table_all.moveToFirst()) {
+//                Log.d(TAG, TAG_doInBackground + " TABLE_ALL is empty ! ");
+//            }
+//            if(!cursor_read_from_table_all.moveToNext()){
+//                Log.d(TAG, "doInBackground: no more values in TABLE_ALL ");
+//            }
+//            else {
+            Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: interator i = " + i);
                 int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
                 int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
                 int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
@@ -899,14 +927,19 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, TAG_doInBackground + " epoch_date = " + epoch_date + " which is : " + printable_date);      // EDIT HERE
                     Log.d(TAG, TAG_doInBackground + " ");
 
-                    String str = "SMS From: " + getContactName(MainActivity.instance(), sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+                    String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(activityWeakReference.get(), sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
                     messages_list.add(str);
-                    publishProgress(i);
-                    i++;
+                    progressObject.message_list = messages_list;
+                    progressObject.i = i;
+                    Log.d(TAG, "doInBackground: progress_iterator = " + progress_iterator);
+                    Log.d(TAG, "doInBackground: i = " + i);
+                    publishProgress(progressObject);
+//                    i++;
+                    Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
                 } while (cursor_read_from_table_all.moveToNext());
-            }
+//            }
             cursor_read_from_table_all.close();
-            return messages_list;
+            return progressObject;
         }
 
         @Override
@@ -920,39 +953,91 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(ArrayList arrayList) {
-            super.onPostExecute(arrayList);
+        protected void onPostExecute(ProgressObject progressObject) {
+            super.onPostExecute(progressObject);
             MainActivity activity = activityWeakReference.get();
             if (activity == null || activity.isFinishing()) {
                 return;
             }
+
+            //if any values are left, please update
+//            Log.d(TAG, " onPostExecute():  appending sms_adapter with message_list1 values index " +
+//                    progressObject.i + " to " + progressObject.message_list.size());
+            Log.d(TAG, "onPostExecute:  appending sms_adapter with messages_list1 values index " +
+                    progressObject.i + " to " + (progressObject.message_list.size()-1) );
+            activity.sms_adapter.append(progressObject.message_list.subList(progressObject.i, progressObject.message_list.size() - 1));
+            Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
-            super.onProgressUpdate(values);
-            MainActivity activity = activityWeakReference.get();
-            if (activity == null || activity.isFinishing()) {
-                return;
-            }
-            if(values[0] <= 25 ) {
-                Log.d(TAG, TAG_onProgressUpdate + " value[0] <= 25");
-                Log.d(TAG, TAG_onProgressUpdate + " messages_list.get(values[0]).toString() = " +
-                        messages_list.get(values[0]).toString());
-                activity.sms_adapter.insert(values[0], messages_list.get(values[0]).toString());
-            }
-            if (values[0] > 25){
-                Log.d(TAG, TAG_onProgressUpdate + " value[0] > 25");
-                if(values[0] % 25 == 0){
-                    Log.d(TAG, TAG_onProgressUpdate + " value[0] % 25 == 0         TRUE");
-                    Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with messages_list values index " +
-                            values[0] + " to " + messages_list.size());
-                    activity.sms_adapter.append(messages_list.subList(values[0], messages_list.size()));
+        protected void onProgressUpdate(ProgressObject... values) {
+                final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
+                super.onProgressUpdate(values);
+            Log.d(TAG, "onProgressUpdate: progress_iterator = " + progress_iterator++);
+
+            Log.d(TAG, "onProgressUpdate: values.length = "  + values.length);
+            Log.d(TAG, "onProgressUpdate:  values.getClass = " + values.getClass());
+
+            Log.d(TAG, "onProgressUpdate:  values[values.length - 1].i = " + values[values.length - 1].i);
+                MainActivity activity = activityWeakReference.get();
+                if (activity == null || activity.isFinishing()) {
+                    return;
                 }
-            }
+//                Log.d(TAG, "onProgressUpdate: iterator = " + values[0].i);
+//                if (values[0].i <= 25) {
+//                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
+//                    Log.d(TAG, TAG_onProgressUpdate + " message_list1.get(values[0]).toString() = " +
+//                            message_list1.get(values[0].i).toString());
+//                    activity.sms_adapter.insert(values[0].i, message_list1.get(values[0].i).toString());
+//                }
+//                if (values[0].i > 25) {
+//                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
+//                    if (values[0].i % 25 == 0) {
+//                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
+//                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
+//                                values[0].i + " to " + message_list1.size());
+//                        activity.sms_adapter.append(message_list1.subList(values[0].i, message_list1.size()));
+//                    }
+//
+//                }
+
+//            for(int j=values[0].i; j < values[values.length-1].i; j++) {
+
+
+                int j = values.length - 1;  //latest index
+                ArrayList message_list1 = values[j].message_list;
+                int k = values[j].i;
+                Log.d(TAG, "onProgressUpdate: iterator = " + j);
+
+            Log.d(TAG, "onProgressUpdate: values[j].i = " + k);
+//                if (j <= 25) {
+//                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
+                    Log.d(TAG, "onProgressUpdate:    now inserting at index " + j);
+                    Log.d(TAG, TAG_onProgressUpdate + " message_list1.get(values[0]).toString() = " +
+                            message_list1.get(j).toString());
+//                    activity.sms_adapter.insert(j, message_list1.get(j).toString());
+//                }
+
+//                if ( j > 25) {
+//                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
+//                    if (j % 25 == 0) {
+//                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
+//                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
+//                                 j + " to " + message_list1.size());
+//                        activity.sms_adapter.append(message_list1.subList(j, message_list1.size()));
+//                    }
+//                }
+//            }
+        }
+
+        private class ProgressObject extends  Object {
+            public ArrayList message_list;
+            public int i;
+
         }
     }
+
+
 }
 
 
