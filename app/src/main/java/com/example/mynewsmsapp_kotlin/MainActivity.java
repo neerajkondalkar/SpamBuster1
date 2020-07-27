@@ -839,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
 //  ----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Integer, ReadDbTableAllAsyncTask.ProgressObject>{
+    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, ReadDbTableAllAsyncTask.ProgressObject>{
         private static final String TAG = "[MY_DEBUG]";
 
         private WeakReference<MainActivity> activityWeakReference;
@@ -853,7 +853,8 @@ public class MainActivity extends AppCompatActivity {
         private  ArrayList messages_list;
         private ProgressObject progressObject = new ProgressObject();
 //        private int progress_iterator;
-        private Integer progress_iterator;
+        private int progress_iterator;
+        private int progress_iterator1;
         private  Cursor cursor_read_from_table_all;
 
         ReadDbTableAllAsyncTask(MainActivity activity, Cursor cursor_read_from_table_all){
@@ -861,6 +862,7 @@ public class MainActivity extends AppCompatActivity {
 //            db = db1;
             this.cursor_read_from_table_all = cursor_read_from_table_all;
             progress_iterator = 11;//since we start thread only if no. of messages is greater than 10
+            progress_iterator1 = 11;//since we start thread only if no. of messages is greater than 10
             i=11;
         }
 
@@ -891,12 +893,15 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, TAG_doInBackground + " ");
 
                     String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(activityWeakReference.get(), sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
-                    messages_list.add(str);
-                    progressObject.message_list = messages_list;
-                    progressObject.i = i;
+//                    messages_list.add(str);
                     Log.d(TAG, "doInBackground: progress_iterator = " + progress_iterator);
                     Log.d(TAG, "doInBackground: i = " + i);
-                    publishProgress(progress_iterator);
+                    Log.d(TAG, "doInBackground: adding into message_list at index + " + progress_iterator);
+                    Log.d(TAG, "doInBackground: messages_list.add("+progress_iterator+", " + str+")");
+                    messages_list.add(progress_iterator++, str);
+                    progressObject.message_list = messages_list;
+                    progressObject.i = i;
+//                    publishProgress(progress_iterator);
 //                    i++;
                     Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
                 } while (cursor_read_from_table_all.moveToNext());
@@ -913,6 +918,8 @@ public class MainActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
+            progress_iterator1=11;
+            progress_iterator=11;
         }
 
         @Override
@@ -926,80 +933,140 @@ public class MainActivity extends AppCompatActivity {
             //if any values are left, please update
 //            Log.d(TAG, " onPostExecute():  appending sms_adapter with message_list1 values index " +
 //                    progressObject.i + " to " + progressObject.message_list.size());
-            Log.d(TAG, "onPostExecute:  appending sms_adapter with messages_list1 values index " +
-                    progressObject.i + " to " + (progressObject.message_list.size()-1) );
-            activity.sms_adapter.append(progressObject.message_list.subList(progressObject.i, progressObject.message_list.size() - 1));
-            Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
-        }
+//            Log.d(TAG, "onPostExecute:  appending sms_adapter with messages_list1 values index " +
+//                    progressObject.i + " to " + (progressObject.message_list.size() - 1));
+//            Log.d(TAG, "onPostExecute: progressObject.message_list.sublist(" + progressObject.i + ", " + (progressObject.message_list.size() - 1)
+//                    + ")");
+//            activity.sms_adapter.append(progressObject.message_list.subList(progressObject.i, progressObject.message_list.size() - 1));
 
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-                final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
-                super.onProgressUpdate(values);
-            Log.d(TAG, "onProgressUpdate: progress_iterator = " + progress_iterator++);
+            Log.d(TAG, "onPostExecute: Printing the whole messages_list : ");
+            int j=0;
+            while (j < messages_list.size()){
+                Log.d(TAG, "onPostExecute: j="+j);
+//                Log.d(TAG, "onPostExecute: messages_list["+j+"] = " + messages_list.get(j));
+////                Log.d(TAG, "onPostExecute:    now inserting at index progress_iterator1 = " + j);
+                Log.d(TAG, "onPostExecute(): messages_list.get(" + j + ").toString() = \n" +
+                        messages_list.get(j).toString());
+//                Log.d(TAG, "onPostExecute(): Performing :   activity.sms_adapter.insert(" + j + ", " +
+//                        messages_list.get(j).toString() + ")");
+//                activity.sms_adapter.insert(j, messages_list.get(j).toString());
+//                        messages_list.get(j).toString() + ")");
+                j++;
+            }
+            j=11;
 
-            Log.d(TAG, "onProgressUpdate: values[0] = " + values[0]);
-            Log.d(TAG, "onProgressUpdate: values.length = "  + values.length);
-            Log.d(TAG, "onProgressUpdate:  values.getClass = " + values.getClass());
-
-            Log.d(TAG, "onProgressUpdate:  values[values.length - 1] = " + values[values.length - 1]);
-                MainActivity activity = activityWeakReference.get();
-                if (activity == null || activity.isFinishing()) {
-                    return;
-                }
-//                Log.d(TAG, "onProgressUpdate: iterator = " + values[0].i);
-//                if (values[0].i <= 25) {
-//                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
-//                    Log.d(TAG, TAG_onProgressUpdate + " message_list1.get(values[0]).toString() = " +
-//                            message_list1.get(values[0].i).toString());
-//                    activity.sms_adapter.insert(values[0].i, message_list1.get(values[0].i).toString());
+            activity.sms_adapter.append(messages_list.subList(11, messages_list.size()));
+//            Log.d(TAG, "onPostExecute: j < messages_list.size()  is   " + (j<messages_list.size()));
+////            while(j<messages_list.size()){
+//                Log.d(TAG, "onPostExecute: j = " + j);
+//                Log.d(TAG, "onPostExecute: j+10 = " + (j+10));
+//                Log.d(TAG, "onPostExecute: j+10 < messages_list.size()   is    " + (j+10 < messages_list.size()));
+//                if(j+10 < messages_list.size()) {
+//                    Log.d(TAG, "onPostExecute: activity.sms_adapter.append(messages_list.subList(j, j+10));");
+//                    Log.d(TAG, "onPostExecute: activity.sms_adapter.append(messages_list.subList("+j+", " + (j+10));
+////                    activity.sms_adapter.append(messages_list.subList(j, j+10));
 //                }
-//                if (values[0].i > 25) {
-//                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
-//                    if (values[0].i % 25 == 0) {
-//                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
-//                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
-//                                values[0].i + " to " + message_list1.size());
-//                        activity.sms_adapter.append(message_list1.subList(values[0].i, message_list1.size()));
-//                    }
-//
+//                else{
+//                    Log.d(TAG, "onPostExecute: activity.sms_adapter.append(messages_list.subList(j, messages_list.size() - 1);");
+//                    Log.d(TAG, "onPostExecute: activity.sms_adapter.append(messages_list.subList("+j+", " + (messages_list.size() - 1));
+//                    activity.sms_adapter.append(messages_list.subList(j, messages_list.size() - 1));
 //                }
+//                j++;
+//            }
 
-//            for(int j=values[0].i; j < values[values.length-1].i; j++) {
-
-
-//                int j = values.length - 1;  //latest index
-//                ArrayList message_list1 = values[j].message_list;
-//                int k = values[j].i;
-//                Log.d(TAG, "onProgressUpdate: iterator = " + j);
-
-//            Log.d(TAG, "onProgressUpdate: values[j].i = " + k);
-//                if (j <= 25) {
-//                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
-            Log.d(TAG, "onProgressUpdate:  progress_iterator < messages_list.size()  is  " + (progress_iterator < messages_list.size()));
-                    if (progress_iterator < messages_list.size()) {
-                        Log.d(TAG, "onProgressUpdate:    now inserting at index progress_iterator = " + progress_iterator);
-                        Log.d(TAG, TAG_onProgressUpdate + " messages_list.get(progress_iterator).toString() = " +
-                                messages_list.get(progress_iterator).toString());
-                    }
-//                    activity.sms_adapter.insert(progress_iterator, messages_list.get(progress_iterator).toString());
-//                }
-
-//                if ( j > 25) {
-//                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
-//                    if (j % 25 == 0) {
-//                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
-//                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
-//                                 j + " to " + message_list1.size());
-//                        activity.sms_adapter.append(message_list1.subList(j, message_list1.size()));
-//                    }
+//            Log.d(TAG, "onPostExecute:  progress_iterator1 < progress_iterator  is  " + (progress_iterator1 < progress_iterator));
+//            //to avoid reading messgaes_list[index which is out of bound]
+//            while (progress_iterator1 < progress_iterator) {
+//                Log.d(TAG, "onPostExecute: progress_iterator1 = " + progress_iterator1);
+//                Log.d(TAG, "onPostExecute: progress_iterator = " + progress_iterator);
+//                Log.d(TAG, "onPostExecute: messages_list.size() = " + messages_list.size());
+//                Log.d(TAG, "onPostExecute: ");
+//                Log.d(TAG, "onPostExecute:    now inserting at index progress_iterator1 = " + progress_iterator1);
+//                Log.d(TAG, "onPostExecute(): messages_list.get(progress_iterator1).toString() = " +
+//                        messages_list.get(progress_iterator1).toString());
+//                Log.d(TAG, "onPostExecute(): Performing :   activity.sms_adapter.insert(" + progress_iterator1 + ", " +
+//                        messages_list.get(progress_iterator1).toString() + ")");
+//                if (progress_iterator1 < progress_iterator) {
+//                    activity.sms_adapter.insert(progress_iterator1, messages_list.get(progress_iterator1++).toString());
 //                }
 //            }
-        }
+
+                Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
+            }
+//        }
+
+//        @Override
+//        protected void onProgressUpdate() {
+//                final String TAG_onProgressUpdate = "ReadDbTableAllAsyncTask onProgressUpdate(): ";
+//                super.onProgressUpdate(values);
+//            Log.d(TAG, "onProgressUpdate: progress_iterator1 = " + progress_iterator1);
+//
+//            Log.d(TAG, "onProgressUpdate: values[0] = " + values[0]);
+//            Log.d(TAG, "onProgressUpdate: values.length = "  + values.length);
+//            Log.d(TAG, "onProgressUpdate:  values.getClass = " + values.getClass());
+//
+//            Log.d(TAG, "onProgressUpdate:  values[values.length - 1] = " + values[values.length - 1]);
+//                MainActivity activity = activityWeakReference.get();
+//                if (activity == null || activity.isFinishing()) {
+//                    return;
+//                }
+////                Log.d(TAG, "onProgressUpdate: iterator = " + values[0].i);
+////                if (values[0].i <= 25) {
+////                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
+////                    Log.d(TAG, TAG_onProgressUpdate + " message_list1.get(values[0]).toString() = " +
+////                            message_list1.get(values[0].i).toString());
+////                    activity.sms_adapter.insert(values[0].i, message_list1.get(values[0].i).toString());
+////                }
+////                if (values[0].i > 25) {
+////                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
+////                    if (values[0].i % 25 == 0) {
+////                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
+////                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
+////                                values[0].i + " to " + message_list1.size());
+////                        activity.sms_adapter.append(message_list1.subList(values[0].i, message_list1.size()));
+////                    }
+////
+////                }
+//
+////            for(int j=values[0].i; j < values[values.length-1].i; j++) {
+//
+//
+////                int j = values.length - 1;  //latest index
+////                ArrayList message_list1 = values[j].message_list;
+////                int k = values[j].i;
+////                Log.d(TAG, "onProgressUpdate: iterator = " + j);
+//
+////            Log.d(TAG, "onProgressUpdate: values[j].i = " + k);
+////                if (j <= 25) {
+////                    Log.d(TAG, TAG_onProgressUpdate + " iterator  <= 25");
+////            Log.d(TAG, "onProgressUpdate:  progress_iterator1 < messages_list.size()  is  " + (progress_iterator1 < messages_list.size()));
+////                //to avoid reading messgaes_list[index which is out of bound]
+////                    if (progress_iterator1 < messages_list.size()) {
+////                        Log.d(TAG, "onProgressUpdate:    now inserting at index progress_iterator = " + progress_iterator1);
+////                        Log.d(TAG, TAG_onProgressUpdate + " messages_list.get(progress_iterator).toString() = " +
+////                                messages_list.get(progress_iterator1).toString());
+////                        Log.d(TAG, "onProgressUpdate: Performing :   activity.sms_adapter.insert(" + progress_iterator1 + ", " +
+////                                messages_list.get(progress_iterator1).toString() + ")");
+////                        activity.sms_adapter.insert(progress_iterator1, messages_list.get(progress_iterator1).toString());
+////                    }
+////
+////                }
+//
+////                if ( j > 25) {
+////                    Log.d(TAG, TAG_onProgressUpdate + " iterator > 25");
+////                    if (j % 25 == 0) {
+////                        Log.d(TAG, TAG_onProgressUpdate + " iterator % 25 == 0   TRUE");
+////                        Log.d(TAG, TAG_onProgressUpdate + " appending sms_adapter with message_list1 values index " +
+////                                 j + " to " + message_list1.size());
+////                        activity.sms_adapter.append(message_list1.subList(j, message_list1.size()));
+////                    }
+////                }
+////            }
+//        }
 
         private class ProgressObject extends  Object {
-            public ArrayList message_list;
-            public int i;
+            public ArrayList message_list=null;
+            public int i=0;
 
         }
     }
