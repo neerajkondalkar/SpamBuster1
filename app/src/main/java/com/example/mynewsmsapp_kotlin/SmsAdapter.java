@@ -25,13 +25,17 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     public  SmsAdapter(Context ct, ArrayList<String> array_list){
         context = ct;
         sms_messages_list = array_list;
+//        sms_messages_list.clear();
     }
 
     public void insert(int position, String new_sms) {
         final String TAG_insert = " insert(): ";
         Log.d(TAG, TAG_insert + " called ");
+        Log.d(TAG, "SmsAdapter: insert(): adding a new message at position + " + position);
         sms_messages_list.add(position, new_sms);
+//        sms_messages_list.add(new_sms);
         notifyItemInserted(position);
+        notifyDataSetChanged();
     }
 
     public void append(Collection new_messages){
