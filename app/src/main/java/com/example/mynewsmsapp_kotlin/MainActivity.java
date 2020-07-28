@@ -641,17 +641,14 @@ public class MainActivity extends AppCompatActivity {
 
 //    public void readMessagesFromDbTable(SQLiteDatabase db, int table) {
     public void readMessagesFromDbTable(int table, SQLiteDatabase db1) {
-
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
         int i=0;
         boolean cursor_first = false;
         boolean cursor_next = false;
         Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
-
         switch (table) {
 
             case TABLE_ALL:
-
             ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db1);
             Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
             ArrayList msg_list = new ArrayList();
@@ -882,16 +879,14 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, 
             Log.d(TAG, "onPostExecute: Printing the whole messages_list : ");
             int j=0;
             try {
-                while (j < messages_list.size()) {
+                    while (j < msg_list.size()) {
                     Log.d(TAG, "onPostExecute: j=" + j);
-                    Log.d(TAG, "onPostExecute(): messages_list.get(" + j + ").toString() = \n" +
-                            messages_list.get(j).toString());
-//                    activity.sms_adapter.insert(j, messages_list.get(j).toString());
-//                    activity.sms_adapter.insert(j, messages_list.get(j).toString());
+                    Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
+                            msg_list.get(j).toString());
                     j++;
                 }
-                Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + messages_list.size() + " items to sms_adapter... ");
-                activity.sms_adapter.append(messages_list);
+                Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
+                activity.sms_adapter.append(msg_list);
             }
             catch (Exception e){
                 Log.d(TAG, "onPostExecute: exception : " + e);
