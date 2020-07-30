@@ -34,7 +34,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         Log.d(TAG, "SmsAdapter: insert(): adding a new message at position + " + position);
         sms_messages_list.add(position, new_sms);
 //        sms_messages_list.add(new_sms);
-        notifyItemInserted(position);
+//        notifyItemInserted(position);
         notifyDataSetChanged();
     }
 

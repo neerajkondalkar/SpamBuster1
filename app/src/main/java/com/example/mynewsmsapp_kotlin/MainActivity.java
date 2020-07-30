@@ -652,7 +652,6 @@ public class MainActivity extends AppCompatActivity {
             ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db1);
             Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
             ArrayList msg_list = new ArrayList();
-            msg_list = null;
             readDbTableAllAsyncTask.execute(msg_list);
             break;
         }
@@ -753,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 //    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, ReadDbTableAllAsyncTask.ProgressObject>{
-private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, ArrayList>{
+private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>, Void, ArrayList<String>>{
     private static final String TAG = "[MY_DEBUG]";
 
         private WeakReference<MainActivity> activityWeakReference;
@@ -763,7 +762,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, 
         private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
         private String printable_date;
         private int i=0;
-        private  ArrayList messages_list = new ArrayList();
+        private  ArrayList<String> messages_list = new ArrayList();
         private ProgressObject progressObject = new ProgressObject();
         private int progress_iterator;
         private  Cursor cursor_read_from_table_all;
@@ -774,11 +773,10 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, 
             progress_iterator = 0;
             db1 = db2;
             i=0;
-            messages_list = new ArrayList();
     }
 
         @Override
-        protected ArrayList doInBackground(ArrayList... arrayList) {
+        protected ArrayList<String> doInBackground(ArrayList<String>... arrayList) {
             final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
             Log.d(TAG, "doInBackground: called");
             db1.beginTransaction();
@@ -869,7 +867,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, 
         }
 
         @Override
-        protected void onPostExecute(ArrayList msg_list) {
+        protected void onPostExecute(ArrayList<String> msg_list) {
             super.onPostExecute(msg_list);
             Log.d(TAG, "onPostExecute: called");
             MainActivity activity = activityWeakReference.get();
@@ -883,10 +881,11 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, 
                     Log.d(TAG, "onPostExecute: j=" + j);
                     Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
                             msg_list.get(j).toString());
+                    activity.sms_adapter.insert(j, msg_list.get(j).toString());
                     j++;
                 }
                 Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
-                activity.sms_adapter.append(msg_list);
+//                activity.sms_adapter.append(msg_list);
             }
             catch (Exception e){
                 Log.d(TAG, "onPostExecute: exception : " + e);
