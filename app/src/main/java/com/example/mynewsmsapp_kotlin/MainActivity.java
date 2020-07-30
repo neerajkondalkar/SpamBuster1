@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
-    ArrayList<String> sms_messages_list = new ArrayList<>();
+    List<String> sms_messages_list = new ArrayList<>();
 //    ListView messages;
     RecyclerView messages;
     ArrayAdapter array_adapter;
@@ -348,7 +348,6 @@ public class MainActivity extends AppCompatActivity {
         messages.setAdapter(sms_adapter);
         messages.setLayoutManager(new LinearLayoutManager(this));
         readMessagesFromDbTable(TABLE_ALL, db1);
-
         db1.endTransaction();
         //end of READING from table
         //end of all DATABASE operations
@@ -882,6 +881,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                     Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
                             msg_list.get(j).toString());
                     activity.sms_adapter.insert(j, msg_list.get(j).toString());
+                        activity.sms_adapter.notifyDataSetChanged();
                     j++;
                 }
                 Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
@@ -891,6 +891,8 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                 Log.d(TAG, "onPostExecute: exception : " + e);
             }
             Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
+            activity.messages.setAdapter(activity.sms_adapter);
+            activity.messages.setLayoutManager(new LinearLayoutManager(activity));
             db1.beginTransaction();
             db1.close();
         }

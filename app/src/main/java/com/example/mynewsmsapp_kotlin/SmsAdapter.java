@@ -13,16 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
 
-    ArrayList<String> sms_messages_list;
+    List<String> sms_messages_list = new ArrayList<>();
     Context context;
     //    String[] sms_message_string_array;
 //    Object[] sms_message_object_array;
 
-    public  SmsAdapter(Context ct, ArrayList<String> array_list){
+    public  SmsAdapter(Context ct, List<String> array_list){
         context = ct;
         sms_messages_list = array_list;
 //        sms_messages_list.clear();
