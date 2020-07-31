@@ -47,14 +47,16 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
-    private static final int TABLE_ALL = 1;
-    private static final int TABLE_INBOX = 2;
-    private static final int TABLE_SPAM = 3;
-    private static final int TABLE_CONTENT_SMS_INBOX = 4;
+    public static final int TABLE_ALL = 1;
+    public static final int TABLE_INBOX = 2;
+    public static final int TABLE_SPAM = 3;
+    public static final int TABLE_CONTENT_SMS_INBOX = 4;
+
+    private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread();
 
     Handler handler_main = new Handler();
 
-    private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
+    public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
     ArrayList<String> sms_messages_list = new ArrayList<>();
 //    ListView messages;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
 //    EditText input;
     SmsAdapter sms_adapter;
     SpamBusterdbHelper db_helper;
+
+
 
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
@@ -169,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onCreate = TAG + " onCreate() ";
         Log.d(TAG_onCreate, " called ");
         super.onCreate(savedInstanceState);
+        tableAllSyncInboxHandlerThread.start();
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
 
@@ -263,9 +268,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_refreshSmsInbox + " reading the table before inserting anything ... ");
         // start here - only to read _ID to determine whether we want to insert into table or not, so that we dont get duplicates
         SQLiteDatabase db_read_for_id = db_helper.getReadableDatabase();
-        List item_ids_tableall = new ArrayList();
-        item_ids_tableall.clear();
-        item_ids_tableall = getAllIdsFromDbTable(db_read_for_id, TABLE_ALL);
+
+//        List item_ids_tableall = new ArrayList();
+//        item_ids_tableall.clear();
+//        item_ids_tableall = getAllIdsFromDbTable(db_read_for_id, TABLE_ALL);
 
 
 //        -------------------- DELETE database ---------------------------
@@ -286,26 +292,23 @@ public class MainActivity extends AppCompatActivity {
 
 //         ------------- READING the topmost _id in sms/inbox ------------------
 //          ------------------ PRINTING THE WHOLE sms/inbox ------------------
-        List item_ids_inbox = new ArrayList();
-        item_ids_inbox = getAllIdsFromDbTable(null, TABLE_CONTENT_SMS_INBOX);
+//        List item_ids_inbox = new ArrayList();
+//        item_ids_inbox = getAllIdsFromDbTable(null, TABLE_CONTENT_SMS_INBOX);
 
         //printing how many messsages are there in SMS/INBOX and TABLE_ALL
-        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall.size() = " + item_ids_tableall.size());
-        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_inbox.size() = " + item_ids_inbox.size());
+//        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall.size() = " + item_ids_tableall.size());
+//        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_inbox.size() = " + item_ids_inbox.size());
         Log.d(TAG, TAG_refreshSmsInbox + "");
 
         // compare the lists item_ids_tableall and item_ids_inbox
-        List missing_item_ids = new ArrayList();
-        missing_item_ids.clear();
+//        List missing_item_ids = new ArrayList();
+//        missing_item_ids.clear();
         //checking if all the  ids present in item_ids_inbox are also present in item_ids_tableall
         //if not, the ids present in items_ids_inbox but not in items_ids_tableall , will be added to list missing_item_ids
-        missing_item_ids = compareSmsIdsInLists(TABLE_ALL, TABLE_CONTENT_SMS_INBOX, item_ids_tableall, item_ids_inbox);
-        if (missing_item_ids.isEmpty()) {
-            table_all_sync_inbox = true;
-        } else {
-            table_all_sync_inbox = false;
-        }
-        Log.d(TAG, TAG_refreshSmsInbox + "");
+//        missing_item_ids = compareSmsIdsInLists(TABLE_ALL, TABLE_CONTENT_SMS_INBOX, item_ids_tableall, item_ids_inbox);
+
+
+
 
 
         // Gets the data repository in write mode
@@ -354,108 +357,108 @@ public class MainActivity extends AppCompatActivity {
 
 
     // this fucntion returns a list of ids i.e the COLUMN_CORRES_INBOX_ID
-    public List getAllIdsFromDbTable(SQLiteDatabase db, int table) {
-        final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
-        List item_ids = new ArrayList();
-        item_ids.clear();
-
-        switch (table) {
-
-//            ------------for TABLE_ALL ----------------
-
-            case TABLE_ALL:
-                String[] projection_id = {
-                        BaseColumns._ID,
-                        SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
-                };
-
-                String selection_id = null;
-                String[] selection_args = null;
-                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
-                Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-                        projection_id,             // The array of columns to return (pass null to get all)
-                        selection_id,              // The columns for the WHERE clause
-                        selection_args,          // The values for the WHERE clause
-                        null,                   // don't group the rows
-                        null,                   // don't filter by row groups
-                        sort_order               // The sort order
-                );
-                if (!cursor_read_id.moveToFirst()) {
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
-                } else {
-                    do {
-                        String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
-                        String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " corress_inbox_id = " + temp_corres_inbox_id_holder);
-                        item_ids.add(temp_corres_inbox_id_holder);
-                    } while (cursor_read_id.moveToNext());
-                    // topmost is largest/latest _ID
-                }
-                break;
-
-//                -------------- for TABLE_INBOX -------------------
-
-            case TABLE_INBOX:
-                //do nothing for now
-                break;
-
-//                -------------  for TABLE_SPAM --------------------
-
-            case TABLE_SPAM:
-                //do nothing for now
-                break;
-
-//                --------------  for inbuilt SMS INBOX  --------------------
-
-            case TABLE_CONTENT_SMS_INBOX:
-                ContentResolver content_resolver = getContentResolver();
-                Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
-                String latest_sms_id_in_inbuilt_sms_inbox = "";
-                String latest_sms_thread_id_in_inbuilt_sms_inbox = "";
-                String id_inbox = "";
-                String threadid_inbox = "";
-                String address_inbox = "";
-                String body_inbox = "";
-
-                if (cursor_check_sms_id.moveToFirst()) {
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + " dumping the whole sms/inbox : ");
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                    int index_id = cursor_check_sms_id.getColumnIndex("_id");
-                    int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
-                    int index_address = cursor_check_sms_id.getColumnIndex("address");
-                    int index_body = cursor_check_sms_id.getColumnIndex("body");
-
-                    latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
-                    latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
-
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                    do {
-                        id_inbox = cursor_check_sms_id.getString(index_id);
-                        threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
-                        address_inbox = cursor_check_sms_id.getString(index_address);
-                        body_inbox = cursor_check_sms_id.getString(index_body);
-
-                        item_ids.add(id_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " id_inbox = " + id_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " threadid_inbox = " + threadid_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " address_inbox = " + address_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + " body_inbox = " + body_inbox);
-                        Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                    } while (cursor_check_sms_id.moveToNext());
-                } else {
-                    Log.d(TAG, TAG_getAllIdsFromDbTable + "  inbuilt sms/inbox empty! ");
-                }
-                Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                break;
-            default:
-                Log.d(TAG, TAG_getAllIdsFromDbTable + " invalid table selection");
-        }
-        return item_ids;
-    }
+//    public List getAllIdsFromDbTable(SQLiteDatabase db, int table) {
+//        final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
+//        List item_ids = new ArrayList();
+//        item_ids.clear();
+//
+//        switch (table) {
+//
+////            ------------for TABLE_ALL ----------------
+//
+//            case TABLE_ALL:
+//                String[] projection_id = {
+//                        BaseColumns._ID,
+//                        SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
+//                };
+//
+//                String selection_id = null;
+//                String[] selection_args = null;
+//                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+//                Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+//                        projection_id,             // The array of columns to return (pass null to get all)
+//                        selection_id,              // The columns for the WHERE clause
+//                        selection_args,          // The values for the WHERE clause
+//                        null,                   // don't group the rows
+//                        null,                   // don't filter by row groups
+//                        sort_order               // The sort order
+//                );
+//                if (!cursor_read_id.moveToFirst()) {
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
+//                } else {
+//                    do {
+//                        String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
+//                        String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " corress_inbox_id = " + temp_corres_inbox_id_holder);
+//                        item_ids.add(temp_corres_inbox_id_holder);
+//                    } while (cursor_read_id.moveToNext());
+//                    // topmost is largest/latest _ID
+//                }
+//                break;
+//
+////                -------------- for TABLE_INBOX -------------------
+//
+//            case TABLE_INBOX:
+//                //do nothing for now
+//                break;
+//
+////                -------------  for TABLE_SPAM --------------------
+//
+//            case TABLE_SPAM:
+//                //do nothing for now
+//                break;
+//
+////                --------------  for inbuilt SMS INBOX  --------------------
+//
+//            case TABLE_CONTENT_SMS_INBOX:
+//                ContentResolver content_resolver = getContentResolver();
+//                Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
+//                String latest_sms_id_in_inbuilt_sms_inbox = "";
+//                String latest_sms_thread_id_in_inbuilt_sms_inbox = "";
+//                String id_inbox = "";
+//                String threadid_inbox = "";
+//                String address_inbox = "";
+//                String body_inbox = "";
+//
+//                if (cursor_check_sms_id.moveToFirst()) {
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " dumping the whole sms/inbox : ");
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+//                    int index_id = cursor_check_sms_id.getColumnIndex("_id");
+//                    int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
+//                    int index_address = cursor_check_sms_id.getColumnIndex("address");
+//                    int index_body = cursor_check_sms_id.getColumnIndex("body");
+//
+//                    latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
+//                    latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
+//
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+//                    do {
+//                        id_inbox = cursor_check_sms_id.getString(index_id);
+//                        threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
+//                        address_inbox = cursor_check_sms_id.getString(index_address);
+//                        body_inbox = cursor_check_sms_id.getString(index_body);
+//
+//                        item_ids.add(id_inbox);
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " id_inbox = " + id_inbox);
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " threadid_inbox = " + threadid_inbox);
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " address_inbox = " + address_inbox);
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " body_inbox = " + body_inbox);
+//                        Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+//                    } while (cursor_check_sms_id.moveToNext());
+//                } else {
+//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "  inbuilt sms/inbox empty! ");
+//                }
+//                Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+//                break;
+//            default:
+//                Log.d(TAG, TAG_getAllIdsFromDbTable + " invalid table selection");
+//        }
+//        return item_ids;
+//    }
 
 
 //    ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -466,51 +469,51 @@ public class MainActivity extends AppCompatActivity {
     //checking whether list1 has all items that are present in list2
     //any item that is present in list2 but not in list1, must be put in missing_item_ids list;
 
-    public List compareSmsIdsInLists(int Table1, int Table2, List list1, List list2) {
-        final String TAG_compareSmsIdsInLists = " compareSmsIdsInLists(): ";
-        List missing_item_ids = new ArrayList();
-        missing_item_ids.clear();
-
-        // check if TABLE_ALL has all messages that are present in SMS/INBOX
-        // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
-        if (Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX) {
-            List item_ids_tableall = list1;
-            List item_ids_inbox = list2;
-            ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
-            String current_list_item_ids_inbox;
-            if (!iterator_item_ids_inbox.hasNext()) {
-                Log.d(TAG, TAG_compareSmsIdsInLists + " List item_ids_inbox is empty ! ");
-            } else {
-                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-                Log.d(TAG, TAG_compareSmsIdsInLists + " first element in item_ids_tableall = " + item_ids_tableall.get(0).toString());
-                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-                Log.d(TAG, TAG_compareSmsIdsInLists + " iterating in item_ids_inbox ");
-                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-                for (int i = 0; i < item_ids_inbox.size(); i++) {
-                    current_list_item_ids_inbox = iterator_item_ids_inbox.next().toString();
-                    Log.d(TAG, TAG_compareSmsIdsInLists + " iterator_item_ids_inbox.next().toString() = " + current_list_item_ids_inbox);
-                    try {
-                        if (item_ids_tableall.contains(current_list_item_ids_inbox)) {
-                            Log.d(TAG, TAG_compareSmsIdsInLists + " present in items_ids_tableall");
-                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
-                        } else {
-                            Log.d(TAG, TAG_compareSmsIdsInLists + " not present in items_ids_tableall ");
-                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
-                            missing_item_ids.add(current_list_item_ids_inbox);
-                        }
-                    } catch (Exception e) {
-                        Log.d(TAG, TAG_compareSmsIdsInLists + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e);
-                    }
-//            Log.d(TAG, TAG_compareSmsIdsInLists + " " + item_ids_tableall.conta)
-                }
-            }
-            Log.d(TAG, TAG_compareSmsIdsInLists + "");
-
-        }
-
-        return missing_item_ids;
-    }
-
+//    public List compareSmsIdsInLists(int Table1, int Table2, List list1, List list2) {
+//        final String TAG_compareSmsIdsInLists = " compareSmsIdsInLists(): ";
+//        List missing_item_ids = new ArrayList();
+//        missing_item_ids.clear();
+//
+//        // check if TABLE_ALL has all messages that are present in SMS/INBOX
+//        // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
+//        if (Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX) {
+//            List item_ids_tableall = list1;
+//            List item_ids_inbox = list2;
+//            ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
+//            String current_list_item_ids_inbox;
+//            if (!iterator_item_ids_inbox.hasNext()) {
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " List item_ids_inbox is empty ! ");
+//            } else {
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " first element in item_ids_tableall = " + item_ids_tableall.get(0).toString());
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " iterating in item_ids_inbox ");
+//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
+//                for (int i = 0; i < item_ids_inbox.size(); i++) {
+//                    current_list_item_ids_inbox = iterator_item_ids_inbox.next().toString();
+//                    Log.d(TAG, TAG_compareSmsIdsInLists + " iterator_item_ids_inbox.next().toString() = " + current_list_item_ids_inbox);
+//                    try {
+//                        if (item_ids_tableall.contains(current_list_item_ids_inbox)) {
+//                            Log.d(TAG, TAG_compareSmsIdsInLists + " present in items_ids_tableall");
+//                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
+//                        } else {
+//                            Log.d(TAG, TAG_compareSmsIdsInLists + " not present in items_ids_tableall ");
+//                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
+//                            missing_item_ids.add(current_list_item_ids_inbox);
+//                        }
+//                    } catch (Exception e) {
+//                        Log.d(TAG, TAG_compareSmsIdsInLists + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e);
+//                    }
+////            Log.d(TAG, TAG_compareSmsIdsInLists + " " + item_ids_tableall.conta)
+//                }
+//            }
+//            Log.d(TAG, TAG_compareSmsIdsInLists + "");
+//
+//        }
+//
+//        return missing_item_ids;
+//    }
+//
 
 //    ------------------------------------------------------------------------------------------------------------------------------------------------
 
