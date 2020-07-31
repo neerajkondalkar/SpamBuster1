@@ -18,14 +18,15 @@ import java.util.List;
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
 
-    List<String> sms_messages_list = new ArrayList<>();
+    ArrayList<String> sms_messages_list = new ArrayList<>();
     Context context;
     //    String[] sms_message_string_array;
 //    Object[] sms_message_object_array;
 
-    public  SmsAdapter(Context ct, List<String> array_list){
-        context = ct;
-        sms_messages_list = array_list;
+    public  SmsAdapter(Context ct, ArrayList<String> array_list){
+        this.context = ct;
+//        sms_messages_list = array_list;
+        this.sms_messages_list.addAll(array_list);
 //        sms_messages_list.clear();
     }
 
@@ -33,7 +34,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         final String TAG_insert = " insert(): ";
         Log.d(TAG, TAG_insert + " called ");
         Log.d(TAG, "SmsAdapter: insert(): adding a new message at position + " + position);
-        sms_messages_list.add(position, new_sms);
+        sms_messages_list.add(new_sms);
 //        sms_messages_list.add(new_sms);
 //        notifyItemInserted(position);
         notifyDataSetChanged();

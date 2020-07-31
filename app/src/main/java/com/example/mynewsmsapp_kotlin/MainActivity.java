@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
-    List<String> sms_messages_list = new ArrayList<>();
+    ArrayList<String> sms_messages_list = new ArrayList<>();
 //    ListView messages;
     RecyclerView messages;
     ArrayAdapter array_adapter;
@@ -650,8 +650,8 @@ public class MainActivity extends AppCompatActivity {
             case TABLE_ALL:
             ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db1);
             Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
-            ArrayList msg_list = new ArrayList();
-            readDbTableAllAsyncTask.execute(msg_list);
+            ArrayList msg1_list = new ArrayList();
+            readDbTableAllAsyncTask.execute(msg1_list);
             break;
         }
 
