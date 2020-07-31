@@ -762,7 +762,6 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
         private String printable_date;
         private int i=0;
         private  ArrayList<String> messages_list = new ArrayList();
-        private ProgressObject progressObject = new ProgressObject();
         private int progress_iterator;
         private  Cursor cursor_read_from_table_all;
         private boolean cursor_first;
@@ -840,8 +839,6 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                         Log.d(TAG, "doInBackground: adding into message_list at index + " + progress_iterator);
                         Log.d(TAG, "doInBackground: messages_list.add(" + progress_iterator + ", " + str + ")");
                         messages_list.add(progress_iterator++, str);
-                        progressObject.message_list = messages_list;
-                        progressObject.i = i;
                         Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
                     } while (cursor_read_from_table_all.moveToNext());
                 }
@@ -850,6 +847,8 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                 }
             }
             cursor_read_from_table_all.close();
+            db1.endTransaction();
+            db1.close();
             return messages_list;
         }
 
@@ -884,20 +883,11 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                     j++;
                 }
                 Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
-//                activity.sms_adapter.append(msg_list);
             }
             catch (Exception e){
                 Log.d(TAG, "onPostExecute: exception : " + e);
             }
             Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
-            activity.messages.setAdapter(activity.sms_adapter);
-            activity.messages.setLayoutManager(new LinearLayoutManager(activity));
-            db1.close();
-        }
-
-        private class ProgressObject extends  Object {
-            public ArrayList message_list=null;
-            public int i=0;
         }
     }
 }
