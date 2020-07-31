@@ -340,15 +340,12 @@ public class MainActivity extends AppCompatActivity {
         db.endTransaction();
 
         SQLiteDatabase db1 = db_helper.getReadableDatabase();
-        db1.beginTransaction();
-
         //inserting a dummy item at index 0 of list   (list will be cleared once SmsAdapter object is created)
         sms_messages_list.add(0, "dummy");
         sms_adapter = new SmsAdapter(this, sms_messages_list);
         messages.setAdapter(sms_adapter);
         messages.setLayoutManager(new LinearLayoutManager(this));
         readMessagesFromDbTable(TABLE_ALL, db1);
-        db1.endTransaction();
         //end of READING from table
         //end of all DATABASE operations
     }
@@ -638,7 +635,6 @@ public class MainActivity extends AppCompatActivity {
 //    -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-//    public void readMessagesFromDbTable(SQLiteDatabase db, int table) {
     public void readMessagesFromDbTable(int table, SQLiteDatabase db1) {
         final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
         int i=0;
@@ -655,12 +651,7 @@ public class MainActivity extends AppCompatActivity {
             break;
         }
 
-//        db.setTransactionSuccessful();
-//        db.endTransaction();
-//        return  messages_list;
-
     }
-
 
     //    -------------------------------------------------------------------------------------------------------------------------------------------------
     public static String getContactName(Context context, String phone_number) {
