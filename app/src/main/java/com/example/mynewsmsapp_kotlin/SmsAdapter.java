@@ -27,7 +27,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         this.context = ct;
 //        sms_messages_list = array_list;
         this.sms_messages_list.addAll(array_list);
-//        sms_messages_list.clear();
+        sms_messages_list.clear();
     }
 
     public void insert(int position, String new_sms) {
@@ -35,8 +35,6 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         Log.d(TAG, TAG_insert + " called ");
         Log.d(TAG, "SmsAdapter: insert(): adding a new message at position + " + position);
         sms_messages_list.add(new_sms);
-//        sms_messages_list.add(new_sms);
-//        notifyItemInserted(position);
         notifyDataSetChanged();
     }
 

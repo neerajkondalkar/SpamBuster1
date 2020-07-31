@@ -881,7 +881,6 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                     Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
                             msg_list.get(j).toString());
                     activity.sms_adapter.insert(j, msg_list.get(j).toString());
-                        activity.sms_adapter.notifyDataSetChanged();
                     j++;
                 }
                 Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
@@ -893,7 +892,6 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
             Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
             activity.messages.setAdapter(activity.sms_adapter);
             activity.messages.setLayoutManager(new LinearLayoutManager(activity));
-            db1.beginTransaction();
             db1.close();
         }
 
