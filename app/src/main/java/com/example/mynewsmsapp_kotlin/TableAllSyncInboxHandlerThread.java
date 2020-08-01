@@ -62,8 +62,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                     case TASK_GET_IDS:
                         db = db_helper.getReadableDatabase();
                         db.beginTransaction();
-                        final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
-
                         switch (msg.arg1) { //select TABLE to operate on    msg.arg1 = TABLE
 
                             case TABLE_ALL:
@@ -83,13 +81,13 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                         sort_order               // The sort order
                                 );
                                 if (!cursor_read_id.moveToFirst()) {
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): TABLE_ALL is empty! ");
                                 } else {
                                     do {
                                         String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): _id = " + temp_id_holder);
                                         String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " corress_inbox_id = " + temp_corres_inbox_id_holder);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():  corress_inbox_id = " + temp_corres_inbox_id_holder);
                                         item_ids_tableall.add(temp_corres_inbox_id_holder);
                                     } while (cursor_read_id.moveToNext());
                                     // topmost is largest/latest _ID
@@ -116,46 +114,36 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 String threadid_inbox = "";
                                 String address_inbox = "";
                                 String body_inbox = "";
-
                                 if (cursor_check_sms_id.moveToFirst()) {
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + " dumping the whole sms/inbox : ");
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): dumping the whole sms/inbox :");
                                     int index_id = cursor_check_sms_id.getColumnIndex("_id");
                                     int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
                                     int index_address = cursor_check_sms_id.getColumnIndex("address");
                                     int index_body = cursor_check_sms_id.getColumnIndex("body");
-
                                     latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
                                     latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
-
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():  latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
                                     do {
                                         id_inbox = cursor_check_sms_id.getString(index_id);
                                         threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
                                         address_inbox = cursor_check_sms_id.getString(index_address);
                                         body_inbox = cursor_check_sms_id.getString(index_body);
-
                                         item_ids_inbox.add(id_inbox);
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " id_inbox = " + id_inbox);
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " threadid_inbox = " + threadid_inbox);
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " address_inbox = " + address_inbox);
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + " body_inbox = " + body_inbox);
-                                        Log.d(TAG, TAG_getAllIdsFromDbTable + "");
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): id_inbox = " + id_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): threadid_inbox = " + threadid_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():  address_inbox = " + address_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): body_inbox = " + body_inbox);
                                     } while (cursor_check_sms_id.moveToNext());
                                 } else {
-                                    Log.d(TAG, TAG_getAllIdsFromDbTable + "  inbuilt sms/inbox empty! ");
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():  inbuilt sms/inbox empty! ");
                                 }
-//                                item_ids_inbox = item_ids;
-                                Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): ");
                                 DONE_TASK_GET_IDS_SMSINBOX = true;
                                 break;   // end of inner case TABLE_CONTENT_SMS_INBOX    [ still inside case  TASK_GET_IDS ]
 
                             default:
-                                Log.d(TAG, TAG_getAllIdsFromDbTable + " invalid table selection");
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): invalid table selection");
                         }
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): item_ids_tableall.size() = " + item_ids_tableall.size());
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): item_ids_inbox.size() = " + item_ids_inbox.size());
@@ -308,7 +296,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         }
                         db.setTransactionSuccessful();
                         db.endTransaction();
-                        db.close();
                         DONE_TASK_UPDATE_MISSING_IDS = true;
                         break; // end of case TASK_UPDATE_MISSING_IDS
                 }
