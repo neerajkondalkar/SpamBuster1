@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
@@ -40,6 +41,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Stream;
 
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_SMSINBOX;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_TABLEALL;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_UPDATE_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_UPDATE_MISSING_IDS;
+
 // This activity is used for:
 // 1. Showing all messages to user
 // 2. A button to take user to ComposeSmsActivity to compose a new sms
@@ -52,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int TABLE_SPAM = 3;
     public static final int TABLE_CONTENT_SMS_INBOX = 4;
 
-    private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread();
-
-    Handler handler_main = new Handler();
+    private DbOperationsAsyncTask dbOperationsAsyncTask;
+    private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
+    private Handler handler;
 
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
@@ -135,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_onStop + " called ");
         super.onDestroy();
         active = false; //indicate that activity is killed, check bottom of SmsBroadcastReceiver.onReceive() method
+        tableAllSyncInboxHandlerThread.quit();
         db_helper.close();
-
     }
 
 
@@ -173,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onCreate = TAG + " onCreate() ";
         Log.d(TAG_onCreate, " called ");
         super.onCreate(savedInstanceState);
-        tableAllSyncInboxHandlerThread.start();
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
 
@@ -258,21 +266,6 @@ public class MainActivity extends AppCompatActivity {
 //        ArrayList<String> sms_list = new ArrayList<String>();
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
-        db_helper = new SpamBusterdbHelper(this);
-
-
-
-        // ------------------------------------       READING from database  table TABLE_ALL      -----------------------------
-
-
-        Log.d(TAG, TAG_refreshSmsInbox + " reading the table before inserting anything ... ");
-        // start here - only to read _ID to determine whether we want to insert into table or not, so that we dont get duplicates
-        SQLiteDatabase db_read_for_id = db_helper.getReadableDatabase();
-
-//        List item_ids_tableall = new ArrayList();
-//        item_ids_tableall.clear();
-//        item_ids_tableall = getAllIdsFromDbTable(db_read_for_id, TABLE_ALL);
-
 
 //        -------------------- DELETE database ---------------------------
 
@@ -287,376 +280,21 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //            //so now we have a list of all IDs that are already present in the table, i.e we know what sms are already present in the table
 
-        // end READING from TABLE_ALL here
-
-
-//         ------------- READING the topmost _id in sms/inbox ------------------
-//          ------------------ PRINTING THE WHOLE sms/inbox ------------------
-//        List item_ids_inbox = new ArrayList();
-//        item_ids_inbox = getAllIdsFromDbTable(null, TABLE_CONTENT_SMS_INBOX);
-
-        //printing how many messsages are there in SMS/INBOX and TABLE_ALL
-//        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall.size() = " + item_ids_tableall.size());
-//        Log.d(TAG, TAG_refreshSmsInbox + " item_ids_inbox.size() = " + item_ids_inbox.size());
-        Log.d(TAG, TAG_refreshSmsInbox + "");
-
-        // compare the lists item_ids_tableall and item_ids_inbox
-//        List missing_item_ids = new ArrayList();
-//        missing_item_ids.clear();
-        //checking if all the  ids present in item_ids_inbox are also present in item_ids_tableall
-        //if not, the ids present in items_ids_inbox but not in items_ids_tableall , will be added to list missing_item_ids
-//        missing_item_ids = compareSmsIdsInLists(TABLE_ALL, TABLE_CONTENT_SMS_INBOX, item_ids_tableall, item_ids_inbox);
-
-
-
-
-
-        // Gets the data repository in write mode
-        SQLiteDatabase db = db_helper.getWritableDatabase();
-        db.beginTransaction();
-
-
-//     -------------------------- inbox is not  IS NOT IN SYNC, therefore INSERT all the new messages in our db table TABLE_ALL -----------------------
-
-//        array_adapter.clear();
-
-        if (!table_all_sync_inbox) {
-
-            Log.d(TAG, TAG_refreshSmsInbox + "TABLE_ALL  is not in sync  with sms/inbox ! Hence update db TABLE_ALL with new messages ");
-            // update the TABLE_ALL according to SMS/INBOX
-            updateMissingValuesInDbTable(db, TABLE_ALL, TABLE_CONTENT_SMS_INBOX, missing_item_ids);
-            //end of inserting into db
-        } else {
-            Log.d(TAG, TAG_refreshSmsInbox + " ");
-            Log.d(TAG, TAG_refreshSmsInbox + " TABLE_ALL is in sync with SMS/INBOX. So no need to update  TABLE_ALL ");
-            Log.d(TAG, TAG_refreshSmsInbox + " ");
-        }
-
-
-//   -----------------------         READING all entried from TABLE_ALL  and filling the  array_adapter  with those messages i.e from reading TABLE_ALL------------------------
-        //                          also fill the array_adapter with the values read from the TABLE_ALL
-
-        Log.d(TAG, TAG_refreshSmsInbox + " ");
-        Log.d(TAG, TAG_refreshSmsInbox + " Now reading values from TABLE_ALL ");
-        Log.d(TAG, TAG_refreshSmsInbox + " ");
-
-        db.endTransaction();
-
-        SQLiteDatabase db1 = db_helper.getReadableDatabase();
-        //inserting a dummy item at index 0 of list   (list will be cleared once SmsAdapter object is created)
         sms_messages_list.add(0, "dummy");
         sms_adapter = new SmsAdapter(this, sms_messages_list);
         messages.setAdapter(sms_adapter);
         messages.setLayoutManager(new LinearLayoutManager(this));
-        readMessagesFromDbTable(TABLE_ALL, db1);
-        //end of READING from table
-        //end of all DATABASE operations
-    }
 
-//    ---------------------------------------------------------------------------------------------------------------------------------------
+        // pushing db operations to asynctask
+        dbOperationsAsyncTask = new DbOperationsAsyncTask(this);
 
+        //inserting a dummy item at index 0 of list   (list will be cleared once SmsAdapter object is created)
 
-    // this fucntion returns a list of ids i.e the COLUMN_CORRES_INBOX_ID
-//    public List getAllIdsFromDbTable(SQLiteDatabase db, int table) {
-//        final String TAG_getAllIdsFromDbTable = " getAllIdsFromDbTable(): ";
-//        List item_ids = new ArrayList();
-//        item_ids.clear();
-//
-//        switch (table) {
-//
-////            ------------for TABLE_ALL ----------------
-//
-//            case TABLE_ALL:
-//                String[] projection_id = {
-//                        BaseColumns._ID,
-//                        SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
-//                };
-//
-//                String selection_id = null;
-//                String[] selection_args = null;
-//                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
-//                Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-//                        projection_id,             // The array of columns to return (pass null to get all)
-//                        selection_id,              // The columns for the WHERE clause
-//                        selection_args,          // The values for the WHERE clause
-//                        null,                   // don't group the rows
-//                        null,                   // don't filter by row groups
-//                        sort_order               // The sort order
-//                );
-//                if (!cursor_read_id.moveToFirst()) {
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " TABLE_ALL is empty! ");
-//                } else {
-//                    do {
-//                        String temp_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " _id = " + temp_id_holder);
-//                        String temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " corress_inbox_id = " + temp_corres_inbox_id_holder);
-//                        item_ids.add(temp_corres_inbox_id_holder);
-//                    } while (cursor_read_id.moveToNext());
-//                    // topmost is largest/latest _ID
-//                }
-//                break;
-//
-////                -------------- for TABLE_INBOX -------------------
-//
-//            case TABLE_INBOX:
-//                //do nothing for now
-//                break;
-//
-////                -------------  for TABLE_SPAM --------------------
-//
-//            case TABLE_SPAM:
-//                //do nothing for now
-//                break;
-//
-////                --------------  for inbuilt SMS INBOX  --------------------
-//
-//            case TABLE_CONTENT_SMS_INBOX:
-//                ContentResolver content_resolver = getContentResolver();
-//                Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
-//                String latest_sms_id_in_inbuilt_sms_inbox = "";
-//                String latest_sms_thread_id_in_inbuilt_sms_inbox = "";
-//                String id_inbox = "";
-//                String threadid_inbox = "";
-//                String address_inbox = "";
-//                String body_inbox = "";
-//
-//                if (cursor_check_sms_id.moveToFirst()) {
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " dumping the whole sms/inbox : ");
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-//                    int index_id = cursor_check_sms_id.getColumnIndex("_id");
-//                    int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
-//                    int index_address = cursor_check_sms_id.getColumnIndex("address");
-//                    int index_body = cursor_check_sms_id.getColumnIndex("body");
-//
-//                    latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
-//                    latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
-//
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + " latest_sms_thread_id_in_inbuilt_sms_inbox = " + latest_sms_thread_id_in_inbuilt_sms_inbox);
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-//                    do {
-//                        id_inbox = cursor_check_sms_id.getString(index_id);
-//                        threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
-//                        address_inbox = cursor_check_sms_id.getString(index_address);
-//                        body_inbox = cursor_check_sms_id.getString(index_body);
-//
-//                        item_ids.add(id_inbox);
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " id_inbox = " + id_inbox);
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " threadid_inbox = " + threadid_inbox);
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " address_inbox = " + address_inbox);
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + " body_inbox = " + body_inbox);
-//                        Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-//                    } while (cursor_check_sms_id.moveToNext());
-//                } else {
-//                    Log.d(TAG, TAG_getAllIdsFromDbTable + "  inbuilt sms/inbox empty! ");
-//                }
-//                Log.d(TAG, TAG_getAllIdsFromDbTable + "");
-//                break;
-//            default:
-//                Log.d(TAG, TAG_getAllIdsFromDbTable + " invalid table selection");
-//        }
-//        return item_ids;
-//    }
-
-
-//    ----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    //checking whether table1 has all the items that are present in table2
-    //OR
-    //checking whether list1 has all items that are present in list2
-    //any item that is present in list2 but not in list1, must be put in missing_item_ids list;
-
-//    public List compareSmsIdsInLists(int Table1, int Table2, List list1, List list2) {
-//        final String TAG_compareSmsIdsInLists = " compareSmsIdsInLists(): ";
-//        List missing_item_ids = new ArrayList();
-//        missing_item_ids.clear();
-//
-//        // check if TABLE_ALL has all messages that are present in SMS/INBOX
-//        // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
-//        if (Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX) {
-//            List item_ids_tableall = list1;
-//            List item_ids_inbox = list2;
-//            ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
-//            String current_list_item_ids_inbox;
-//            if (!iterator_item_ids_inbox.hasNext()) {
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " List item_ids_inbox is empty ! ");
-//            } else {
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " first element in item_ids_tableall = " + item_ids_tableall.get(0).toString());
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " iterating in item_ids_inbox ");
-//                Log.d(TAG, TAG_compareSmsIdsInLists + " ");
-//                for (int i = 0; i < item_ids_inbox.size(); i++) {
-//                    current_list_item_ids_inbox = iterator_item_ids_inbox.next().toString();
-//                    Log.d(TAG, TAG_compareSmsIdsInLists + " iterator_item_ids_inbox.next().toString() = " + current_list_item_ids_inbox);
-//                    try {
-//                        if (item_ids_tableall.contains(current_list_item_ids_inbox)) {
-//                            Log.d(TAG, TAG_compareSmsIdsInLists + " present in items_ids_tableall");
-//                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
-//                        } else {
-//                            Log.d(TAG, TAG_compareSmsIdsInLists + " not present in items_ids_tableall ");
-//                            Log.d(TAG, TAG_compareSmsIdsInLists + " -----------");
-//                            missing_item_ids.add(current_list_item_ids_inbox);
-//                        }
-//                    } catch (Exception e) {
-//                        Log.d(TAG, TAG_compareSmsIdsInLists + " exception while item_ids_tableall.contains(current_list_item_ids_inbox) :  " + e);
-//                    }
-////            Log.d(TAG, TAG_compareSmsIdsInLists + " " + item_ids_tableall.conta)
-//                }
-//            }
-//            Log.d(TAG, TAG_compareSmsIdsInLists + "");
-//
-//        }
-//
-//        return missing_item_ids;
-//    }
-//
-
-//    ------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    //table1 will be updated with values present in table2 if table1 elemets < table2 elements
-    public void updateMissingValuesInDbTable(SQLiteDatabase db, int table1, int table2, List missing_item_ids) {
-        final String TAG_updateMissingValuesInDbTable = " updateMissingValuesInDbTable(): ";
-        Log.d(TAG, TAG_updateMissingValuesInDbTable + " called ");
-
-        String date_str = "";
-        long milli_seconds = 0;
-        Calendar calendar = Calendar.getInstance();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-        String printable_date;
-
-        if (table1 == TABLE_ALL && table2 == TABLE_CONTENT_SMS_INBOX) {
-            ContentResolver content_resolver = getContentResolver();
-            String[] projection_sms_inbox = null;
-            String selection_sms_inbox = null;
-            String[] selection_args_sms_inbox = null;
-            String sort_order_sms_inbox = " _id DESC ";
-
-            Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
-
-            //[DEBUG] start
-
-            //print all columns of sms/inbox
-
-//        System.out.print(TAG + TAG_updateMissingValuesInDbTable + " [DEBUG] "+ " updateMissingValuesInDbTable() :  all columns in sms/inbox : \n [DEBUG]");
-//            Log.d(TAG, TAG_updateMissingValuesInDbTable + " all columns in sms/inbox : ");
-//            int column_index = 0;
-//            for (String str_col : sms_inbox_cursor.getColumnNames()) {
-//                //System.out.print(" " + str_col);
-//                Log.d(TAG, TAG_updateMissingValuesInDbTable + " [ " + column_index + " ] " + str_col);
-//                column_index++;
-//            }
-//            System.out.println();
-            //[DEBUG] end
-
-            int index_id = sms_inbox_cursor.getColumnIndex("_id");
-            int index_body = sms_inbox_cursor.getColumnIndex("body");
-            int index_date = sms_inbox_cursor.getColumnIndex("date");
-            int index_date_sent = sms_inbox_cursor.getColumnIndexOrThrow("date_sent");
-//            Log.d(TAG, TAG_updateMissingValuesInDbTable + "index body = " + index_body + '\n');
-            int index_address = sms_inbox_cursor.getColumnIndex("address");
-//            Log.d(TAG, TAG_updateMissingValuesInDbTable + "index_address = " + index_address + '\n');
-            if (index_body < 0 || !sms_inbox_cursor.moveToFirst()) {
-                Log.d(TAG, TAG_updateMissingValuesInDbTable + " sms/inbox empty!");
-                return;
-            }
-
-
-            date_str = sms_inbox_cursor.getString(index_date);
-            milli_seconds = Long.parseLong(date_str);
-//            Log.d(TAG, TAG_updateMissingValuesInDbTable + "milli_seconds = " + Long.toString(milli_seconds));
-            calendar.setTimeInMillis(milli_seconds);
-//            Log.d(TAG, TAG_updateMissingValuesInDbTable + "formatter.format(calender.getTime()) returns " + formatter.format((calendar.getTime())));
-            printable_date = formatter.format(calendar.getTime());
-
-
-            do {
-
-                String address = sms_inbox_cursor.getString(index_address); //actual phone number
-                String contact_name = getContactName(this, address); //contact name retirved from phonelookup
-                String corress_inbox_id = sms_inbox_cursor.getString(index_id);
-                Log.d(TAG, TAG_updateMissingValuesInDbTable + "getContactName() returns = " + contact_name);
-                String sms_body = sms_inbox_cursor.getString(index_body);
-                date_str = sms_inbox_cursor.getString(index_date);
-                String date_sent = sms_inbox_cursor.getString(index_date_sent);
-
-//                String str = "SMS From: " + contact_name + "\n Recieved at: " + printable_date + "\n" + sms_body;
-
-                // Create a new map of values, where column names are the keys
-                ContentValues values = new ContentValues();
-
-                Log.d(TAG, TAG_updateMissingValuesInDbTable + " checking if sms is already present, by comaprin _ID of sms/inbox and corres_inbox_id of TABLE_ALL");
-//                Log.d(TAG, TAG_updateMissingValuesInDbTable + " item_ids_tableall.contains(corress_inbox_id) =  " + item_ids_tableall.contains(corress_inbox_id));
-                Log.d(TAG, TAG_updateMissingValuesInDbTable + " missing_item_ids.contains(corress_inbox_id) =  " + missing_item_ids.contains(corress_inbox_id));
-
-                //insert only the messages which are not already present in the TABLE_ALL i.e insert only the new sms i.e sms which which new _ID
-
-                if (missing_item_ids.contains(corress_inbox_id)) {
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " new sms confirmed!    _ID = " + corress_inbox_id);
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of corress_inbox_id = " + corress_inbox_id + " into COLUMN_CORRESS_INBOX_ID ");
-                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
-                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
-                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " value of date_sent = " + date_sent);
-                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
-
-                    // Insert the new row, returning the primary key value of the new row
-                    long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
-                    if (newRowId == -1) {
-                        Log.d(TAG, TAG_updateMissingValuesInDbTable + " insert failed\n\n");
-                    } else {
-                        Log.d(TAG, TAG_updateMissingValuesInDbTable + " Insert Complete! returned newRowId = " + newRowId);
-                        Log.d(TAG, TAG_updateMissingValuesInDbTable + " ");
-                    }
-                } else {
-                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " not a new sms. Hence skipping insertion ");
-                }
-
-//                array_adapter.add(str); //add the message to adapter list view
-//            sms_list.add(str);
-            } while (sms_inbox_cursor.moveToNext());
-
-            Log.d(TAG, TAG_updateMissingValuesInDbTable + " Done inserting values! \n");
-            Log.d(TAG, TAG_updateMissingValuesInDbTable + " ");
-            Log.d(TAG, TAG_updateMissingValuesInDbTable + " ");
-            db.setTransactionSuccessful();
-            db.endTransaction();
-            db.close();
-        }
-
-        //end of inserting into db
-    }
-
-
-//    -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public void readMessagesFromDbTable(int table, SQLiteDatabase db1) {
-        final String TAG_readMessagesFromDbTable = " readMessagesFromDbTable(): ";
-        int i=0;
-        boolean cursor_first = false;
-        boolean cursor_next = false;
-        Log.d(TAG, TAG_readMessagesFromDbTable + " called ");
-        switch (table) {
-
-            case TABLE_ALL:
-            ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(this, db1);
-            Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
-            ArrayList msg1_list = new ArrayList();
-            readDbTableAllAsyncTask.execute(msg1_list);
-            break;
-        }
 
     }
 
     //    -------------------------------------------------------------------------------------------------------------------------------------------------
+
     public static String getContactName(Context context, String phone_number) {
         final String TAG_getContactName = " getContactName(): ";
         Log.d(TAG, TAG_getContactName + " called ");
@@ -742,6 +380,122 @@ public class MainActivity extends AppCompatActivity {
 
 
 //  ----------------------------------------------------------------------------------------------------------------------------------------
+
+
+    private static class DbOperationsAsyncTask extends AsyncTask<Void, Void, Void>{
+
+        private SpamBusterdbHelper db_helper;
+        private SQLiteDatabase db;
+        private WeakReference<MainActivity> activityWeakReference;
+        private  Handler handler;
+        private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
+
+        DbOperationsAsyncTask(MainActivity activity){
+                    activityWeakReference = new WeakReference<MainActivity>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            this.db_helper = new SpamBusterdbHelper(activity);
+            activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper);
+            this.tableAllSyncInboxHandlerThread = tableAllSyncInboxHandlerThread;
+            this.tableAllSyncInboxHandlerThread.start();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //handler for the tableAllSyncInboxHandlerThread
+            handler = tableAllSyncInboxHandlerThread.getHandler();
+            Message msg = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+
+            //get all ids from TABLE_ALL
+            msg.what = TASK_GET_IDS;
+            msg.arg1 = TABLE_ALL;
+            msg.sendToTarget();
+
+            while (true){
+                //if all ids are read from TABLE_ALL then move ahead
+                if(DONE_TASK_GET_IDS_TABLEALL){
+                    //get all ids from SMS/INBOX
+                    msg.arg1 = TABLE_CONTENT_SMS_INBOX;
+                    msg.sendToTarget();
+                    break;
+                }
+            }
+            //reset  to false for next time
+            DONE_TASK_GET_IDS_TABLEALL = false;
+
+            while (true) {
+                if (DONE_TASK_GET_IDS_SMSINBOX) {
+                    //compare ids and get missing IDs
+                    msg.what = TASK_GET_MISSING_IDS;
+                    msg.arg1 = TABLE_ALL;
+                    msg.arg2 = TABLE_CONTENT_SMS_INBOX;
+                    msg.sendToTarget();
+                    break;
+                }
+            }
+            //reset  to false for next time
+            DONE_TASK_GET_IDS_SMSINBOX = false;
+
+            while (true) {
+             if(DONE_TASK_GET_MISSING_IDS) {
+                 //update the missing messages in TABLE_ALL
+                 msg.what = TASK_UPDATE_MISSING_IDS;
+                 msg.arg1 = TABLE_ALL;
+                 msg.arg2 = TABLE_CONTENT_SMS_INBOX;
+                 msg.sendToTarget();
+                 break;
+                 }
+            }
+            DONE_TASK_GET_MISSING_IDS = false;
+
+            while (true){
+                //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
+                if (DONE_TASK_UPDATE_MISSING_IDS){
+                    break;
+                }
+            }
+            DONE_TASK_UPDATE_MISSING_IDS = false;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+
+            // ------------------------------------       READING from database  table TABLE_ALL      -----------------------------
+            Log.d(TAG, "DbOperationsAsyncTask: onPostExecute():  reading the table before inserting anything ... ");
+            // start here - only to read _ID to determine whether we want to insert into table or not, so that we dont get duplicates
+            Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): Now reading values from TABLE_ALL ");
+            db = db_helper.getReadableDatabase();
+
+            int table = TABLE_ALL;
+            switch (table) {
+
+                case TABLE_ALL:
+                    ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(activity, db);
+                    Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
+                    ArrayList msg1_list = new ArrayList();  //dummy
+                    readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
+                    break;
+            }
+        }
+    }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 //    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, ReadDbTableAllAsyncTask.ProgressObject>{
