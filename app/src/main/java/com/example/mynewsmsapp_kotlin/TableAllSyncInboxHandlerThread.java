@@ -39,7 +39,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
     public static final int DUMMY_VAL = 9999;
 
     private final String TAG = "[MY_DEBUG]";
-    private static boolean need_to_sync = true;
     private Handler handler;
     private SpamBusterdbHelper db_helper;
     private SQLiteDatabase db;
@@ -71,8 +70,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         switch (msg.arg1) { //select TABLE to operate on    msg.arg1 = TABLE
 
                             case TABLE_ALL:
-                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():             | ");
-                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():             |__ TABLE_ALL ");
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():                        |");
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():                        |__ TABLE_ALL");
                                 String[] projection_id = {
                                         BaseColumns._ID,
                                         SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID

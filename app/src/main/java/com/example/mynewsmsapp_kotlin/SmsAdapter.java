@@ -20,12 +20,9 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     ArrayList<String> sms_messages_list = new ArrayList<>();
     Context context;
-    //    String[] sms_message_string_array;
-//    Object[] sms_message_object_array;
 
     public  SmsAdapter(Context ct, ArrayList<String> array_list){
         this.context = ct;
-//        sms_messages_list = array_list;
         this.sms_messages_list.addAll(array_list);
         sms_messages_list.clear();
     }
@@ -55,13 +52,11 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull SmsViewHolder holder, int position) {
-//        sms_message_object_array = sms_messages_list.toArray();
         holder.sms_text.setText(sms_messages_list.get(position).toString());
     }
 
     @Override
     public int getItemCount() {
-//        sms_message_object_array = sms_messages_list.toArray();
         return sms_messages_list.size();
     }
 

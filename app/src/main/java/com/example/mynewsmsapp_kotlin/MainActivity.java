@@ -145,7 +145,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, TAG_onStop + " called ");
         super.onDestroy();
         active = false; //indicate that activity is killed, check bottom of SmsBroadcastReceiver.onReceive() method
-        tableAllSyncInboxHandlerThread.quit();
+        try {
+            tableAllSyncInboxHandlerThread.quit();
+        }
+        catch (Exception e){
+            Log.d(TAG, "MainActivity: onDestroy(): exception " + e);
+        }
         db_helper.close();
     }
 
@@ -504,6 +509,12 @@ public class MainActivity extends AppCompatActivity {
             }
             DONE_TASK_UPDATE_MISSING_IDS = false;
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset DONE_TASK_UPDATE_MISSING_IDS to " + DONE_TASK_UPDATE_MISSING_IDS);
+            try {
+                tableAllSyncInboxHandlerThread.quit();
+            }
+            catch (Exception e){
+                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): exception " + e);
+            }
             return null;
         }
 
@@ -520,9 +531,10 @@ public class MainActivity extends AppCompatActivity {
             int table = TABLE_ALL;
             switch (table) {
                 case TABLE_ALL:
+                    Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): inside case TABLE_ALL");
                     ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(MainActivity.instance(), db);
-                    Log.d(TAG, "readMessagesFromDbTable: executing readDb thread in background");
                     ArrayList msg1_list = new ArrayList();  //dummy
+                    Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): executing readDb thread in background");
                     readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
                     break;
             }
@@ -635,8 +647,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Log.d(TAG, "onPreExecute: called");
-
+            Log.d(TAG, "ReadDbTableAllAsyncTask: onPreExecute(): called");
             MainActivity activity = activityWeakReference.get();
             if (activity == null || activity.isFinishing()) {
                 return;
