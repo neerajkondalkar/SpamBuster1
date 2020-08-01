@@ -45,6 +45,7 @@ import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_TABLEALL;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_UPDATE_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DUMMY_VAL;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_MISSING_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_UPDATE_MISSING_IDS;
@@ -419,21 +420,26 @@ public class MainActivity extends AppCompatActivity {
             msg.what = TASK_GET_IDS;
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg.arg1 = TABLE_ALL");
             msg.arg1 = TABLE_ALL;
+            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg.arg2 = DUMMY_VAL");
+            msg.arg2 = DUMMY_VAL;
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg preparation complete");
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg sent!");
             msg.sendToTarget();
 
             Message msg1 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 initialized");
+            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
             while (true){
                 //if all ids are read from TABLE_ALL then move ahead
-                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
                 if(DONE_TASK_GET_IDS_TABLEALL){
+                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
                     //get all ids from SMS/INBOX
                     Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.what = TASK_GET_IDS");
                     msg1.what = TASK_GET_IDS;
                     Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
                     msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
+                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.arg2 = DUMMY_VAL");
+                    msg1.arg2 = DUMMY_VAL;
                     Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 preparation complete");
                     Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 sent!");
                     msg1.sendToTarget();
@@ -446,9 +452,10 @@ public class MainActivity extends AppCompatActivity {
 
             Message msg2 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg2 initialized");
+            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
             while (true) {
-                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_SMSINBOX...  "  + DONE_TASK_GET_IDS_SMSINBOX);
                 if (DONE_TASK_GET_IDS_SMSINBOX) {
+                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_SMSINBOX...  "  + DONE_TASK_GET_IDS_SMSINBOX);
                     //compare ids and get missing IDs
                     Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg2.what = TASK_GET_MISSING_IDS");
                     msg2.what = TASK_GET_MISSING_IDS;
@@ -468,9 +475,10 @@ public class MainActivity extends AppCompatActivity {
 
             Message msg3 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg3 initialized");
+            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_MISSING_IDS is true");
             while (true) {
-                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
              if(DONE_TASK_GET_MISSING_IDS) {
+                 Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
                  //update the missing messages in TABLE_ALL
                  Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
                  msg3.what = TASK_UPDATE_MISSING_IDS;
@@ -486,11 +494,11 @@ public class MainActivity extends AppCompatActivity {
             }
             DONE_TASK_GET_MISSING_IDS = false;
             Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
-
+            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
             while (true){
                 //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
-                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
                 if (DONE_TASK_UPDATE_MISSING_IDS){
+                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
                     break;
                 }
             }
