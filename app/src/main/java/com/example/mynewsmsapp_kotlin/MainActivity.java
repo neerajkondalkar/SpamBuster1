@@ -62,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int TABLE_SPAM = 3;
     public static final int TABLE_CONTENT_SMS_INBOX = 4;
 
-//    private DbOperationsAsyncTask dbOperationsAsyncTask;
+    protected ReadDbTableAllAsyncTask readDbTableAllAsyncTask;
+    //    private DbOperationsAsyncTask dbOperationsAsyncTask;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler handler;
-
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
 
     ArrayList<String> sms_messages_list = new ArrayList<>();
@@ -517,10 +517,10 @@ public class MainActivity extends AppCompatActivity {
             switch (table) {
                 case TABLE_ALL:
                     Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): inside case TABLE_ALL");
-                    ReadDbTableAllAsyncTask readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(MainActivity.instance(), db);
+                    readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(activity, db);
                     ArrayList msg1_list = new ArrayList();  //dummy
                     Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): executing readDb thread in background");
-                    readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
+                    activity.readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
                     break;
             }
         }
@@ -719,7 +719,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
         protected ArrayList<String> doInBackground(ArrayList<String>... arrayList) {
             final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
             Log.d(TAG, TAG_doInBackground + " called");
-            db1.beginTransaction();
+//            db1.beginTransaction();
             String[] projection = {
                     BaseColumns._ID,
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
@@ -784,7 +784,7 @@ private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>
                 }
             }
             cursor_read_from_table_all.close();
-            db1.endTransaction();
+//            db1.endTransaction();
             db1.close();
             return messages_list;
         }
