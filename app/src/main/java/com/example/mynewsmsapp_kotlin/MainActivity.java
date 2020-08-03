@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private class DbOperationsRunnable implements Runnable {
+    private static class DbOperationsRunnable implements Runnable {
         private SpamBusterdbHelper db_helper;
         private SQLiteDatabase db;
         private WeakReference<MainActivity> activityWeakReference;
@@ -512,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
                     ArrayList msg1_list = new ArrayList();  //dummy
                     Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): executing readDb thread in background");
 //                    activity.readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
-                    activity.thread = new Thread(readDbTableAllRunnable);
+                    activity.thread = new Thread(activity.readDbTableAllRunnable);
                     activity.thread.start();
                     break;
             }
@@ -565,6 +565,7 @@ public class MainActivity extends AppCompatActivity {
 // How you want the results sorted in the resulting Cursor
             String sortOrder =
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
+            db1.beginTransaction();
             cursor_read_from_table_all = db1.query(
                     SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                     projection,             // The array of columns to return (pass null to get all)
@@ -615,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             cursor_read_from_table_all.close();
-//            db1.endTransaction();
+            db1.endTransaction();
             db1.close();
             Log.d(TAG, "onPostExecute: Printing the whole messages_list : ");
             try {

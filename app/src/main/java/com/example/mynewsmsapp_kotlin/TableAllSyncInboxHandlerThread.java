@@ -65,11 +65,11 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                 switch (msg.what){
                     case TASK_GET_IDS:
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): Inside case TASK_GET_IDS");
-                        db = db_helper.getReadableDatabase();
-                        db.beginTransaction();
                         switch (msg.arg1) { //select TABLE to operate on    msg.arg1 = TABLE
 
                             case TABLE_ALL:
+                                db = db_helper.getReadableDatabase();
+                                db.beginTransaction();
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():                        |");
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():                        |__ TABLE_ALL");
                                 String[] projection_id = {
@@ -99,9 +99,10 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                     } while (cursor_read_id.moveToNext());
                                     // topmost is largest/latest _ID
                                 }
-                                db.endTransaction();
 //                                item_ids_tableall = item_ids;
                                 DONE_TASK_GET_IDS_TABLEALL = true;
+                                db.setTransactionSuccessful();
+                                db.endTransaction();
                                 break;  // end of inner case TABLE_ALL   [ still inside case  TASK_GET_IDS ]
 
                             case TABLE_INBOX:
@@ -113,6 +114,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 break;
 
                             case TABLE_CONTENT_SMS_INBOX:
+                                db = db_helper.getReadableDatabase();
+                                db.beginTransaction();
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():             | ");
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage():             |__ TABLE_CONTENT_SMS_INBOX ");
                                 ContentResolver content_resolver = MainActivity.instance().getContentResolver();
@@ -149,6 +152,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 }
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): ");
                                 DONE_TASK_GET_IDS_SMSINBOX = true;
+                                db.setTransactionSuccessful();
+                                db.endTransaction();
                                 break;   // end of inner case TABLE_CONTENT_SMS_INBOX    [ still inside case  TASK_GET_IDS ]
 
                             default:
@@ -310,6 +315,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         DONE_TASK_UPDATE_MISSING_IDS = true;
                         break; // end of case TASK_UPDATE_MISSING_IDS
                 }
+                db.close();
             }
         };
     }
