@@ -195,12 +195,12 @@ public class MainActivity extends AppCompatActivity {
 
 //        //to delete the database. so that everytime a new database is created
 
-//        try {
-//            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
-//        }
-//        catch (Exception e){
-//            Log.d(TAG, TAG_onCreate + " Exception : " + e);
-//        }
+        try {
+            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
+        }
+        catch (Exception e){
+            Log.d(TAG, TAG_onCreate + " Exception : " + e);
+        }
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -404,115 +404,115 @@ public class MainActivity extends AppCompatActivity {
             }
             this.handler = tableAllSyncInboxHandlerThread.getHandler();
             Message msg = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg initialized");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg initialized");
             //get all ids from TABLE_ALL
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg.what = TASK_GET_IDS");
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg.what = TASK_GET_IDS");
             msg.what = TASK_GET_IDS;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg.arg1 = TABLE_ALL");
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg1 = TABLE_ALL");
             msg.arg1 = TABLE_ALL;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg.arg2 = DUMMY_VAL");
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg2 = DUMMY_VAL");
             msg.arg2 = DUMMY_VAL;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg preparation complete");
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg sent!");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg preparation complete");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg sent!");
             msg.sendToTarget();
 
             Message msg1 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 initialized");
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg1 initialized");
+            Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
             while (true) {
                 //if all ids are read from TABLE_ALL then move ahead
                 if (DONE_TASK_GET_IDS_TABLEALL) {
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
+                    Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
                     //get all ids from SMS/INBOX
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.what = TASK_GET_IDS");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.what = TASK_GET_IDS");
                     msg1.what = TASK_GET_IDS;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
                     msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg1.arg2 = DUMMY_VAL");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg2 = DUMMY_VAL");
                     msg1.arg2 = DUMMY_VAL;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 preparation complete");
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg1 sent!");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg1 preparation complete");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg1 sent!");
                     msg1.sendToTarget();
                     break;
                 }
             }
             //reset  to false for next time
             DONE_TASK_GET_IDS_TABLEALL = false;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset  DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
+            Log.d(TAG, "DbOperationsRunnable: run(): reset  DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
 
             Message msg2 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg2 initialized");
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg2 initialized");
+            Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
             while (true) {
                 if (DONE_TASK_GET_IDS_SMSINBOX) {
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
+                    Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
                     //compare ids and get missing IDs
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg2.what = TASK_GET_MISSING_IDS");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.what = TASK_GET_MISSING_IDS");
                     msg2.what = TASK_GET_MISSING_IDS;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg2.arg1 = TABLE_ALL");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg1 = TABLE_ALL");
                     msg2.arg1 = TABLE_ALL;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg2.arg2 = TABLE_CONTENT_SMS_INBOX");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg2 = TABLE_CONTENT_SMS_INBOX");
                     msg2.arg2 = TABLE_CONTENT_SMS_INBOX;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg2 preparation complete");
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg2 sent!");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg2 preparation complete");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg2 sent!");
                     msg2.sendToTarget();
                     break;
                 }
             }
             //reset  to false for next time
             DONE_TASK_GET_IDS_SMSINBOX = false;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
+            Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
 
             Message msg3 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg3 initialized");
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_GET_MISSING_IDS is true");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg3 initialized");
+            Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS is true");
             while (true) {
                 if (DONE_TASK_GET_MISSING_IDS) {
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
+                    Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
                     //update the missing messages in TABLE_ALL
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
                     msg3.what = TASK_UPDATE_MISSING_IDS;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg3.arg1 = TABLE_ALL");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg1 = TABLE_ALL");
                     msg3.arg1 = TABLE_ALL;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): setting msg3.arg2 = TABLE_CONTENT_SMS_INBOX");
+                    Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg2 = TABLE_CONTENT_SMS_INBOX");
                     msg3.arg2 = TABLE_CONTENT_SMS_INBOX;
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg3 preparation complete");
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): msg3 sent!");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg3 preparation complete");
+                    Log.d(TAG, "DbOperationsRunnable: run(): msg3 sent!");
                     msg3.sendToTarget();
                     break;
                 }
             }
             DONE_TASK_GET_MISSING_IDS = false;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
+            Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
+            Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
             while (true) {
                 //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
                 if (DONE_TASK_UPDATE_MISSING_IDS) {
-                    Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
+                    Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
                     break;
                 }
             }
             DONE_TASK_UPDATE_MISSING_IDS = false;
-            Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): reset DONE_TASK_UPDATE_MISSING_IDS to " + DONE_TASK_UPDATE_MISSING_IDS);
+            Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_UPDATE_MISSING_IDS to " + DONE_TASK_UPDATE_MISSING_IDS);
             try {
                 tableAllSyncInboxHandlerThread.quit();
             } catch (Exception e) {
-                Log.d(TAG, "DbOperationsAsyncTask: doInBackground(): exception " + e);
+                Log.d(TAG, "DbOperationsRunnable: run(): exception " + e);
             }
             //READING from database  table TABLE_ALL
-            Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): Now reading values from TABLE_ALL ");
+            Log.d(TAG, "DbOperationsRunnable: run(): Now reading values from TABLE_ALL ");
             db = db_helper.getReadableDatabase();
             int table = TABLE_ALL;
             switch (table) {
                 case TABLE_ALL:
-                    Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): inside case TABLE_ALL");
+                    Log.d(TAG, "DbOperationsRunnable: run(): inside case TABLE_ALL");
 //                    activity.readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(activity, db);
 //                    activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, activity.main_handler, db);
 
                     activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, db);
 
                     ArrayList msg1_list = new ArrayList();  //dummy
-                    Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): executing readDb thread in background");
+                    Log.d(TAG, "DbOperationsRunnable: run(): executing readDb thread in background");
 //                    activity.readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
                     activity.thread = new Thread(activity.readDbTableAllRunnable);
                     activity.thread.start();
@@ -555,8 +555,8 @@ public class MainActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
-            final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
-            Log.d(TAG, TAG_doInBackground + " called");
+            final String TAG_run = " ReadDbTableAllRunnable run(): ";
+            Log.d(TAG, TAG_run + " called");
             String[] projection = {
                     BaseColumns._ID,
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
@@ -582,9 +582,9 @@ public class MainActivity extends AppCompatActivity {
             i = 0;
             cursor_first = cursor_read_from_table_all.moveToFirst();
             if (!cursor_first) {
-                Log.d(TAG, "ReadDbTableAllAsyncTask: doInBackground(): TABLE_ALL is empty");
+                Log.d(TAG, "ReadDbTableAllRunnable: run(): TABLE_ALL is empty");
             } else {
-                Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: interator i = " + i);
+                Log.d(TAG, "ReadDbTableAllRunnable run: interator i = " + i);
                 int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
                 int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
                 int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
@@ -598,198 +598,51 @@ public class MainActivity extends AppCompatActivity {
                         String sms_body = cursor_read_from_table_all.getString(index_sms_body);
                         String sms_address = cursor_read_from_table_all.getString(index_sms_address);
                         String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
-                        Log.d(TAG, TAG_doInBackground + " itemId = " + itemId);
-                        Log.d(TAG, TAG_doInBackground + " corress_inbox_id = " + corress_inbox_id);
-                        Log.d(TAG, TAG_doInBackground + " sms_body = " + sms_body);
-                        Log.d(TAG, TAG_doInBackground + " sms_address = " + sms_address);
+                        Log.d(TAG, TAG_run + " itemId = " + itemId);
+                        Log.d(TAG, TAG_run + " corress_inbox_id = " + corress_inbox_id);
+                        Log.d(TAG, TAG_run + " sms_body = " + sms_body);
+                        Log.d(TAG, TAG_run + " sms_address = " + sms_address);
                         milli_seconds = Long.parseLong(epoch_date);
                         calendar.setTimeInMillis(milli_seconds);
                         printable_date = formatter.format(calendar.getTime());
-                        Log.d(TAG, TAG_doInBackground + " epoch_date = " + epoch_date + " which is : " + printable_date);
-                        Log.d(TAG, TAG_doInBackground + " ");
+                        Log.d(TAG, TAG_run + " epoch_date = " + epoch_date + " which is : " + printable_date);
+                        Log.d(TAG, TAG_run + " ");
                         String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(activity, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
-                        Log.d(TAG, "doInBackground: progress_iterator = " + progress_iterator);
-                        Log.d(TAG, "doInBackground: i = " + i);
-                        Log.d(TAG, "doInBackground: adding into message_list at index + " + progress_iterator);
-                        Log.d(TAG, "doInBackground: messages_list.add(" + progress_iterator + ", " + str + ")");
+                        Log.d(TAG, "run(): progress_iterator = " + progress_iterator);
+                        Log.d(TAG, "run(): i = " + i);
+                        Log.d(TAG, "run(): adding into message_list at index + " + progress_iterator);
+                        Log.d(TAG, "run(): messages_list.add(" + progress_iterator + ", " + str + ")");
                         messages_list.add(progress_iterator++, str);
-                        Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
+                        Log.d(TAG, "ReadDbTableAllRunnable run(): incrementing iterator i to " + ++i);
                     } while (cursor_read_from_table_all.moveToNext());
                 } catch (Exception e) {
-                    Log.d(TAG, "doInBackground: exception : " + e);
+                    Log.d(TAG, "run(): exception : " + e);
                 }
             }
             cursor_read_from_table_all.close();
             db1.endTransaction();
             db1.close();
-            Log.d(TAG, "onPostExecute: Printing the whole messages_list : ");
+            Log.d(TAG, "run(): Printing the whole messages_list : ");
             try {
-//                j = 0;
-//                while (j < messages_list.size()) {
-//                    Log.d(TAG, "onPostExecute: j=" + j);
-//                    Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
-//                            messages_list.get(j).toString());
-//                    activity.sms_adapter.insert(j, messages_list.get(j).toString());
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             j = 0;
                             while (j < messages_list.size()) {
-                                Log.d(TAG, "onPostExecute: j=" + j);
-                                Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
+                                Log.d(TAG, "run(): j=" + j);
+                                Log.d(TAG, "run(): msg_list.get(" + j + ").toString() = \n" +
                                         messages_list.get(j).toString());
                             activity.sms_adapter.insert(j, messages_list.get(j).toString());
                                 j++;
                             }
                         }
                     });
-                Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + messages_list.size() + " items to sms_adapter... ");
+                Log.d(TAG, "ReadDbTableAllRunnable: run(): appending " + messages_list.size() + " items to sms_adapter... ");
             } catch (Exception e) {
-                Log.d(TAG, "onPostExecute: exception : " + e);
+                Log.d(TAG, "run(): exception : " + e);
             }
-            Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
+            Log.d(TAG, "run(): Finished reading TABLE_ALL");
         }
     }
-} //MainActivity
+} //MainActivity class ends
 
-
-//    ------------------------------------------------------------------------------------------------------------------------------------------
-
-
-//    private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList, Void, ReadDbTableAllAsyncTask.ProgressObject>{
-//private static class ReadDbTableAllAsyncTask extends AsyncTask<ArrayList<String>, Void, ArrayList<String>>{
-//    private static final String TAG = "[MY_DEBUG]";
-//
-//        private WeakReference<MainActivity> activityWeakReference;
-//        private SQLiteDatabase db1;
-//        private long milli_seconds = 0;
-//        private Calendar calendar = Calendar.getInstance();
-//        private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-//        private String printable_date;
-//        private int i=0;
-//        private  ArrayList<String> messages_list = new ArrayList();
-//        private int progress_iterator;
-//        private  Cursor cursor_read_from_table_all;
-//        private boolean cursor_first;
-//
-//    ReadDbTableAllAsyncTask(MainActivity activity, SQLiteDatabase db2){
-//            activityWeakReference = new WeakReference<MainActivity>(activity);
-//            progress_iterator = 0;
-//            db1 = db2;
-//            i=0;
-//    }
-//
-//        @Override
-//        protected ArrayList<String> doInBackground(ArrayList<String>... arrayList) {
-//            final String TAG_doInBackground = " ReadDbTableAllAsyncTask doInBackground(): ";
-//            Log.d(TAG, TAG_doInBackground + " called");
-////            db1.beginTransaction();
-//            String[] projection = {
-//                    BaseColumns._ID,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
-//            };
-//            String selection = null;
-//            String[] selectionArgs = null;
-//// How you want the results sorted in the resulting Cursor
-//            String sortOrder =
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
-//            cursor_read_from_table_all = db1.query(
-//                    SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-//                    projection,             // The array of columns to return (pass null to get all)
-//                    selection,              // The columns for the WHERE clause
-//                    selectionArgs,          // The values for the WHERE clause
-//                    null,                   // don't group the rows
-//                    null,                   // don't filter by row groups
-//                    sortOrder               // The sort order
-//            );
-//            i = 0;
-//            cursor_first = cursor_read_from_table_all.moveToFirst();
-//            if (!cursor_first) {
-//                Log.d(TAG, "ReadDbTableAllAsyncTask: doInBackground(): TABLE_ALL is empty");
-//            }
-//            else {
-//                Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: interator i = " + i);
-//                int index_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
-//                int index_corres_id = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
-//                int index_sms_body = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
-//                int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
-//                int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
-//                try {
-//                    messages_list.clear();
-//                    do {
-//                        long itemId = cursor_read_from_table_all.getLong(index_id);
-//                        String corress_inbox_id = cursor_read_from_table_all.getString(index_corres_id);
-//                        String sms_body = cursor_read_from_table_all.getString(index_sms_body);
-//                        String sms_address = cursor_read_from_table_all.getString(index_sms_address);
-//                        String epoch_date = cursor_read_from_table_all.getString(index_sms_epoch_date);
-//                        Log.d(TAG, TAG_doInBackground + " itemId = " + itemId);
-//                        Log.d(TAG, TAG_doInBackground + " corress_inbox_id = " + corress_inbox_id);
-//                        Log.d(TAG, TAG_doInBackground + " sms_body = " + sms_body);
-//                        Log.d(TAG, TAG_doInBackground + " sms_address = " + sms_address);
-//                        milli_seconds = Long.parseLong(epoch_date);
-//                        calendar.setTimeInMillis(milli_seconds);
-//                        printable_date = formatter.format(calendar.getTime());
-//                        Log.d(TAG, TAG_doInBackground + " epoch_date = " + epoch_date + " which is : " + printable_date);
-//                        Log.d(TAG, TAG_doInBackground + " ");
-//                        String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(activityWeakReference.get(), sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
-//                        Log.d(TAG, "doInBackground: progress_iterator = " + progress_iterator);
-//                        Log.d(TAG, "doInBackground: i = " + i);
-//                        Log.d(TAG, "doInBackground: adding into message_list at index + " + progress_iterator);
-//                        Log.d(TAG, "doInBackground: messages_list.add(" + progress_iterator + ", " + str + ")");
-//                        messages_list.add(progress_iterator++, str);
-//                        Log.d(TAG, "ReadDbTableAllAsyncTask doInBackground: incrementing iterator i to " + ++i);
-//                    } while (cursor_read_from_table_all.moveToNext());
-//                }
-//                catch(Exception e){
-//                    Log.d(TAG, "doInBackground: exception : " + e);
-//                }
-//            }
-//            cursor_read_from_table_all.close();
-////            db1.endTransaction();
-//            db1.close();
-//            return messages_list;
-//        }
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            Log.d(TAG, "ReadDbTableAllAsyncTask: onPreExecute(): called");
-//            MainActivity activity = activityWeakReference.get();
-//            if (activity == null || activity.isFinishing()) {
-//                return;
-//            }
-//            messages_list.clear();
-//        }
-//
-//        @Override
-//        protected void onPostExecute(ArrayList<String> msg_list) {
-//            super.onPostExecute(msg_list);
-//            Log.d(TAG, "onPostExecute: called");
-//            MainActivity activity = activityWeakReference.get();
-//            if (activity == null || activity.isFinishing()) {
-//                return;
-//            }
-//            Log.d(TAG, "onPostExecute: Printing the whole messages_list : ");
-//            int j=0;
-//            try {
-//                    while (j < msg_list.size()) {
-//                    Log.d(TAG, "onPostExecute: j=" + j);
-//                    Log.d(TAG, "onPostExecute(): msg_list.get(" + j + ").toString() = \n" +
-//                            msg_list.get(j).toString());
-//                    activity.sms_adapter.insert(j, msg_list.get(j).toString());
-//                    j++;
-//                }
-//                Log.d(TAG, "ReadDbTableAllAsyncTask: onPostExecute(): appending " + msg_list.size() + " items to sms_adapter... ");
-//            }
-//            catch (Exception e){
-//                Log.d(TAG, "onPostExecute: exception : " + e);
-//            }
-//            Log.d(TAG, "onPostExecute: Finished reading TABLE_ALL");
-//        }
-//    }
-//}
-//
-//
