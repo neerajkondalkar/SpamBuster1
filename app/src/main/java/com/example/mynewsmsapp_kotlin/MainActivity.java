@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
     //    private DbOperationsAsyncTask dbOperationsAsyncTask;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
-    private Handler main_handler;
+    private Handler main_handler = new Handler();
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
     private Thread thread;
 
@@ -507,7 +507,9 @@ public class MainActivity extends AppCompatActivity {
                 case TABLE_ALL:
                     Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): inside case TABLE_ALL");
 //                    activity.readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(activity, db);
-                    activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, activity.main_handler, db);
+//                    activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, activity.main_handler, db);
+
+                    activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, db);
 
                     ArrayList msg1_list = new ArrayList();  //dummy
                     Log.d(TAG, "DbOperationsAsyncTask: onPostExecute(): executing readDb thread in background");
@@ -537,8 +539,10 @@ public class MainActivity extends AppCompatActivity {
         private boolean cursor_first;
         private int j = 0;
 
-        ReadDbTableAllRunnable(MainActivity activity, Handler handler_main, SQLiteDatabase db) {
-            this.handler = handler_main;
+//        ReadDbTableAllRunnable(MainActivity activity, Handler handler_main, SQLiteDatabase db) {
+        ReadDbTableAllRunnable(MainActivity activity, SQLiteDatabase db) {
+//            this.handler = handler_main;
+            handler = activity.main_handler;
             activityWeakReference = new WeakReference<MainActivity>(activity);
             this.db1 = db;
             progress_iterator = 0;
