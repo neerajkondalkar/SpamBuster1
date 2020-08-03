@@ -54,37 +54,25 @@ import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK
 // 1. Showing all messages to user
 // 2. A button to take user to ComposeSmsActivity to compose a new sms
 public class MainActivity extends AppCompatActivity {
-
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
     public static final int TABLE_ALL = 1;
     public static final int TABLE_INBOX = 2;
     public static final int TABLE_SPAM = 3;
     public static final int TABLE_CONTENT_SMS_INBOX = 4;
-
-    //    protected ReadDbTableAllAsyncTask readDbTableAllAsyncTask;
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
-    //    private DbOperationsAsyncTask dbOperationsAsyncTask;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler main_handler = new Handler();
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
     private Thread thread;
-
     ArrayList<String> sms_messages_list = new ArrayList<>();
-    //    ListView messages;
     RecyclerView messages;
-    ArrayAdapter array_adapter;
-    //    EditText input;
     SmsAdapter sms_adapter;
     SpamBusterdbHelper db_helper;
-
-
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
     private static MainActivity inst;
-
     public static boolean active = false;
-
     //will be used as requestCode parameter in requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
     private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
 
@@ -163,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onSaveInstanceState = " onSaveInstanceState(): ";
         Log.d(TAG, TAG_onSaveInstanceState + "called");
         super.onSaveInstanceState(outState);
-//        outState.putStringArrayList(KEY_LIST_CONTENTS, sms_messages_list);   //<------------TOO LARGE, causes error
     }
 
 
@@ -175,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
         final String TAG_onRestoreInstanceState = " onRestoreInstanceState(): ";
         Log.d(TAG, TAG_onRestoreInstanceState + "called");
         super.onRestoreInstanceState(savedInstanceState);
-//        sms_messages_list = savedInstanceState.getStringArrayList(KEY_LIST_CONTENTS);
     }
 
 
@@ -190,19 +176,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
-
 //        ----------------------- DELETE DATABASE --------------------
-
 //        //to delete the database. so that everytime a new database is created
-
         try {
             this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
         }
         catch (Exception e){
             Log.d(TAG, TAG_onCreate + " Exception : " + e);
         }
-
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
@@ -271,9 +252,7 @@ public class MainActivity extends AppCompatActivity {
 //        ArrayList<String> sms_list = new ArrayList<String>();
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
-
 //        -------------------- DELETE database ---------------------------
-
 //        try {
 //            Log.d(TAG, TAG_refreshSmsInbox + " item_ids_tableall[0] = " + item_ids_tableall.get(0).toString());
 //            latest_sms_id_in_table_all = item_ids_tableall.get(0).toString();
@@ -284,20 +263,14 @@ public class MainActivity extends AppCompatActivity {
 //            Log.d(TAG, TAG_refreshSmsInbox + " Exception : " + e);
 //        }
 //            //so now we have a list of all IDs that are already present in the table, i.e we know what sms are already present in the table
-
         //inserting a dummy item at index 0 of list   (list will be cleared once SmsAdapter object is created)
         sms_messages_list.add(0, "dummy");
         sms_adapter = new SmsAdapter(this, sms_messages_list);
         messages.setAdapter(sms_adapter);
         messages.setLayoutManager(new LinearLayoutManager(this));
-
         //running on seperate thread
         DbOperationsRunnable dbOperationsRunnable = new DbOperationsRunnable(this);
         new Thread(dbOperationsRunnable).start();
-
-        // pushing db operations to asynctask
-//        dbOperationsAsyncTask = new DbOperationsAsyncTask(this);
-//        dbOperationsAsyncTask.execute();
     }
 
     //    -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -506,14 +479,8 @@ public class MainActivity extends AppCompatActivity {
             switch (table) {
                 case TABLE_ALL:
                     Log.d(TAG, "DbOperationsRunnable: run(): inside case TABLE_ALL");
-//                    activity.readDbTableAllAsyncTask = new ReadDbTableAllAsyncTask(activity, db);
-//                    activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, activity.main_handler, db);
-
                     activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, db);
-
-                    ArrayList msg1_list = new ArrayList();  //dummy
                     Log.d(TAG, "DbOperationsRunnable: run(): executing readDb thread in background");
-//                    activity.readDbTableAllAsyncTask.execute(msg1_list);  //msg1_list is never going to be used
                     activity.thread = new Thread(activity.readDbTableAllRunnable);
                     activity.thread.start();
                     break;
@@ -539,9 +506,7 @@ public class MainActivity extends AppCompatActivity {
         private boolean cursor_first;
         private int j = 0;
 
-//        ReadDbTableAllRunnable(MainActivity activity, Handler handler_main, SQLiteDatabase db) {
         ReadDbTableAllRunnable(MainActivity activity, SQLiteDatabase db) {
-//            this.handler = handler_main;
             handler = activity.main_handler;
             activityWeakReference = new WeakReference<MainActivity>(activity);
             this.db1 = db;
