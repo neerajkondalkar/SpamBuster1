@@ -178,12 +178,12 @@ public class MainActivity extends AppCompatActivity {
         messages = (RecyclerView) findViewById(R.id.messages);
 //        ----------------------- DELETE DATABASE --------------------
 //        //to delete the database. so that everytime a new database is created
-        try {
-            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
-        }
-        catch (Exception e){
-            Log.d(TAG, TAG_onCreate + " Exception : " + e);
-        }
+//        try {
+//            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
+//        }
+//        catch (Exception e){
+//            Log.d(TAG, TAG_onCreate + " Exception : " + e);
+//        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
@@ -597,8 +597,13 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "run(): j=" + j);
                                 Log.d(TAG, "run(): msg_list.get(" + j + ").toString() = \n" +
                                         messages_list.get(j).toString());
-                            activity.sms_adapter.insert(j, messages_list.get(j).toString());
-                                j++;
+                                try {
+                                    activity.sms_adapter.insert(j, messages_list.get(j).toString());
+                                    j++;
+                                }
+                                catch (Exception e){
+                                    Log.d(TAG, "ReadDbTableAllRunnable: run(): exception : "+ e);
+                                }
                             }
                         }
                     });
