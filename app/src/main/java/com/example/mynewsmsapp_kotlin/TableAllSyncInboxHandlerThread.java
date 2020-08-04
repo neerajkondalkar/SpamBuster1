@@ -29,26 +29,26 @@ import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_SPAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
 
 public class TableAllSyncInboxHandlerThread  extends HandlerThread {
-    public static final int TASK_GET_IDS = 1;
-    public static boolean DONE_TASK_GET_IDS_TABLEALL = false;
-    public static boolean DONE_TASK_GET_IDS_SMSINBOX = false;
-    public static final int TASK_GET_MISSING_IDS = 2;
-    public static boolean DONE_TASK_GET_MISSING_IDS = false;
-    public static final int TASK_UPDATE_MISSING_IDS = 3;
-    public static boolean DONE_TASK_UPDATE_MISSING_IDS = false;
-    public static final int DUMMY_VAL = 9999;
-    public static boolean tableall_is_empty = false;
-    public static boolean smsinbox_is_empty = false;
-
     private final String TAG = "[MY_DEBUG]";
     private Handler handler;
     private SpamBusterdbHelper db_helper;
     private SQLiteDatabase db;
-
     private List item_ids_inbox = new ArrayList();
     private List item_ids_tableall = new ArrayList();
     private List missing_item_ids_in_tableall = new ArrayList();
 
+    public static final int TASK_COMPARE_TOP_ID=11;
+    public static boolean DONE_TASK_COMPARETOPID = false;
+    public static final int TASK_GET_IDS = 12;
+    public static boolean DONE_TASK_GET_IDS_TABLEALL = false;
+    public static boolean DONE_TASK_GET_IDS_SMSINBOX = false;
+    public static final int TASK_GET_MISSING_IDS = 13;
+    public static boolean DONE_TASK_GET_MISSING_IDS = false;
+    public static final int TASK_UPDATE_MISSING_IDS = 14;
+    public static boolean DONE_TASK_UPDATE_MISSING_IDS = false;
+    public static final int DUMMY_VAL = 19999;
+    public static boolean tableall_is_empty = false;
+    public static boolean smsinbox_is_empty = false;
 
     public TableAllSyncInboxHandlerThread(SpamBusterdbHelper db_helper){
         super("TableAllSyncHandlerThread");
@@ -66,10 +66,69 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): arg1 = " + msg.arg1);
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): arg2 = " + msg.arg2);
                 switch (msg.what){
+
+                    case TASK_COMPARE_TOP_ID:
+                        String latest_corresinboxid_tableall = "";
+                        String latest_id_inbox = "";
+                        int table1_taskcomparetopid = msg.arg1;
+                        int table2_taskcomparetopid = msg.arg2;
+                        if(table1_taskcomparetopid == TABLE_ALL && table2_taskcomparetopid == TABLE_INBOX){
+                            db = db_helper.getReadableDatabase();
+                            db.beginTransaction();
+                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_ALL:        |");
+                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_ALL:        |__ TABLE_ALL");
+                            String[] projection_id = {
+                                    BaseColumns._ID,
+                                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
+                            };
+                            String selection_id = null;
+                            String[] selection_args = null;
+                            String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+                            Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                                    projection_id,             // The array of columns to return (pass null to get all)
+                                    selection_id,              // The columns for the WHERE clause
+                                    selection_args,          // The values for the WHERE clause
+                                    null,                   // don't group the rows
+                                    null,                   // don't filter by row groups
+                                    sort_order               // The sort order
+                            );
+                            if (!cursor_read_id.moveToFirst()) {
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_ALL: TABLE_ALL is empty! ");
+                                tableall_is_empty = true;
+                            } else {
+                                tableall_is_empty = false;
+                                    latest_corresinboxid_tableall = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+                                // topmost is largest/latest coress_inbox_id  in table_all
+                            }
+                            db.setTransactionSuccessful();
+                            db.endTransaction();
+                            db.beginTransaction();
+                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: | ");
+                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: |_ TABLE_CONTENT_SMS_INBOX ");
+                            ContentResolver content_resolver = MainActivity.instance().getContentResolver();
+                            Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
+                            if (cursor_check_sms_id.moveToFirst()) {
+                                smsinbox_is_empty = false;
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: dumping the whole sms/inbox :");
+                                int index_id = cursor_check_sms_id.getColumnIndex("_id");
+                                latest_id_inbox = cursor_check_sms_id.getString(index_id);
+                                //latest ID in sms/inbox
+                            }
+                            else{
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: SMS/INBOX empty!");
+                            }
+                            if(latest_corresinboxid_tableall.equals(latest_id_inbox)){
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_ID: TABLE_ALL in sync with SMS/INBOX");
+                                table_all_sync_inbox = true;
+                            }
+                            db.endTransaction();
+                        }
+                        DONE_TASK_COMPARETOPID = true;
+                        break;
+
                     case TASK_GET_IDS:
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS : Inside case TASK_GET_IDS");
                         switch (msg.arg1) { //select TABLE to operate on    msg.arg1 = TABLE
-
                             case TABLE_ALL:
                                 db = db_helper.getReadableDatabase();
                                 db.beginTransaction();
@@ -178,11 +237,11 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: inside case TASK_GET_MISSING_IDS");
                         // compare the lists item_ids_tableall and item_ids_inbox
                         missing_item_ids_in_tableall.clear();
-                        int Table1 = msg.arg1;
-                        int Table2 = msg.arg2;
+                        int Table1_taskgetmissingids = msg.arg1;
+                        int Table2_taskgetmissingids = msg.arg2;
                         // check if TABLE_ALL has all messages that are present in SMS/INBOX
                         // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
-                        if (Table1 == TABLE_ALL && Table2 == TABLE_CONTENT_SMS_INBOX) {
+                        if (Table1_taskgetmissingids == TABLE_ALL && Table2_taskgetmissingids == TABLE_CONTENT_SMS_INBOX) {
                             ListIterator iterator_item_ids_inbox = item_ids_inbox.listIterator();
                             String currentlistitem_item_ids_inbox;
                             if (!iterator_item_ids_inbox.hasNext() || smsinbox_is_empty) {
@@ -239,8 +298,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         if (!table_all_sync_inbox) {
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_UPDATE_MISSING_IDS: TABLE_ALL  is not in sync  with sms/inbox ! Hence update db TABLE_ALL with new messages");
                             // update the TABLE_ALL according to SMS/INBOX
-                            int table1 = msg.arg1;
-                            int table2 = msg.arg2;
+                            int table1_taskupdatemissingids = msg.arg1;
+                            int table2_taskupdatemissingids = msg.arg2;
                             final String TAG_updateMissingValuesInDbTable = " updateMissingValuesInDbTable(): ";
                             Log.d(TAG, TAG_updateMissingValuesInDbTable + " case TASK_UPDATE_MISSING_IDS: called ");
                             String date_str = "";
@@ -248,7 +307,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             Calendar calendar = Calendar.getInstance();
                             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
                             String printable_date;
-                            if (table1 == TABLE_ALL && table2 == TABLE_CONTENT_SMS_INBOX) {
+                            if (table1_taskupdatemissingids == TABLE_ALL && table2_taskupdatemissingids == TABLE_CONTENT_SMS_INBOX) {
                                 List missing_item_ids = missing_item_ids_in_tableall;
                                 ContentResolver content_resolver = MainActivity.instance().getContentResolver();
                                 String[] projection_sms_inbox = null;
@@ -334,7 +393,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
             }
         };
     }
-
 
     public Handler getHandler(){
         return handler;
