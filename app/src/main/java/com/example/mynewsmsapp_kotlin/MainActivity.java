@@ -2,14 +2,12 @@ package com.example.mynewsmsapp_kotlin;
 
 import android.Manifest;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +17,6 @@ import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -31,16 +28,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.Stream;
 
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_COMPARETOPID;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_SMSINBOX;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_TABLEALL;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS;
@@ -58,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
     public static final int TABLE_ALL = 1;
-    public static final int TABLE_INBOX = 2;
+    public static final int TABLE_CONTENTSMSINBOX = 2;
     public static final int TABLE_SPAM = 3;
     public static final int TABLE_CONTENT_SMS_INBOX = 4;
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
@@ -382,108 +375,114 @@ public class MainActivity extends AppCompatActivity {
             //compare only top IDs of TABLE_ALL[corres_inbox_id] and SMS/INBOX[_id]
             msg_comparetopids.what = TASK_COMPARE_TOP_ID;
             msg_comparetopids.arg1 = TABLE_ALL;
-            msg_comparetopids.arg2 = TABLE_INBOX;
+            msg_comparetopids.arg2 = TABLE_CONTENTSMSINBOX;
             msg_comparetopids.sendToTarget();
 
-            //if top IDs don't match
-            if (!table_all_sync_inbox) {
-                Message msg = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-                Log.d(TAG, "DbOperationsRunnable: run(): msg initialized");
-                //get all ids from TABLE_ALL
-                Log.d(TAG, "DbOperationsRunnable: run(): setting msg.what = TASK_GET_IDS");
-                msg.what = TASK_GET_IDS;
-                Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg1 = TABLE_ALL");
-                msg.arg1 = TABLE_ALL;
-                Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg2 = DUMMY_VAL");
-                msg.arg2 = DUMMY_VAL;
-                Log.d(TAG, "DbOperationsRunnable: run(): msg preparation complete");
-                Log.d(TAG, "DbOperationsRunnable: run(): msg sent!");
-                msg.sendToTarget();
+            while(true) {
+                if (DONE_TASK_COMPARETOPID) {
+                    //if top IDs don't match
+                    if (!table_all_sync_inbox) {
+                        Message msg = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg initialized");
+                        //get all ids from TABLE_ALL
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg.what = TASK_GET_IDS");
+                        msg.what = TASK_GET_IDS;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg1 = TABLE_ALL");
+                        msg.arg1 = TABLE_ALL;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg.arg2 = DUMMY_VAL");
+                        msg.arg2 = DUMMY_VAL;
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg preparation complete");
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg sent!");
+                        msg.sendToTarget();
 
-                Message msg1 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-                Log.d(TAG, "DbOperationsRunnable: run(): msg1 initialized");
-                Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
-                while (true) {
-                    //if all ids are read from TABLE_ALL then move ahead
-                    if (DONE_TASK_GET_IDS_TABLEALL) {
-                        Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
-                        //get all ids from SMS/INBOX
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.what = TASK_GET_IDS");
-                        msg1.what = TASK_GET_IDS;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
-                        msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg2 = DUMMY_VAL");
-                        msg1.arg2 = DUMMY_VAL;
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg1 preparation complete");
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg1 sent!");
-                        msg1.sendToTarget();
-                        break;
-                    }
-                }
-                //reset  to false for next time
-                DONE_TASK_GET_IDS_TABLEALL = false;
-                Log.d(TAG, "DbOperationsRunnable: run(): reset  DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
+                        Message msg1 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg1 initialized");
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
+                        while (true) {
+                            //if all ids are read from TABLE_ALL then move ahead
+                            if (DONE_TASK_GET_IDS_TABLEALL) {
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
+                                //get all ids from SMS/INBOX
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.what = TASK_GET_IDS");
+                                msg1.what = TASK_GET_IDS;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
+                                msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg2 = DUMMY_VAL");
+                                msg1.arg2 = DUMMY_VAL;
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg1 preparation complete");
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg1 sent!");
+                                msg1.sendToTarget();
+                                break;
+                            }
+                        }
+                        //reset  to false for next time
+                        DONE_TASK_GET_IDS_TABLEALL = false;
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset  DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
 
-                Message msg2 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-                Log.d(TAG, "DbOperationsRunnable: run(): msg2 initialized");
-                Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
-                while (true) {
-                    if (DONE_TASK_GET_IDS_SMSINBOX) {
-                        Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
-                        //compare ids and get missing IDs
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.what = TASK_GET_MISSING_IDS");
-                        msg2.what = TASK_GET_MISSING_IDS;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg1 = TABLE_ALL");
-                        msg2.arg1 = TABLE_ALL;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg2 = TABLE_CONTENT_SMS_INBOX");
-                        msg2.arg2 = TABLE_CONTENT_SMS_INBOX;
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg2 preparation complete");
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg2 sent!");
-                        msg2.sendToTarget();
-                        break;
-                    }
-                }
-                //reset  to false for next time
-                DONE_TASK_GET_IDS_SMSINBOX = false;
-                Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
+                        Message msg2 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg2 initialized");
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
+                        while (true) {
+                            if (DONE_TASK_GET_IDS_SMSINBOX) {
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
+                                //compare ids and get missing IDs
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.what = TASK_GET_MISSING_IDS");
+                                msg2.what = TASK_GET_MISSING_IDS;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg1 = TABLE_ALL");
+                                msg2.arg1 = TABLE_ALL;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg2.arg2 = TABLE_CONTENT_SMS_INBOX");
+                                msg2.arg2 = TABLE_CONTENT_SMS_INBOX;
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg2 preparation complete");
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg2 sent!");
+                                msg2.sendToTarget();
+                                break;
+                            }
+                        }
+                        //reset  to false for next time
+                        DONE_TASK_GET_IDS_SMSINBOX = false;
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
 
-                Message msg3 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-                Log.d(TAG, "DbOperationsRunnable: run(): msg3 initialized");
-                Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS is true");
-                while (true) {
-                    if (DONE_TASK_GET_MISSING_IDS) {
-                        Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
-                        //update the missing messages in TABLE_ALL
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
-                        msg3.what = TASK_UPDATE_MISSING_IDS;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg1 = TABLE_ALL");
-                        msg3.arg1 = TABLE_ALL;
-                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg2 = TABLE_CONTENT_SMS_INBOX");
-                        msg3.arg2 = TABLE_CONTENT_SMS_INBOX;
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg3 preparation complete");
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg3 sent!");
-                        msg3.sendToTarget();
-                        break;
+                        Message msg3 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg3 initialized");
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS is true");
+                        while (true) {
+                            if (DONE_TASK_GET_MISSING_IDS) {
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
+                                //update the missing messages in TABLE_ALL
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
+                                msg3.what = TASK_UPDATE_MISSING_IDS;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg1 = TABLE_ALL");
+                                msg3.arg1 = TABLE_ALL;
+                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.arg2 = TABLE_CONTENT_SMS_INBOX");
+                                msg3.arg2 = TABLE_CONTENT_SMS_INBOX;
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg3 preparation complete");
+                                Log.d(TAG, "DbOperationsRunnable: run(): msg3 sent!");
+                                msg3.sendToTarget();
+                                break;
+                            }
+                        }
+                        DONE_TASK_GET_MISSING_IDS = false;
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
+                        while (true) {
+                            //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
+                            if (DONE_TASK_UPDATE_MISSING_IDS) {
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
+                                break;
+                            }
+                        }
+                        DONE_TASK_UPDATE_MISSING_IDS = false;
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_UPDATE_MISSING_IDS to " + DONE_TASK_UPDATE_MISSING_IDS);
+                        try {
+                            tableAllSyncInboxHandlerThread.quit();
+                        } catch (Exception e) {
+                            Log.d(TAG, "DbOperationsRunnable: run(): exception " + e);
+                        }
                     }
-                }
-                DONE_TASK_GET_MISSING_IDS = false;
-                Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
-                Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
-                while (true) {
-                    //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
-                    if (DONE_TASK_UPDATE_MISSING_IDS) {
-                        Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_UPDATE_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
-                        break;
-                    }
-                }
-                DONE_TASK_UPDATE_MISSING_IDS = false;
-                Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_UPDATE_MISSING_IDS to " + DONE_TASK_UPDATE_MISSING_IDS);
-                try {
-                    tableAllSyncInboxHandlerThread.quit();
-                } catch (Exception e) {
-                    Log.d(TAG, "DbOperationsRunnable: run(): exception " + e);
+                    break;
                 }
             }
+            DONE_TASK_COMPARETOPID = false;
                 //READING from database  table TABLE_ALL
                 Log.d(TAG, "DbOperationsRunnable: run(): Now reading values from TABLE_ALL ");
                 db = db_helper.getReadableDatabase();
@@ -499,7 +498,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         }
     }
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 

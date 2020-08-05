@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.os.Process;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -24,7 +23,7 @@ import java.util.ListIterator;
 
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_ALL;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_CONTENT_SMS_INBOX;
-import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_INBOX;
+import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_CONTENTSMSINBOX;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_SPAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
 
@@ -72,7 +71,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         String latest_id_inbox = "";
                         int table1_taskcomparetopid = msg.arg1;
                         int table2_taskcomparetopid = msg.arg2;
-                        if(table1_taskcomparetopid == TABLE_ALL && table2_taskcomparetopid == TABLE_INBOX){
+                        if(table1_taskcomparetopid == TABLE_ALL && table2_taskcomparetopid == TABLE_CONTENTSMSINBOX){
                             db = db_helper.getReadableDatabase();
                             db.beginTransaction();
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_ALL:        |");
@@ -123,6 +122,9 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_ID: TABLE_ALL in sync with SMS/INBOX");
                                     table_all_sync_inbox = true;
                                 }
+                                else{
+                                    table_all_sync_inbox = false;
+                                }
                             }
                             db.endTransaction();
                         }
@@ -172,7 +174,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 db.endTransaction();
                                 break;  // end of inner case TABLE_ALL   [ still inside case  TASK_GET_IDS ]
 
-                            case TABLE_INBOX:
+                            case TABLE_CONTENTSMSINBOX:
                                 //do nothing for now
                                 break;
 
