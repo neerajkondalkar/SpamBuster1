@@ -511,7 +511,7 @@ public class MainActivity extends AppCompatActivity {
         private Calendar calendar = Calendar.getInstance();
         private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
         private String printable_date;
-        private ArrayList<String> messages_list = new ArrayList();
+        private ArrayList<String> messages_list_tableall = new ArrayList();
         private Cursor cursor_read_from_table_all;
         private boolean cursor_first;
         private int j = 0;
@@ -566,7 +566,7 @@ public class MainActivity extends AppCompatActivity {
                 int index_sms_address = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
                 int index_sms_epoch_date = cursor_read_from_table_all.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
                 try {
-                    messages_list.clear();
+                    messages_list_tableall.clear();
                     do {
                         Log.d(TAG, "ReadDbTableAllRunnable: run(): reading messages from TABLE_ALL");
                         long itemId = cursor_read_from_table_all.getLong(index_id);
@@ -586,9 +586,9 @@ public class MainActivity extends AppCompatActivity {
                         String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + getContactName(activity, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
                         Log.d(TAG, "run(): progress_iterator = " + progress_iterator);
                         Log.d(TAG, "run(): i = " + i);
-                        Log.d(TAG, "run(): adding into message_list at index + " + progress_iterator);
+                        Log.d(TAG, "run(): adding into message_list_tableall at index + " + progress_iterator);
                         Log.d(TAG, "run(): messages_list.add(" + progress_iterator + ", " + str + ")");
-                        messages_list.add(progress_iterator++, str);
+                        messages_list_tableall.add(progress_iterator++, str);
                         Log.d(TAG, "ReadDbTableAllRunnable run(): incrementing iterator i to " + ++i);
                     } while (cursor_read_from_table_all.moveToNext());
                 } catch (Exception e) {
@@ -605,21 +605,21 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
 //                            try {
                                 j = 0;
-                                while (j < messages_list.size()) {
+                                while (j < messages_list_tableall.size()) {
                                     Log.d(TAG, "ReadDbTableAllRunnable: run(): j=" + j);
                                     Log.d(TAG, "ReadDbTableAllRunnable: run(): msg_list.get(" + j + ").toString() = \n" +
-                                            messages_list.get(j).toString().substring(0, 20));
+                                            messages_list_tableall.get(j).toString().substring(0, 20));
                                     if (j <= 200) {
                                         Log.d(TAG, "ReadDbTableAllRunnable: run(): j <= 200   calling  sms_adapter.insert(" + j +
-                                                 ", messages_list.get("+j+").tostring()");
-                                        activity.sms_adapter.insert(j, messages_list.get(j).toString());
+                                                 ", messages_list_tableall.get("+j+").tostring()");
+                                        activity.sms_adapter.insert(j, messages_list_tableall.get(j).toString());
                                     } else {
                                         Log.d(TAG, "ReadDbTableAllRunnable: run(): j>200");
                                         if (j % 50 == 0) {
                                             Log.d(TAG, "ReadDbTableAllRunnable: run(): j % 50 = " + j%50 + " == 0");
                                             Log.d(TAG, "ReadDbTableAllRunnable: run(): sms_adapter.append("+ (j-50) + ", " +
-                                                    "messages_list.subList(" + (j-50) + ", " + j + "))" );
-                                            activity.sms_adapter.append(j-50, messages_list.subList(j-50, j));
+                                                    "messages_list_tableall.subList(" + (j-50) + ", " + j + "))" );
+                                            activity.sms_adapter.append(j-50, messages_list_tableall.subList(j-50, j));
                                         }
                                         else{
                                             Log.d(TAG, "ReadDbTableAllRunnable: run(): j % 50 = " + j%50 + " != 0");
@@ -632,8 +632,8 @@ public class MainActivity extends AppCompatActivity {
                                     Log.d(TAG, "ReadDbTableAllRunnable: run(): j>200 && j%50   true");
                                     Log.d(TAG, "ReadDbTableAllRunnable: run(): j%50 = " + j%50);
                                     Log.d(TAG, "ReadDbTableAllRunnable: run(): sms_adapter.append(" + (j-j%50) +
-                                            ", messages_list.subList(" + (j-j%50) + ", " + j + "))");
-                                    activity.sms_adapter.append(j - j%50, messages_list.subList(j-j%50, j));
+                                            ", messages_list_tableall.subList(" + (j-j%50) + ", " + j + "))");
+                                    activity.sms_adapter.append(j - j%50, messages_list_tableall.subList(j-j%50, j));
                                 }
 //                            }
 //                            catch (Exception e){
@@ -642,7 +642,6 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                     });
-                Log.d(TAG, "ReadDbTableAllRunnable: run(): appending " + messages_list.size() + " items to sms_adapter... ");
             } catch (Exception e) {
                 Log.d(TAG, "run(): exception : " + e);
             }
