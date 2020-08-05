@@ -115,11 +115,14 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 //latest ID in sms/inbox
                             }
                             else{
+                                smsinbox_is_empty = true;
                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: SMS/INBOX empty!");
                             }
-                            if(latest_corresinboxid_tableall.equals(latest_id_inbox)){
-                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_ID: TABLE_ALL in sync with SMS/INBOX");
-                                table_all_sync_inbox = true;
+                            if(!tableall_is_empty && !smsinbox_is_empty) {
+                                if (latest_corresinboxid_tableall.equals(latest_id_inbox)) {
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_ID: TABLE_ALL in sync with SMS/INBOX");
+                                    table_all_sync_inbox = true;
+                                }
                             }
                             db.endTransaction();
                         }
