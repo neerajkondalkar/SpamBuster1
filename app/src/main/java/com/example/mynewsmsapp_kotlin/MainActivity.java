@@ -51,9 +51,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
     public static final int TABLE_ALL = 1;
-    public static final int TABLE_CONTENTSMSINBOX = 2;
+    public static final int TABLE_HAM = 2;
     public static final int TABLE_SPAM = 3;
-    public static final int TABLE_CONTENT_SMS_INBOX = 4;
+    public static final int TABLE_CONTENTSMSINBOX = 4;       //same as TABLE_CONTENT_SMS_INBOX
+    public static final int TABLE_CONTENT_SMS_INBOX = 4;     //same as TABLE_CONTENTSMSINBOX
+
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler main_handler = new Handler();

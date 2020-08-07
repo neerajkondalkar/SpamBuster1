@@ -24,6 +24,7 @@ import java.util.ListIterator;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_ALL;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_CONTENT_SMS_INBOX;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_CONTENTSMSINBOX;
+import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_HAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_SPAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
 
@@ -174,7 +175,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 db.endTransaction();
                                 break;  // end of inner case TABLE_ALL   [ still inside case  TASK_GET_IDS ]
 
-                            case TABLE_CONTENTSMSINBOX:
+                            case TABLE_HAM:
                                 //do nothing for now
                                 break;
 
@@ -337,51 +338,53 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 int index_address = sms_inbox_cursor.getColumnIndex("address");
                                 if (index_body < 0 || !sms_inbox_cursor.moveToFirst()) {
                                     Log.d(TAG, TAG_updateMissingValuesInDbTable + " sms/inbox empty!");
-                                    return;
-                                }
-                                date_str = sms_inbox_cursor.getString(index_date);
-                                milli_seconds = Long.parseLong(date_str);
-                                calendar.setTimeInMillis(milli_seconds);
-                                printable_date = formatter.format(calendar.getTime());
-                                do {
-                                    String address = sms_inbox_cursor.getString(index_address); //actual phone number
-                                    String contact_name = MainActivity.getContactName(MainActivity.instance(), address); //contact name retirved from phonelookup
-                                    String corress_inbox_id = sms_inbox_cursor.getString(index_id);
-                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + "getContactName() returns = " + contact_name);
-                                    String sms_body = sms_inbox_cursor.getString(index_body);
+                                    smsinbox_is_empty = true;
+                                } else {
+                                    smsinbox_is_empty = false;
                                     date_str = sms_inbox_cursor.getString(index_date);
-                                    String date_sent = sms_inbox_cursor.getString(index_date_sent);
-                                    // Create a new map of values, where column names are the keys
-                                    ContentValues values = new ContentValues();
-                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + " case TASK_UPDATE_MISSING_IDS: checking if sms is already present, by comaprin _ID of sms/inbox and corres_inbox_id of TABLE_ALL");
-                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: missing_item_ids.contains(corress_inbox_id) =  " + missing_item_ids.contains(corress_inbox_id));
-                                    //insert only the messages which are not already present in the TABLE_ALL i.e insert only the new sms i.e sms which which new _ID
-                                    if (missing_item_ids.contains(corress_inbox_id)) {
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + " case TASK_UPDATE_MISSING_IDS:  new sms confirmed!    _ID = " + corress_inbox_id);
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of corress_inbox_id = " + corress_inbox_id + " into COLUMN_CORRESS_INBOX_ID ");
-                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
-                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
-                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: value of date_sent = " + date_sent);
-                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
-                                        // Insert the new row, returning the primary key value of the new row
-                                        long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
-                                        if (newRowId == -1) {
-                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: insert failed\n\n");
+                                    milli_seconds = Long.parseLong(date_str);
+                                    calendar.setTimeInMillis(milli_seconds);
+                                    printable_date = formatter.format(calendar.getTime());
+                                    do {
+                                        String address = sms_inbox_cursor.getString(index_address); //actual phone number
+                                        String contact_name = MainActivity.getContactName(MainActivity.instance(), address); //contact name retirved from phonelookup
+                                        String corress_inbox_id = sms_inbox_cursor.getString(index_id);
+                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "getContactName() returns = " + contact_name);
+                                        String sms_body = sms_inbox_cursor.getString(index_body);
+                                        date_str = sms_inbox_cursor.getString(index_date);
+                                        String date_sent = sms_inbox_cursor.getString(index_date_sent);
+                                        // Create a new map of values, where column names are the keys
+                                        ContentValues values = new ContentValues();
+                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + " case TASK_UPDATE_MISSING_IDS: checking if sms is already present, by comaprin _ID of sms/inbox and corres_inbox_id of TABLE_ALL");
+                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: missing_item_ids.contains(corress_inbox_id) =  " + missing_item_ids.contains(corress_inbox_id));
+                                        //insert only the messages which are not already present in the TABLE_ALL i.e insert only the new sms i.e sms which which new _ID
+                                        if (missing_item_ids.contains(corress_inbox_id)) {
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + " case TASK_UPDATE_MISSING_IDS:  new sms confirmed!    _ID = " + corress_inbox_id);
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of corress_inbox_id = " + corress_inbox_id + " into COLUMN_CORRESS_INBOX_ID ");
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of address = " + address + " into COLUMN_SMS_ADDRESS");
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of sms_body = " + sms_body + " into COLUMN_SMS_BODY");
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: inserting value of date_str = " + date_str + " into COLUMN_SMS_EPOCH_DATE");
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: value of date_sent = " + date_sent);
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date_str);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
+                                            // Insert the new row, returning the primary key value of the new row
+                                            long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
+                                            if (newRowId == -1) {
+                                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: insert failed\n\n");
+                                            } else {
+                                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: Insert Complete! returned newRowId = " + newRowId);
+                                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
+                                            }
                                         } else {
-                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: Insert Complete! returned newRowId = " + newRowId);
-                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
+                                            Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: not a new sms. Hence skipping insertion ");
                                         }
-                                    } else {
-                                        Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: not a new sms. Hence skipping insertion ");
-                                    }
-                                } while (sms_inbox_cursor.moveToNext());
-                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: Done inserting values! \n");
-                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
-                                Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
+                                    } while (sms_inbox_cursor.moveToNext());
+                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: Done inserting values! \n");
+                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
+                                    Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
+                                }
                             }
                             //end of inserting into db
                         } else {
