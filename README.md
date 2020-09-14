@@ -5,4 +5,5 @@ Members: 1. Neeraj Kondalkar
          3. Revan Jambhale
 
 SpamBuster app's aim is to provide spam free sms inbox.
-SMS will be filtered at server side using DMM and result will be returned to our app which has to be set to default.
+SMS will be filtered at server side using machine learning.
+Note : set the app as your default sms app.
