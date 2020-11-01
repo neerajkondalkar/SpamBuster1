@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,13 +26,15 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         final String TAG_onReceive = " onReceive(): ";
         final String action_sms_received = "android.provider.Telephony.SMS_RECEIVED";
+ //       final String action_sms_deliver = "android.provider.Telephony.SMS_DELIVER";
         SmsMessage sms_message = null;   // sms_message will be passsed to the MainActivity.updateInbox()
-
+        Log.d(TAG, " onReceive(): Telephony.Sms.Inbox.CONTENT_URI   returns  " + Telephony.Sms.Inbox.CONTENT_URI);
         String intent_getAction = intent.getAction().toString();
         Log.d(TAG, TAG_onReceive + "Action that made the callback is " + intent_getAction);
 
         //only take action on SMS_RECEIVE, so as to remove the double printing of each new sms because of SMS_DELIVER and SMS_RECEIVE
         if (intent.getAction().toString().matches(action_sms_received)) {
+   //     if (intent.getAction().toString().matches(action_sms_deliver)) {
 
             //since the SMS_RECEIVED_ACTION intent makes a callback with Context and Intent
             // and gives the pdus - which is what the sms message is these days SMS PDU mode - and format - which can be either "3gpp" or "3gpp2" - as extra values
@@ -75,6 +78,8 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     long timestampMillis = sms_message.getTimestampMillis();
                     Log.d(TAG, TAG_onReceive + " timestampmillis = " + timestampMillis);
 
+                    int protocol_id = sms_message.getProtocolIdentifier();
+                    Log.d(TAG, "SmsBroadcastReceiver: onReceive(): protocol identifier = " + Integer.toString(protocol_id));
 
                     Calendar calendar = Calendar.getInstance();
                     DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");

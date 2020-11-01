@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
     private static MainActivity inst;
     public static boolean active = false;
-    //will be used as requestCode parameter in requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
+    //will be used as requestCode parameter in method requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
     private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
 
 

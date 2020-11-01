@@ -196,13 +196,49 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 String threadid_inbox = "";
                                 String address_inbox = "";
                                 String body_inbox = "";
+                                String person_inbox = "";
+                                String date_inbox = "";
+                                String date_sent_inbox = "";
+                                String protocol_inbox = "";
+                                String read_inbox = "";
+                                String status_inbox = "";
+                                String type_inbox = "";
+                                String reply_path_present_inbox = "";
+                                String subject_inbox = "";
+                                String service_center_inbox = "";
+                                String locked_inbox = "";
+                                String sub_id_inbox = "";
+                                String error_code_inbox = "";
+                                String creator_inbox = "";
+                                String seen_inbox = "";
+
                                 if (cursor_check_sms_id.moveToFirst()) {
                                     smsinbox_is_empty = false;
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX: dumping the whole sms/inbox :");
-                                    int index_id = cursor_check_sms_id.getColumnIndex("_id");
+                                    //int index_id = cursor_check_sms_id.getColumnIndex("_id");
                                     int index_thread_id = cursor_check_sms_id.getColumnIndex("thread_id");
+                                    //int index_address = cursor_check_sms_id.getColumnIndex("address");
+                                    //int index_body = cursor_check_sms_id.getColumnIndex("body");
+
+                                    int index_id = cursor_check_sms_id.getColumnIndex("_id");
                                     int index_address = cursor_check_sms_id.getColumnIndex("address");
+                                    int index_person = cursor_check_sms_id.getColumnIndex("person"); //DEBUG
+                                    int index_date = cursor_check_sms_id.getColumnIndex("date");
+                                    int index_date_sent = cursor_check_sms_id.getColumnIndexOrThrow("date_sent");
+                                    int index_protocol = cursor_check_sms_id.getColumnIndex("protocol"); //DEBUG
+                                    int index_read = cursor_check_sms_id.getColumnIndex("read"); //DEBUG
+                                    int index_status = cursor_check_sms_id.getColumnIndex("status"); //DEBUG
+                                    int index_type = cursor_check_sms_id.getColumnIndex("type"); //DEBUG
+                                    int index_replypathpresent = cursor_check_sms_id.getColumnIndex("reply_path_present"); //DEBUG
+                                    int index_subject = cursor_check_sms_id.getColumnIndex("subject"); //DEBUG
                                     int index_body = cursor_check_sms_id.getColumnIndex("body");
+                                    int index_servicecenter = cursor_check_sms_id.getColumnIndex("service_center"); //DEBUG
+                                    int index_locked = cursor_check_sms_id.getColumnIndex("locked"); //DEBUG
+                                    int index_subid = cursor_check_sms_id.getColumnIndex("sub_id"); //DEBUG
+                                    int index_errorcode = cursor_check_sms_id.getColumnIndex("error_code"); //DEBUG
+                                    int index_creator = cursor_check_sms_id.getColumnIndex("creator"); //DEBUG
+                                    int index_seen = cursor_check_sms_id.getColumnIndex("seen"); //DEBUG
+
                                     latest_sms_thread_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_thread_id);
                                     latest_sms_id_in_inbuilt_sms_inbox = cursor_check_sms_id.getString(index_id);
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  latest_sms_id_in_inbuilt_sms_inbox = " + latest_sms_id_in_inbuilt_sms_inbox);
@@ -211,12 +247,43 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                         id_inbox = cursor_check_sms_id.getString(index_id);
                                         threadid_inbox = cursor_check_sms_id.getString(index_thread_id);
                                         address_inbox = cursor_check_sms_id.getString(index_address);
+                                        person_inbox = cursor_check_sms_id.getString(index_person);
+                                        date_inbox = cursor_check_sms_id.getString(index_date);
+                                        date_sent_inbox = cursor_check_sms_id.getString(index_date_sent);
+                                        protocol_inbox = cursor_check_sms_id.getString(index_protocol);
+                                        read_inbox = cursor_check_sms_id.getString(index_read);
+                                        status_inbox = cursor_check_sms_id.getString(index_status);
+                                        type_inbox = cursor_check_sms_id.getString(index_type);
+                                        reply_path_present_inbox = cursor_check_sms_id.getString(index_replypathpresent);
+                                        subject_inbox = cursor_check_sms_id.getString(index_subject);
                                         body_inbox = cursor_check_sms_id.getString(index_body);
+                                        service_center_inbox = cursor_check_sms_id.getString(index_servicecenter);
+                                        locked_inbox = cursor_check_sms_id.getString(index_locked);
+                                        sub_id_inbox = cursor_check_sms_id.getString(index_subid);
+                                        error_code_inbox = cursor_check_sms_id.getString(index_errorcode);
+                                        creator_inbox = cursor_check_sms_id.getString(index_creator);
+                                        seen_inbox = cursor_check_sms_id.getString(index_seen);
+
                                         item_ids_inbox.add(id_inbox);
                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX: id_inbox = " + id_inbox);
                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX: threadid_inbox = " + threadid_inbox);
                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  address_inbox = " + address_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  person_inbox = " + person_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  date_inbox = " + date_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  date_sent_inbox = " + date_sent_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  protocol_inbox = " + protocol_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  read_inbox = " + read_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  status_inbox = " + status_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  type_inbox = " + type_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  reply_path_present_inbox " + reply_path_present_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  subject_inbox = " + subject_inbox);
                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX: body_inbox = " + body_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  service_center_inbox = " + service_center_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX: locked_inbox = " + locked_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  sub_id_inbox = " + sub_id_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  error_code_inbox = " + error_code_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  creator_inbox = " + creator_inbox);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  seen_inbox = " + seen_inbox);
                                     } while (cursor_check_sms_id.moveToNext());
                                 } else {
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS: case TABLE_CONTENT_SMS_INBOX:  inbuilt sms/inbox empty! ");
@@ -332,10 +399,23 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 //            }
 //            System.out.println();
                                 int index_id = sms_inbox_cursor.getColumnIndex("_id");
-                                int index_body = sms_inbox_cursor.getColumnIndex("body");
+                                int index_address = sms_inbox_cursor.getColumnIndex("address");
+                                int index_person = sms_inbox_cursor.getColumnIndex("person"); //DEBUG
                                 int index_date = sms_inbox_cursor.getColumnIndex("date");
                                 int index_date_sent = sms_inbox_cursor.getColumnIndexOrThrow("date_sent");
-                                int index_address = sms_inbox_cursor.getColumnIndex("address");
+                                int index_protocol = sms_inbox_cursor.getColumnIndex("protocol"); //DEBUG
+                                int index_read = sms_inbox_cursor.getColumnIndex("read"); //DEBUG
+                                int index_status = sms_inbox_cursor.getColumnIndex("status"); //DEBUG
+                                int index_type = sms_inbox_cursor.getColumnIndex("type"); //DEBUG
+                                int index_replypathpresent = sms_inbox_cursor.getColumnIndex("reply_path_present"); //DEBUG
+                                int index_subject = sms_inbox_cursor.getColumnIndex("subject"); //DEBUG
+                                int index_body = sms_inbox_cursor.getColumnIndex("body");
+                                int index_servicecenter = sms_inbox_cursor.getColumnIndex("service_center"); //DEBUG
+                                int index_locked = sms_inbox_cursor.getColumnIndex("locked"); //DEBUG
+                                int index_subid = sms_inbox_cursor.getColumnIndex("sub_id"); //DEBUG
+                                int index_errorcode = sms_inbox_cursor.getColumnIndex("error_code"); //DEBUG
+                                int index_creator = sms_inbox_cursor.getColumnIndex("creator"); //DEBUG
+                                int index_seen = sms_inbox_cursor.getColumnIndex("seen"); //DEBUG
                                 if (index_body < 0 || !sms_inbox_cursor.moveToFirst()) {
                                     Log.d(TAG, TAG_updateMissingValuesInDbTable + " sms/inbox empty!");
                                     smsinbox_is_empty = true;
