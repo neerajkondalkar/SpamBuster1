@@ -304,14 +304,16 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 
 //                -----------------------------------------------------------------------------------------------------------------------
 
-                    //checking if all the  ids present in item_ids_inbox are also present in item_ids_tableall
-                    //if not, the ids present in items_ids_inbox but not in items_ids_tableall , will be added to list missing_item_ids
+                    // check if table1 has all messages that are present in table2
+                    // any message that is present in table2 but not present in table1 should be put in missing_ids_table1 ;
                     case TASK_GET_MISSING_IDS:
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: inside case TASK_GET_MISSING_IDS");
                         // compare the lists item_ids_tableall and item_ids_inbox
                         missing_item_ids_in_tableall.clear();
                         int Table1_taskgetmissingids = msg.arg1;
                         int Table2_taskgetmissingids = msg.arg2;
+                        //checking if all the  ids present in item_ids_inbox are also present in item_ids_tableall
+                        //if not, the ids present in items_ids_inbox but not in items_ids_tableall , will be added to list missing_item_ids
                         // check if TABLE_ALL has all messages that are present in SMS/INBOX
                         // any message that is present in SMS/INBOX but not present in TABLE_ALL should be put in missing_ids_tableall;
                         if (Table1_taskgetmissingids == TABLE_ALL && Table2_taskgetmissingids == TABLE_CONTENT_SMS_INBOX) {

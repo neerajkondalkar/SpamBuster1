@@ -96,6 +96,8 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DROP_TABLEALL);
+        db.execSQL(SQL_DROP_TABLEHAM);
+        db.execSQL(SQL_DROP_TABLESPAM);
         onCreate(db);
     }
 
