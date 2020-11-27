@@ -25,6 +25,7 @@
 
     <Button
         android:id="@+id/button_compose_sms"
+        android:onClick="onClickComposeSms"
         android:layout_width="258dp"
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
@@ -36,7 +37,6 @@
         android:layout_marginEnd="150dp"
         android:layout_marginRight="150dp"
         android:layout_marginBottom="8dp"
-        android:onClick="onClickComposeSms"
         android:text="New Message"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
