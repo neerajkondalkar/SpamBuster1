@@ -331,7 +331,13 @@ public class MainActivity extends AppCompatActivity {
         //add code to store sms_message inside the sms/inbox and database table
         String sms_body = sms_message.getMessageBody().toString();
         String address = sms_message.getOriginatingAddress().toString();
-        long date_sent = sms_message.getTimestampMillis();
+        String date_sent = Long.toString(sms_message.getTimestampMillis());
+        String date = Long.toString(System.currentTimeMillis());
+        Log.d(TAG, "MainActivity: updateInbox(): sms_body : " + sms_body);
+        Log.d(TAG, "MainActivity: updateInbox(): address : " + address);
+        Log.d(TAG, "MainActivity: updateInbox(): date_sent : " + date_sent);
+        Log.d(TAG, "MainActivity: updateInbox(): date : " + date);
+
     }
 
 

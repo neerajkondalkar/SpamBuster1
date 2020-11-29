@@ -17,6 +17,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " TEXT, " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " TEXT," +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " TEXT, " +
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT," +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
     private static final String SQL_CREATE_TABLEHAM =
@@ -25,6 +26,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_HAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
                     SpamBusterContract.TABLE_HAM.COLUMN_SMS_BODY + " TEXT," +
                     SpamBusterContract.TABLE_HAM.COLUMN_SMS_ADDRESS + " TEXT, " +
+                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
     private static final String SQL_CREATE_TABLESPAM =
@@ -33,6 +35,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_SPAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_BODY + " TEXT," +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_ADDRESS + " TEXT, " +
+                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
 //    private static final String SQL_DELETE_ENTRIES =

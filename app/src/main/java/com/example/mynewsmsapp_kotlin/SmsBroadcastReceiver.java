@@ -20,7 +20,8 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
     private String TAG = "[MY_DEBUG]" + SmsBroadcastReceiver.class.getSimpleName();
     public static final String SMS_BUNDLE = "pdus";
-
+    public long date;
+    public long date_sent;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void onReceive(Context context, Intent intent) {
@@ -90,11 +91,14 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     sms_message_str += "Received at : " + printable_date + "\n";
                     sms_message_str += sms_body;
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
-
                     sender_number = address; // for Toast.makeText()   to show sender number or name
+                    //timestampMillis is the date_sent to be saved in new column epoch_date_sent
+                    // currentTimeinMillis goes in epoch_date column
+                    //long currentTimeinMillis = System.currentTimeMillis();
+                    //Log.d(TAG, "SmsBroadcastReceiver: onReceive(): currentTimeinMillis = " + currentTimeinMillis);
+                    //date_sent = timestampMillis;
+                    //date = currentTimeinMillis;
                 }
-
-
                 Toast.makeText(context, "Message received from + " + MainActivity.getContactName(context, sender_number), Toast.LENGTH_SHORT).show();
 
                 //if there is alread yan instance of MainActivy then don't create an instance
