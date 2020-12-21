@@ -44,7 +44,9 @@ import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DUMM
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_COMPARE_TOP_ID;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_UPDATE_MISSING_IDS;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -317,6 +319,7 @@ public class MainActivity extends AppCompatActivity {
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
     public void updateInbox(final String sms_message_str, SmsMessage sms_message) {
+        Handler handler;
         final String TAG_updateInbox = " updateInbox(): ";
         Log.d(TAG, TAG_updateInbox + " called ");
 
@@ -333,11 +336,19 @@ public class MainActivity extends AppCompatActivity {
         String address = sms_message.getOriginatingAddress().toString();
         String date_sent = Long.toString(sms_message.getTimestampMillis());
         String date = Long.toString(System.currentTimeMillis());
-        Log.d(TAG, "MainActivity: updateInbox(): sms_body : " + sms_body);
-        Log.d(TAG, "MainActivity: updateInbox(): address : " + address);
-        Log.d(TAG, "MainActivity: updateInbox(): date_sent : " + date_sent);
-        Log.d(TAG, "MainActivity: updateInbox(): date : " + date);
-
+        Log.d(TAG, "MainActivity: updateInbox(): sms_body: " + sms_body);
+        Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
+        Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
+        Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
+        NewSmsMessageRunnable newSmsMessageRunnable = new NewSmsMessageRunnable(this);
+        newSmsMessageRunnable.sms_body = sms_body;
+        newSmsMessageRunnable.address = address;
+        newSmsMessageRunnable.date_sent = date_sent;
+        newSmsMessageRunnable.date = date;
+//        handler = tableAllSyncInboxHandlerThread.getHandler();
+//        Message msg_newsmsrec = Message.obtain(handler);
+//        msg_newsmsrec.what = TASK_NEWSMSREC;
+//        msg_newsmsrec.sendToTarget();
     }
 
 

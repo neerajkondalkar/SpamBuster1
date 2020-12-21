@@ -50,6 +50,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
     public static boolean DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX = false;
     public static final int TASK_UPDATE_MISSING_IDS = 14;
     public static boolean DONE_TASK_UPDATE_MISSING_IDS = false;
+    public static final int TASK_NEWSMSREC = 15;
     public static final int DUMMY_VAL = 19999;
     public static boolean tableall_is_empty = false;
     public static boolean smsinbox_is_empty = false;
@@ -537,6 +538,15 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         db.endTransaction();
                         DONE_TASK_UPDATE_MISSING_IDS = true;
                         break; // end of case TASK_UPDATE_MISSING_IDS
+
+                    case TASK_NEWSMSREC: //on reception of new sms we first put it in table_all and then send it for filtering
+                    //but for now, we just insert it in table_all and also in contentsmsinbox directly
+                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_NEWSMSREC: ");
+                        db = db_helper.getWritableDatabase();
+                        db.beginTransaction();
+
+
+                        break;
                 }
                 db.close();
             }
