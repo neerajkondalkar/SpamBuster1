@@ -28,15 +28,10 @@ public class NewSmsMessageRunnable implements Runnable{
         }
         this.spamBusterdbHelper = new SpamBusterdbHelper(activity);
         db = spamBusterdbHelper.getWritableDatabase();
-        ContentResolver content_resolver = activity.getContentResolver();
-        String[] projection_sms_inbox = null;
-        String selection_sms_inbox = null;
-        String[] selection_args_sms_inbox = null;
-        String sort_order_sms_inbox = " _id DESC ";
-        Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
-        String corress_inboxid = "";
+        String corress_inbox_id = "";
         ContentValues values = new ContentValues();
 
+        values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS, address); //insert value contact_name into COLUMN_SMS_ADDRESS
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date);  // insert value date_str in COLUMN_SMS_EPOCH_DATE

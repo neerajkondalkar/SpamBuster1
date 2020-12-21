@@ -178,13 +178,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
 //        ----------------------- DELETE DATABASE --------------------
-//        //to delete the database. so that everytime a new database is created
+        //to delete the database. so that everytime a new database is created
 //        try {
 //            this.deleteDatabase(SpamBusterdbHelper.DATABASE_NAME);
 //        }
 //        catch (Exception e){
 //            Log.d(TAG, TAG_onCreate + " Exception : " + e);
 //        }
+//        -----------------
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
@@ -345,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
         newSmsMessageRunnable.address = address;
         newSmsMessageRunnable.date_sent = date_sent;
         newSmsMessageRunnable.date = date;
+        new Thread(newSmsMessageRunnable).start();
 //        handler = tableAllSyncInboxHandlerThread.getHandler();
 //        Message msg_newsmsrec = Message.obtain(handler);
 //        msg_newsmsrec.what = TASK_NEWSMSREC;
@@ -466,10 +468,10 @@ public class MainActivity extends AppCompatActivity {
 
                         Message msg22 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
                         Log.d(TAG, "DbOperationsRunnable: run(): msg21 initialized");
-                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS_IN_TABLEALL is true");
                         while (true) {
                             if (DONE_TASK_GET_MISSING_IDS_IN_TABLEALL) {
-                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS_IN_TABLEALL...  " + DONE_TASK_GET_MISSING_IDS_IN_TABLEALL);
                                 //compare ids and get missing IDs
                                 Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.what = TASK_GET_MISSING_IDS");
                                 msg22.what = TASK_GET_MISSING_IDS;
@@ -485,14 +487,15 @@ public class MainActivity extends AppCompatActivity {
                         }
                         //reset  to false for next time
                         DONE_TASK_GET_MISSING_IDS_IN_TABLEALL = false;
-                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS_IN_TABLEALL to " + DONE_TASK_GET_MISSING_IDS_IN_TABLEALL);
 
                         Message msg3 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
                         Log.d(TAG, "DbOperationsRunnable: run(): msg3 initialized");
-                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS is true");
+                        Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX is true");
                         while (true) {
-                            if (DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX || DONE_TASK_GET_MISSING_IDS) {
-                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS ... " + DONE_TASK_UPDATE_MISSING_IDS);
+//                            if (DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX || DONE_TASK_GET_MISSING_IDS) {
+                            if (DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX) {
+                                Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX ... " + DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX);
                                 //update the missing messages in TABLE_ALL
                                 Log.d(TAG, "DbOperationsRunnable: run(): setting msg3.what = TASK_UPDATE_MISSING_IDS");
                                 msg3.what = TASK_UPDATE_MISSING_IDS;
@@ -506,8 +509,9 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             }
                         }
-                        DONE_TASK_GET_MISSING_IDS = false;
-                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS to " + DONE_TASK_GET_MISSING_IDS);
+//                        DONE_TASK_GET_MISSING_IDS = false;
+                        DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX = false;
+                        Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX to " + DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX);
                         Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_UPDATE_MISSING_IDS is true");
                         while (true) {
                             //only if all TASKs are done and finally missing messages are updated, then move ahead to show the messages
