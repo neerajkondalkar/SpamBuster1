@@ -22,8 +22,8 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public static final String SMS_BUNDLE = "pdus";
     public long date;
     public long date_sent;
-
     @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
     public void onReceive(Context context, Intent intent) {
         final String TAG_onReceive = " onReceive(): ";
         final String action_sms_received = "android.provider.Telephony.SMS_RECEIVED";
