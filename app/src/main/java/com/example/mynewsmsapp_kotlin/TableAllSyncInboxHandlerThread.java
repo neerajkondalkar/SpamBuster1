@@ -564,14 +564,14 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         DONE_TASK_UPDATE_MISSING_IDS = true;
                         break; // end of case TASK_UPDATE_MISSING_IDS
 
-                    case TASK_NEWSMSREC: //on reception of new sms we first put it in table_all and then send it for filtering
-                    //but for now, we just insert it in table_all and also in contentsmsinbox directly
-                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_NEWSMSREC: ");
-                        db = db_helper.getWritableDatabase();
-                        db.beginTransaction();
-
-
-                        break;
+//                    case TASK_NEWSMSREC: //on reception of new sms we first put it in table_all and then send it for filtering
+//                    //but for now, we just insert it in table_all and also in contentsmsinbox directly
+//                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_NEWSMSREC: ");
+//                        db = db_helper.getWritableDatabase();
+//                        db.beginTransaction();
+//
+//
+//                        break;
                 }
                 db.close();
             }
