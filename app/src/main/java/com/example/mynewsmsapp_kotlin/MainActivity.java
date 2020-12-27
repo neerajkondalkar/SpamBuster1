@@ -346,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
         newSmsMessageRunnable.address = address;
         newSmsMessageRunnable.date_sent = date_sent;
         newSmsMessageRunnable.date = date;
+        newSmsMessageRunnable.spam = false;//very important field. In future this will be changed after returning result from server
         new Thread(newSmsMessageRunnable).start();
 //        handler = tableAllSyncInboxHandlerThread.getHandler();
 //        Message msg_newsmsrec = Message.obtain(handler);

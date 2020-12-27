@@ -38,6 +38,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
+
 //    private static final String SQL_DELETE_ENTRIES =
 //            "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_ALL.TABLE_NAME;
     private static final String SQL_DROP_TABLEALL = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_ALL.TABLE_NAME;
