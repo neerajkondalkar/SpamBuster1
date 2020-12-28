@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">MyNewSMSApp_Kotlin</string>
+    <string name="app_name">SpamBusters</string>
     <string name="message">Message</string>
 </resources>

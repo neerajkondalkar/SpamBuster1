@@ -1,8 +1,12 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.util.List;
 
 public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
@@ -37,6 +41,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_ADDRESS + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
+
 
 
 //    private static final String SQL_DELETE_ENTRIES =
@@ -86,15 +91,12 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
     @Override
     public void onOpen(SQLiteDatabase db) {
-
         super.onOpen(db);
-
         //for testing purposes, we will always create a new table and delete all entries just to be sure
 //        db.execSQL(SQL_DELETE_ENTRIES);
 //        db.execSQL(SQL_CREATE_TABLE_HAM);
 //        int deleted_rows = db.delete(SpamBusterContract.TABLE_HAM.TABLE_NAME, selection_for_delete, selection_args_for_delete);
 //        db.execSQL(SQL_DELETE_ENTRIES_ROWS);
-
     }
 
     @Override
@@ -109,6 +111,5 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
         onUpgrade(db, oldVersion, newVersion);
     }
-
 
 }

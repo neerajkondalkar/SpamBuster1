@@ -9,12 +9,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Telephony;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
-
 import java.lang.ref.WeakReference;
-
-import static android.provider.Telephony.Sms.Inbox.CONTENT_URI;
 
 public class NewSmsMessageRunnable implements Runnable{
     private final String TAG = " [MY_DEBUG] ";
@@ -47,12 +43,13 @@ public class NewSmsMessageRunnable implements Runnable{
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT, date_sent);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
         Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_ALL...");
-        long newRowId = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
-
-        if (newRowId == -1) {
+        db.beginTransaction();
+        long newRowId_tableall = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
+        db.endTransaction();
+        if (newRowId_tableall == -1) {
             Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
         } else {
-            Log.d(TAG,  "  Insert Complete! returned newRowId = " + newRowId);
+            Log.d(TAG,  "  Insert Complete! returned newRowId_tableall = " + newRowId_tableall);
         }
 
         //insert in contentsmsminbox only if not spam
@@ -95,6 +92,12 @@ public class NewSmsMessageRunnable implements Runnable{
                     Log.d(TAG, "NewSmsMessageRunnable: run(): corress_inbox_id > latest_inbox_id");
                     Log.d(TAG, "NewSmsMessageRunnable: run(): This means, new SMS successfully inserted in content://sms/inbox");
                 }
+                else{
+                    Log.d(TAG, "NewSmsMessageRunnable: run(): insertion in content://sms/inbox failed.");
+                    Log.d(TAG, "NewSmsMessageRunnable: run(): This could be because the SpamBusters app isn't set to default SMS app." +
+                            " In that case it is fine because we don't wan't duplicates in contentsmsinbox anyways.");
+                }
+
                 sms_inbox_cursor.close();
 
                 //now insert the same message in table_ham
@@ -105,15 +108,23 @@ public class NewSmsMessageRunnable implements Runnable{
                 values.put(SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE, date);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
                 values.put(SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE_SENT, date_sent);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
                 Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_HAM...");
-                newRowId = db.insert(SpamBusterContract.TABLE_HAM.TABLE_NAME, null, values);
-                if (newRowId == -1) {
+                db.beginTransaction();
+                long newRowId_tableham = db.insert(SpamBusterContract.TABLE_HAM.TABLE_NAME, null, values);
+                db.endTransaction();
+                if (newRowId_tableham == -1) {
                     Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
                 } else {
-                    Log.d(TAG, "  Insert Complete! returned newRowId = " + newRowId);
+                    Log.d(TAG, "  Insert Complete! returned newRowId = " + newRowId_tableham);
                 }
 
                 //and now update the corress_inbox_id of that message in table_all;
-
+                values.clear();
+                values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
+                String newRowId_tableall_str = Long.toString(newRowId_tableall);
+                db.beginTransaction();
+                db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, " _id = ?", new String[]{newRowId_tableall_str});
+                db.endTransaction();
+                db.close();
             }
 
         }
