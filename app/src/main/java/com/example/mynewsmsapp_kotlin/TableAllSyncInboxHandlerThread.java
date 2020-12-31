@@ -88,7 +88,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             };
                             String selection_id = null;
                             String[] selection_args = null;
-                            String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+//                            String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+                            String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
                             Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                                     projection_id,             // The array of columns to return (pass null to get all)
                                     selection_id,              // The columns for the WHERE clause
@@ -103,6 +104,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             } else {
                                 tableall_is_empty = false;
                                     latest_corresinboxid_tableall = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): latest_corresinboxid_tableall = " + latest_corresinboxid_tableall);
                                 // topmost is largest/latest coress_inbox_id  in table_all
                             }
                             db.setTransactionSuccessful();
@@ -111,12 +113,12 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: | ");
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: |_ TABLE_CONTENT_SMS_INBOX ");
                             ContentResolver content_resolver = MainActivity.instance().getContentResolver();
-                            Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "_id DESC");
+                            Cursor cursor_check_sms_id = content_resolver.query(Uri.parse("content://sms/inbox"), null, null, null, "date DESC");
                             if (cursor_check_sms_id.moveToFirst()) {
                                 smsinbox_is_empty = false;
-                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_COMPARE_TOP_ID: case TABLE_CONTENT_SMS_INBOX: dumping the whole sms/inbox :");
                                 int index_id = cursor_check_sms_id.getColumnIndex("_id");
                                 latest_id_inbox = cursor_check_sms_id.getString(index_id);
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): latest_id_inbox =" + latest_id_inbox );
                                 //latest ID in sms/inbox
                             }
                             else{
@@ -129,6 +131,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                     table_all_sync_inbox = true;
                                 }
                                 else{
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): latest_corressinboxid_tableall = " + latest_corresinboxid_tableall );
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): latest_id_inbox = " + latest_id_inbox);
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_ID: TABLE_ALL and CONTENTSMSINBOX are NOT in sync!");
                                     table_all_sync_inbox = false;
                                 }
@@ -153,7 +157,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 };
                                 String selection_id = null;
                                 String[] selection_args = null;
-                                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+//                                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " DESC";
+                                String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
                                 Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                                         projection_id,             // The array of columns to return (pass null to get all)
                                         selection_id,              // The columns for the WHERE clause
@@ -462,7 +467,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 String[] projection_sms_inbox = null;
                                 String selection_sms_inbox = null;
                                 String[] selection_args_sms_inbox = null;
-                                String sort_order_sms_inbox = " _id DESC ";
+                                String sort_order_sms_inbox = " date DESC ";
                                 Cursor sms_inbox_cursor = content_resolver.query(Uri.parse("content://sms/inbox"), projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
                                 //print all columns of sms/inbox
 //        System.out.print(TAG + TAG_updateMissingValuesInDbTable + " [DEBUG] "+ " updateMissingValuesInDbTable() :  all columns in sms/inbox : \n [DEBUG]");

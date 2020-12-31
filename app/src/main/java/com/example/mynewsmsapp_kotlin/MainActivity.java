@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -76,7 +77,10 @@ public class MainActivity extends AppCompatActivity {
     public static boolean active = false;
     //will be used as requestCode parameter in method requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
     private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
-
+    private ToggleButton toggleButton_tableall;
+    private ToggleButton toggleButton_tableham;
+    private ToggleButton toggleButton_tablespam;
+    public static ArrayList<String> messages_list_tableall = new ArrayList();
 
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -177,6 +181,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
+        toggleButton_tableall = (ToggleButton) findViewById(R.id.all_sms_toggle);
+        toggleButton_tableham = (ToggleButton) findViewById(R.id.ham_sms_toggle);
+        toggleButton_tablespam = (ToggleButton) findViewById(R.id.spam_sms_toggle);
+        //enable toggle tableham on creation of activity
+        toggleButton_tableham.setChecked(true);
 //        ----------------------- DELETE DATABASE --------------------
         //to delete the database. so that everytime a new database is created
 //        try {
@@ -561,7 +570,6 @@ public class MainActivity extends AppCompatActivity {
         private Calendar calendar = Calendar.getInstance();
         private DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
         private String printable_date;
-        private ArrayList<String> messages_list_tableall = new ArrayList();
         private Cursor cursor_read_from_table_all;
         private boolean cursor_first;
         private int j = 0;
@@ -650,6 +658,7 @@ public class MainActivity extends AppCompatActivity {
             db1.close();
             Log.d(TAG, "ReadDbTableAllRunnable: run():  Printing the whole messages_list : ");
             try {
+                //pass the Runnable to MainThread handler because UI elements(sms_adapter) are on MainThread
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
