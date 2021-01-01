@@ -409,8 +409,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "DbOperationsRunnable: run(): msg_comparetopids initialized");
             //compare only top IDs of TABLE_ALL[corres_inbox_id] and SMS/INBOX[_id]
             msg_comparetopids.what = TASK_COMPARE_TOP_ID;
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_comparetopids.what = TASK_COMPARE_TOPIDS");
             msg_comparetopids.arg1 = TABLE_ALL;
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_compatetopids.arg1 = TABLE_ALL");
             msg_comparetopids.arg2 = TABLE_CONTENTSMSINBOX;
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_comparetopids.arg2 = TABLE_CONTENTSMSINBOX");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_comparetopids preparation complete");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_comparetopids sent!");
             msg_comparetopids.sendToTarget();
 
             while(true) {
@@ -431,20 +436,20 @@ public class MainActivity extends AppCompatActivity {
                         msg.sendToTarget();
 
                         Message msg1 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        //get all ids from SMS/INBOX
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.what = TASK_GET_IDS");
+                        msg1.what = TASK_GET_IDS;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
+                        msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg2 = DUMMY_VAL");
+                        msg1.arg2 = DUMMY_VAL;
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg1 preparation complete");
                         Log.d(TAG, "DbOperationsRunnable: run(): msg1 initialized");
                         Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_TABLEALL is true");
                         while (true) {
                             //if all ids are read from TABLE_ALL then move ahead
                             if (DONE_TASK_GET_IDS_TABLEALL) {
                                 Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_TABLEALL... " + DONE_TASK_GET_IDS_TABLEALL);
-                                //get all ids from SMS/INBOX
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.what = TASK_GET_IDS");
-                                msg1.what = TASK_GET_IDS;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg1 = TABLE_CONTENT_SMS_INBOX");
-                                msg1.arg1 = TABLE_CONTENT_SMS_INBOX;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg1.arg2 = DUMMY_VAL");
-                                msg1.arg2 = DUMMY_VAL;
-                                Log.d(TAG, "DbOperationsRunnable: run(): msg1 preparation complete");
                                 Log.d(TAG, "DbOperationsRunnable: run(): msg1 sent!");
                                 msg1.sendToTarget();
                                 break;
@@ -455,19 +460,19 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "DbOperationsRunnable: run(): reset  DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
 
                         Message msg21 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
+                        //compare ids and get missing IDs
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.what = TASK_GET_MISSING_IDS");
+                        msg21.what = TASK_GET_MISSING_IDS;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.arg1 = TABLE_ALL");
+                        msg21.arg1 = TABLE_ALL;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.arg2 = TABLE_CONTENT_SMS_INBOX");
+                        msg21.arg2 = TABLE_CONTENT_SMS_INBOX;
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg21 preparation complete");
                         Log.d(TAG, "DbOperationsRunnable: run(): msg21 initialized");
                         Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_IDS_SMSINBOX is true");
                         while (true) {
                             if (DONE_TASK_GET_IDS_SMSINBOX) {
                                 Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_IDS_SMSINBOX...  " + DONE_TASK_GET_IDS_SMSINBOX);
-                                //compare ids and get missing IDs
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.what = TASK_GET_MISSING_IDS");
-                                msg21.what = TASK_GET_MISSING_IDS;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.arg1 = TABLE_ALL");
-                                msg21.arg1 = TABLE_ALL;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.arg2 = TABLE_CONTENT_SMS_INBOX");
-                                msg21.arg2 = TABLE_CONTENT_SMS_INBOX;
-                                Log.d(TAG, "DbOperationsRunnable: run(): msg21 preparation complete");
                                 Log.d(TAG, "DbOperationsRunnable: run(): msg21 sent!");
                                 msg21.sendToTarget();
                                 break;
@@ -478,19 +483,19 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "DbOperationsRunnable: run(): reset DONE_TASK_GET_IDS_SMSINBOX to " + DONE_TASK_GET_IDS_SMSINBOX);
 
                         Message msg22 = Message.obtain(handler);  //thus the target handler for this message is handler which is the handler of tableAllSyncInboxHandlerThread
-                        Log.d(TAG, "DbOperationsRunnable: run(): msg21 initialized");
+                        //compare ids and get missing IDs
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg22.what = TASK_GET_MISSING_IDS");
+                        msg22.what = TASK_GET_MISSING_IDS;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg22.arg1 = TABLE_CONTENT_SMS_INBOX");
+                        msg22.arg1 = TABLE_CONTENT_SMS_INBOX;
+                        Log.d(TAG, "DbOperationsRunnable: run(): setting msg22.arg2 = TABLE_ALL");
+                        msg22.arg2 = TABLE_ALL;
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg22 preparation complete");
+                        Log.d(TAG, "DbOperationsRunnable: run(): msg22 initialized");
                         Log.d(TAG, "DbOperationsRunnable: run(): loop until DONE_TASK_GET_MISSING_IDS_IN_TABLEALL is true");
                         while (true) {
                             if (DONE_TASK_GET_MISSING_IDS_IN_TABLEALL) {
                                 Log.d(TAG, "DbOperationsRunnable: run(): checking DONE_TASK_GET_MISSING_IDS_IN_TABLEALL...  " + DONE_TASK_GET_MISSING_IDS_IN_TABLEALL);
-                                //compare ids and get missing IDs
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg21.what = TASK_GET_MISSING_IDS");
-                                msg22.what = TASK_GET_MISSING_IDS;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg22.arg1 = TABLE_CONTENT_SMS_INBOX");
-                                msg22.arg1 = TABLE_CONTENT_SMS_INBOX;
-                                Log.d(TAG, "DbOperationsRunnable: run(): setting msg22.arg2 = TABLE_ALL");
-                                msg22.arg2 = TABLE_ALL;
-                                Log.d(TAG, "DbOperationsRunnable: run(): msg22 preparation complete");
                                 Log.d(TAG, "DbOperationsRunnable: run(): msg22 sent!");
                                 msg22.sendToTarget();
                                 break;

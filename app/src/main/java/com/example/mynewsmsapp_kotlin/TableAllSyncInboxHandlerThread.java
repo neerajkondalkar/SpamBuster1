@@ -143,6 +143,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             db.endTransaction();
                         }
                         DONE_TASK_COMPARETOPID = true;
+                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case: TASK_COMPARE_TOP_IDS setting DONE_TASK_COMPARETOPID to " + DONE_TASK_COMPARETOPID);
                         break;
 
                     case TASK_GET_IDS:
@@ -185,6 +186,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 }
 //                                item_ids_tableall = item_ids;
                                 DONE_TASK_GET_IDS_TABLEALL = true;
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS | ");
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_IDS |__ TABLE_ALL: setting DONE_TASK_GET_IDS_TABLEALL to " + DONE_TASK_GET_IDS_TABLEALL);
                                 db.setTransactionSuccessful();
                                 db.endTransaction();
                                 break;  // end of inner case TABLE_ALL   [ still inside case  TASK_GET_IDS ]
