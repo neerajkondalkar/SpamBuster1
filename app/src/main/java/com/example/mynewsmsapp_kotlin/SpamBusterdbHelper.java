@@ -79,13 +79,13 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         db.execSQL(SQL_DROP_TABLEHAM);
         db.execSQL(SQL_CREATE_TABLEHAM);
         //to delete database tables and entries everytime a new database is created
-        deleted_rows = db.delete(SpamBusterContract.TABLE_HAM.TABLE_NAME, selection_for_delete_tableall, selection_args_for_delete_tableall);
+        deleted_rows = db.delete(SpamBusterContract.TABLE_HAM.TABLE_NAME, selection_for_delete_tableham, selection_args_for_delete_tableham);
         db.execSQL(SQL_DELETE_ENTRIES_TABLEHAM);
 
         db.execSQL(SQL_DROP_TABLESPAM);
         db.execSQL(SQL_CREATE_TABLESPAM);
         //to delete database tables and entries everytime a new database is created
-        deleted_rows = db.delete(SpamBusterContract.TABLE_SPAM.TABLE_NAME, selection_for_delete_tableall, selection_args_for_delete_tableall);
+        deleted_rows = db.delete(SpamBusterContract.TABLE_SPAM.TABLE_NAME, selection_for_delete_tablespam, selection_args_for_delete_tablespam);
         db.execSQL(SQL_DELETE_ENTRIES_TABLESPAM);
     }
 
@@ -112,4 +112,13 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+    public void updateValues(SQLiteDatabase db, String table_name, String values, String whereClause){
+        String sql_update = "UPDATE " + table_name +
+                " SET " + values +
+                " WHERE " + whereClause;
+        db.beginTransaction();
+        db.execSQL(sql_update);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
 }

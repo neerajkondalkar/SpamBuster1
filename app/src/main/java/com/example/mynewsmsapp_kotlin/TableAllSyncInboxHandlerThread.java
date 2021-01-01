@@ -28,6 +28,8 @@ import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_HAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_SPAM;
 import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_sync_tableall;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
 
 public class TableAllSyncInboxHandlerThread  extends HandlerThread {
     private final String TAG = "[MY_DEBUG]";
@@ -365,7 +367,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                             if (item_ids_tableall.contains(currentlistitem_item_ids_inbox)) {
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: present in items_ids_tableall");
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: --------------");
-                                            } else {
+                                            } else{
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: not present in items_ids_tableall");
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS:  ----------");
                                                 missing_item_ids_in_tableall.add(currentlistitem_item_ids_inbox);

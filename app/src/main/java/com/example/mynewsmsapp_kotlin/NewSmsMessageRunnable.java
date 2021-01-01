@@ -26,7 +26,8 @@ public class NewSmsMessageRunnable implements Runnable{
 
     private SpamBusterdbHelper spamBusterdbHelper;
     private SQLiteDatabase db;
-    NewSmsMessageRunnable(MainActivity activity) {
+    NewSmsMessageRunnable(MainActivity activity, SpamBusterdbHelper spamBusterdbHelper) {
+        this.spamBusterdbHelper = spamBusterdbHelper;
         activityWeakReference = new WeakReference<MainActivity>(activity);
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -36,7 +37,7 @@ public class NewSmsMessageRunnable implements Runnable{
         if (activity == null || activity.isFinishing()) {
             return;
         }
-        this.spamBusterdbHelper = new SpamBusterdbHelper(activity);
+//        this.spamBusterdbHelper = new SpamBusterdbHelper(activity);
         db = spamBusterdbHelper.getWritableDatabase();
         String corress_inbox_id = UNCLASSIFIED;
         Log.d(TAG, "NewSmsMessageRunnable: run():  ");
@@ -49,6 +50,7 @@ public class NewSmsMessageRunnable implements Runnable{
         Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_ALL...");
         db.beginTransaction();
         long newRowId_tableall = db.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
+        db.setTransactionSuccessful();
         db.endTransaction();
         if (newRowId_tableall == -1) {
             Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
@@ -115,6 +117,7 @@ public class NewSmsMessageRunnable implements Runnable{
                 Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_HAM...");
                 db.beginTransaction();
                 long newRowId_tableham = db.insert(SpamBusterContract.TABLE_HAM.TABLE_NAME, null, values);
+                db.setTransactionSuccessful();
                 db.endTransaction();
                 if (newRowId_tableham == -1) {
                     Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
@@ -124,12 +127,13 @@ public class NewSmsMessageRunnable implements Runnable{
 
                 //and now update the corress_inbox_id of that message in table_all;
                 values.clear();
-                Log.d(TAG, "NewSmsMessageRunnable: run(): corress_inbox_id set to " + corress_inbox_id + "  (unclassified)");
+                Log.d(TAG, "NewSmsMessageRunnable: run(): corress_inbox_id set to " + corress_inbox_id + "  (not spam, so valid corressinboxid)");
                 values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
                 db.beginTransaction();
                 Log.d(TAG, "NewSmsMessageRunnable: run(): updating corress_inbox_id at _id '" + newRowId_tableall_str + "' in table_all to " + corress_inbox_id);
                 String[] whereArgs = new String[]{newRowId_tableall_str};
                 db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+                db.setTransactionSuccessful();
                 db.endTransaction();
             }
         }
@@ -143,9 +147,10 @@ public class NewSmsMessageRunnable implements Runnable{
             values.put(SpamBusterContract.TABLE_SPAM.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
             values.put(SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE, date);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
             values.put(SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT, date_sent);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
-            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_HAM...");
+            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_SPAM...");
             db.beginTransaction();
             long newRowId_tablespam = db.insert(SpamBusterContract.TABLE_SPAM.TABLE_NAME, null, values);
+            db.setTransactionSuccessful();
             db.endTransaction();
             if (newRowId_tablespam == -1) {
                 Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
@@ -155,11 +160,14 @@ public class NewSmsMessageRunnable implements Runnable{
 
             //and now update the corress_inbox_id of that message in table_all; change it to spam i.e -9
             values.clear();
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
+//            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corress_inbox_id);
 //                db.beginTransaction();
             Log.d(TAG, "NewSmsMessageRunnable: run(): updating corress_inbox_id at _id '" + newRowId_tableall_str + "' in table_all to " + corress_inbox_id);
-            String[] whereArgs = new String[]{newRowId_tableall_str};
-            db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values,  SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+            String values_str = SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + " = " + corress_inbox_id;
+//            String[] whereArgs = new String[]{newRowId_tableall_str};
+            String whereClause = SpamBusterContract.TABLE_ALL._ID + " = " + newRowId_tableall_str;
+            spamBusterdbHelper.updateValues(db, SpamBusterContract.TABLE_ALL.TABLE_NAME, values_str, whereClause);
+//            db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values,  SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
 //                db.endTransaction();
             db.close();
         }
@@ -169,7 +177,7 @@ public class NewSmsMessageRunnable implements Runnable{
                 db1 = spamBusterdbHelper.getReadableDatabase();
                 db1.beginTransaction();
                 String[] projection_id = {
-                        BaseColumns._ID,
+                        SpamBusterContract.TABLE_ALL._ID,
                         SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID
                 };
                 String selection_id = null;
@@ -188,6 +196,7 @@ public class NewSmsMessageRunnable implements Runnable{
                             cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID))
                     + " _id = " + cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID)));
                 }
+                db1.setTransactionSuccessful();
                 db1.endTransaction();
                 db1.close();
     }

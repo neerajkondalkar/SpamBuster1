@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> sms_messages_list = new ArrayList<>();
     RecyclerView messages;
     SmsAdapter sms_adapter;
-    SpamBusterdbHelper db_helper;
     // store current instance in inst, will be used in SmsBroadCast receiver to  call
     // MainActivity.updateInbox() with the current instance using function instance() defined at the bottom of MainActivity class
     private static MainActivity inst;
@@ -81,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton_tableham;
     private ToggleButton toggleButton_tablespam;
     public static ArrayList<String> messages_list_tableall = new ArrayList();
-
+    public SpamBusterdbHelper spamBusterdbHelper;
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -144,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d(TAG, "MainActivity: onDestroy(): exception " + e);
         }
-        db_helper.close();
+        spamBusterdbHelper.close();
     }
 
 
@@ -186,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
         toggleButton_tablespam = (ToggleButton) findViewById(R.id.spam_sms_toggle);
         //enable toggle tableham on creation of activity
         toggleButton_tableham.setChecked(true);
+        spamBusterdbHelper = new SpamBusterdbHelper(this);
 //        ----------------------- DELETE DATABASE --------------------
         //to delete the database. so that everytime a new database is created
 //        try {
@@ -350,12 +350,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
         Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
         Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
-        NewSmsMessageRunnable newSmsMessageRunnable = new NewSmsMessageRunnable(this);
+        NewSmsMessageRunnable newSmsMessageRunnable = new NewSmsMessageRunnable(this, spamBusterdbHelper);
         newSmsMessageRunnable.sms_body = sms_body;
         newSmsMessageRunnable.address = address;
         newSmsMessageRunnable.date_sent = date_sent;
         newSmsMessageRunnable.date = date;
-        newSmsMessageRunnable.spam = false;//very important field. In future this will be changed after returning result from server
+        newSmsMessageRunnable.spam = true;//very important field. In future this will be changed after returning result from server
         new Thread(newSmsMessageRunnable).start();
 //        handler = tableAllSyncInboxHandlerThread.getHandler();
 //        Message msg_newsmsrec = Message.obtain(handler);
@@ -394,7 +394,8 @@ public class MainActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
-            this.db_helper = new SpamBusterdbHelper(activity);
+//            this.db_helper = new SpamBusterdbHelper(activity);
+            this.db_helper = activity.spamBusterdbHelper;
             activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper);
             this.tableAllSyncInboxHandlerThread = activity.tableAllSyncInboxHandlerThread;
             this.tableAllSyncInboxHandlerThread.start();
