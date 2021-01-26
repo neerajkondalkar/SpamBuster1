@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int TABLE_CONTENTSMSINBOX = 4;       //same as TABLE_CONTENT_SMS_INBOX
     public static final int TABLE_CONTENT_SMS_INBOX = 4;     //same as TABLE_CONTENTSMSINBOX
 
+    public static final ArrayList<String> persons_list = new ArrayList<>();
+    private GetPersonsHandlerThread getPersonsHandlerThread;
+
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler main_handler = new Handler();
@@ -379,10 +382,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static class DbOperationsRunnable implements Runnable {
         private SpamBusterdbHelper db_helper;
+        private SpamBusterdbHelper db_helper1;
         private SQLiteDatabase db;
         private WeakReference<MainActivity> activityWeakReference;
         private Handler handler;
+        private Handler handler1;
         private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
+        private GetPersonsHandlerThread getPersonsHandlerThread;
 
         DbOperationsRunnable(MainActivity activity) {
             activityWeakReference = new WeakReference<MainActivity>(activity);
@@ -394,6 +400,36 @@ public class MainActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
+
+//            this.db_helper = new SpamBusterdbHelper(activity);
+            this.db_helper1 = activity.spamBusterdbHelper;
+            //get persons list and put in persons_list
+            activity.getPersonsHandlerThread = new GetPersonsHandlerThread(db_helper);
+            this.getPersonsHandlerThread = activity.getPersonsHandlerThread;
+            this.getPersonsHandlerThread.start();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.handler1 = getPersonsHandlerThread.getHandler();
+            Message msg_getpersons = Message.obtain(handler1);
+            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
+            int table1 = TABLE_ALL;
+            switch (table1) {
+                case TABLE_ALL:
+                    msg_getpersons.arg1 = TABLE_ALL;
+                    break;
+                case TABLE_HAM:
+                    msg_getpersons.arg1 = TABLE_HAM;
+                    break;
+                case TABLE_SPAM:
+                    msg_getpersons.arg1 = TABLE_SPAM;
+                    break;
+            }
+
+
+
 //            this.db_helper = new SpamBusterdbHelper(activity);
             this.db_helper = activity.spamBusterdbHelper;
             activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper);
@@ -558,7 +594,7 @@ public class MainActivity extends AppCompatActivity {
                         activity.readDbTableAllRunnable = new ReadDbTableAllRunnable(activity, db);
                         Log.d(TAG, "DbOperationsRunnable: run(): executing readDb thread in background");
                         activity.thread = new Thread(activity.readDbTableAllRunnable);
-                        activity.thread.start();
+//                        activity.thread.start();    EDIT
                         break;
                 }
         }
@@ -714,4 +750,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 } //MainActivity class ends
+
 
