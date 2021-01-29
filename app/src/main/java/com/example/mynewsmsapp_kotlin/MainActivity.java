@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.DONE_TASK_GETPERSONS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_COMPARETOPID;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_SMSINBOX;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_TABLEALL;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private GetPersonsHandlerThread getPersonsHandlerThread;
 
     protected ReadDbTableAllRunnable readDbTableAllRunnable;
+    protected DisplayPersonsRunnable displayPersonsRunnable;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler main_handler = new Handler();
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
@@ -423,7 +425,16 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
             msg_getpersons.sendToTarget();
 
-
+            while(true) {
+                if(DONE_TASK_GETPERSONS) {
+                    activity.displayPersonsRunnable = new DisplayPersonsRunnable(activity, db);
+                    activity.thread = new Thread(activity.displayPersonsRunnable);
+                    activity.thread.start();
+                    break;
+                }
+            }
+            DONE_TASK_GETPERSONS = false;
+/*
 //            this.db_helper = new SpamBusterdbHelper(activity);
             this.db_helper = activity.spamBusterdbHelper;
             activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper);
@@ -591,6 +602,7 @@ public class MainActivity extends AppCompatActivity {
 //                        activity.thread.start();    EDIT
                         break;
                 }
+ */
         }
     }
 
@@ -743,6 +755,42 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "run(): Finished reading TABLE_ALL");
         }
     }
+
+    private static class DisplayPersonsRunnable implements Runnable{
+        private Handler handler;
+        private WeakReference<MainActivity> activityWeakReference;
+        private SQLiteDatabase db1;
+
+        DisplayPersonsRunnable(MainActivity activity, SQLiteDatabase db) {
+            handler = activity.main_handler;
+            activityWeakReference = new WeakReference<MainActivity>(activity);
+            this.db1 = db;
+        }
+
+        @Override
+        public void run() {
+            final MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+                try {
+                    //pass the Runnable to MainThread handler because UI elements(sms_adapter) are on MainThread
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int i=0; i<persons_list.size(); i++) {
+                                Log.d(TAG, "DisplayPersonsRunnable: run(): inserting " + getContactName(activity, persons_list.get(i)) + " in sms_adapter");
+                                activity.sms_adapter.insert(i, getContactName(activity, persons_list.get(i)));
+                            }
+                        }
+                    });
+                }
+                catch (Exception e) {
+                    Log.d(TAG, "run(): exception : " + e);
+                }
+        }
+    }
+
 } //MainActivity class ends
 
 

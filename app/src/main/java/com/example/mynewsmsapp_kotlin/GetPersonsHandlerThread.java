@@ -23,6 +23,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
     private Handler handler;
     private SpamBusterdbHelper db_helper;
     private SQLiteDatabase db;
+    public static boolean DONE_TASK_GETPERSONS = false;
     public GetPersonsHandlerThread(SpamBusterdbHelper spamBusterdbHelper) {
         super("GetPersonsHandlerThread");
         this.db_helper = spamBusterdbHelper;
@@ -102,6 +103,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                     Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + persons_list.get(i));
                                 }
                             }
+                            DONE_TASK_GETPERSONS = true;
                             break;
                         }
                 }
