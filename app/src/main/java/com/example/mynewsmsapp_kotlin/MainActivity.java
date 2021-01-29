@@ -404,7 +404,7 @@ public class MainActivity extends AppCompatActivity {
 //            this.db_helper = new SpamBusterdbHelper(activity);
             this.db_helper1 = activity.spamBusterdbHelper;
             //get persons list and put in persons_list
-            activity.getPersonsHandlerThread = new GetPersonsHandlerThread(db_helper);
+            activity.getPersonsHandlerThread = new GetPersonsHandlerThread(db_helper1);
             this.getPersonsHandlerThread = activity.getPersonsHandlerThread;
             this.getPersonsHandlerThread.start();
             try {
@@ -416,18 +416,12 @@ public class MainActivity extends AppCompatActivity {
             Message msg_getpersons = Message.obtain(handler1);
             msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
             int table1 = TABLE_ALL;
-            switch (table1) {
-                case TABLE_ALL:
-                    msg_getpersons.arg1 = TABLE_ALL;
-                    break;
-                case TABLE_HAM:
-                    msg_getpersons.arg1 = TABLE_HAM;
-                    break;
-                case TABLE_SPAM:
-                    msg_getpersons.arg1 = TABLE_SPAM;
-                    break;
-            }
-
+            msg_getpersons.arg1 = table1;
+            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
+            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
+            msg_getpersons.sendToTarget();
 
 
 //            this.db_helper = new SpamBusterdbHelper(activity);
