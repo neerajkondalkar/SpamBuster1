@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +26,13 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         this.context = ct;
         this.sms_messages_list.addAll(array_list);
         sms_messages_list.clear();
+    }
+
+    public void insertPerson(int position, String address) {
+        final String TAG_insert = " insertPerson(): ";
+        Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
+        sms_messages_list.add(position, address);
+        notifyDataSetChanged();
     }
 
     public void insert(int position, String new_sms) {
@@ -53,7 +61,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull SmsViewHolder holder, int position) {
-        holder.sms_text.setText(sms_messages_list.get(position).toString());
+        holder.sms_text.setText(MainActivity.getContactName(context, sms_messages_list.get(position).toString()));
     }
 
     @Override
@@ -62,11 +70,19 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     }
 
     //inner class
-    public class SmsViewHolder extends  RecyclerView.ViewHolder{
+    public class SmsViewHolder extends  RecyclerView.ViewHolder implements View.OnClickListener{
         TextView sms_text;
         public SmsViewHolder(@NonNull View itemView) {
             super(itemView);
             sms_text = itemView.findViewById(R.id.sms_text);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getLayoutPosition();
+            String person_name = MainActivity.getContactName(context, sms_messages_list.get(position));
+            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
         }
     }
 }

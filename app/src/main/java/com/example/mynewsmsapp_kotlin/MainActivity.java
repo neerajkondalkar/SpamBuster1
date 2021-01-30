@@ -780,7 +780,8 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             for(int i=0; i<persons_list.size(); i++) {
                                 Log.d(TAG, "DisplayPersonsRunnable: run(): inserting " + getContactName(activity, persons_list.get(i)) + " in sms_adapter");
-                                activity.sms_adapter.insert(i, getContactName(activity, persons_list.get(i)));
+//                                activity.sms_adapter.insert(i, getContactName(activity, persons_list.get(i)));
+                                activity.sms_adapter.insertPerson(i,  persons_list.get(i));
                             }
                         }
                     });
