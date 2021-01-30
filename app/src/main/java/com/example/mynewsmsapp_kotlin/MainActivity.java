@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton_tableall;
     private ToggleButton toggleButton_tableham;
     private ToggleButton toggleButton_tablespam;
-    public static ArrayList<String> messages_list_tableall = new ArrayList();
+    protected static ArrayList<String> messages_list_tableall = new ArrayList();
     public SpamBusterdbHelper spamBusterdbHelper;
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
