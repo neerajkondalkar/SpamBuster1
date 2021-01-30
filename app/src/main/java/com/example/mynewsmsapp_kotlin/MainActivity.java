@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     public static final ArrayList<String> persons_list = new ArrayList<>();
     private GetPersonsHandlerThread getPersonsHandlerThread;
 
-    protected ReadDbTableAllRunnable readDbTableAllRunnable;
     protected DisplayPersonsRunnable displayPersonsRunnable;
     private TableAllSyncInboxHandlerThread tableAllSyncInboxHandlerThread;
     private Handler main_handler = new Handler();
