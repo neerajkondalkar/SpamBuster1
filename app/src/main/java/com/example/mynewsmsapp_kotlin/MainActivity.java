@@ -47,6 +47,7 @@ import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_MISSING_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_SYNCTABLES;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_UPDATE_MISSING_IDS;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
 
@@ -433,6 +434,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             DONE_TASK_GETPERSONS = false;
+
+            //carry out sync of tables everytime the app starts
+            this.db_helper = new SpamBusterdbHelper(activity);
+            this.db_helper = activity.spamBusterdbHelper;
+            activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper);
+            this.tableAllSyncInboxHandlerThread = activity.tableAllSyncInboxHandlerThread;
+            this.tableAllSyncInboxHandlerThread.start();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.handler = tableAllSyncInboxHandlerThread.getHandler();
+            Message msg_synctables = Message.obtain(handler);
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables initialized");
+            //compare only top IDs of TABLE_ALL[corres_inbox_id] and SMS/INBOX[_id]
+            msg_synctables.what = TASK_SYNCTABLES;
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_synctables.what = " + msg_synctables);
+//            msg_synctables.arg1 = TABLE_ALL;
+//            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_compatetopids.arg1 = TABLE_ALL");
+//            msg_synctables.arg2 = TABLE_CONTENTSMSINBOX;
+//            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_synctables.arg2 = TABLE_CONTENTSMSINBOX");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables preparation complete");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables sent!");
+            msg_synctables.sendToTarget();
+
+
 /*
 ////            this.db_helper = new SpamBusterdbHelper(activity);
             this.db_helper = activity.spamBusterdbHelper;
