@@ -42,7 +42,6 @@ public class GetPersonsHandlerThread extends HandlerThread {
                             Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): msg.what = TASK_GET_PERSONS");
                             Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): msg.arg1 = TABLE_ALL");
                             db = db_helper.getReadableDatabase();
-
                             //fill persons_list with all the persons
                             persons_list.clear();
                             Cursor cursor;
@@ -103,9 +102,9 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                     Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + persons_list.get(i));
                                 }
                             }
-                            DONE_TASK_GETPERSONS = true;
-                            break;
                         }
+                        DONE_TASK_GETPERSONS = true;
+                        break;
                 }
             }
         };
