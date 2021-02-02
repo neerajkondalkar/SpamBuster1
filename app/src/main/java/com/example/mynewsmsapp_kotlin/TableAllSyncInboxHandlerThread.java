@@ -84,7 +84,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                     String selection_id = null;
                     String[] selection_args = null;
                     String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
-                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): reading values from TABLE_ALL");
+                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): reading values from TABLE_ALL");
                     Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                             projection_id,             // The array of columns to return (pass null to get all)
                             selection_id,              // The columns for the WHERE clause
@@ -128,7 +128,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                     selection_id = null;
                     selection_args = null;
                     sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
-
                     Cursor cursor_read_id1 = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                             projection_id1,             // The array of columns to return (pass null to get all)
                             selection_id,              // The columns for the WHERE clause
