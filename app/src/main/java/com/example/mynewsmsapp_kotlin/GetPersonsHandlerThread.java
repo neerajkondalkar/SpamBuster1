@@ -53,7 +53,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
                             String groupBy = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS;
                             String sortOrder =
                                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " desc ";   //latest one appears on top of array_adapter
-                            db.beginTransaction();
+//                            db.beginTransaction();
                             cursor = db.query(
                                     SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
                                     projection,             // The array of columns to return (pass null to get all)
