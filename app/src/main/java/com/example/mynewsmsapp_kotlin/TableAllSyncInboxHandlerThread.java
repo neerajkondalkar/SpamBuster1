@@ -372,7 +372,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                                 if (!spam) {
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS:  ----------");
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): not spam, meaning message is unclassified. Hence first decide whether spam or ham.");
-                                                    //EDIT read the TABLE_ALL messages which have corress_inbox_id == UNCLASSIFIED
+
                                                     // first process them, segregate whether spam or not, them put in CONTENTSMSINBOX
 //                                                    -----------------------
 //                                                    here comes the http request to backend server with the message as data
@@ -533,9 +533,11 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
                             String printable_date;
                             content_resolver = MainActivity.instance().getContentResolver();
-                            ContentValues values = new ContentValues();
-                            values.clear();
-
+                            //everything in missing_item_ids_in_smsinbox is non-spam, so add to contentsmsinbox
+//                            item_ids_inbox has all the _ids of contentsmsinbox, first item in this list is the largest _id
+                            //we will keep this to check whether upcoming insertion into contetnsmsinbox was successfull
+                            String latest_inboxid = item_ids_inbox.get(0).toString();
+                            
 
                         }
                             DONE_TASK_UPDATE_MISSING_IDS = true;
