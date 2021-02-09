@@ -355,7 +355,10 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: finding missing IDs in item_ids_inbox " +
                                             " by comparing to each ID in item_ids_tableall");
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: ");
-                                    for (int i = 0; i < item_ids_tableall.size(); i++) {
+
+                                boolean result_bool_spam = true; //result from http response
+
+                                for (int i = 0; i < item_ids_tableall.size(); i++) {
                                         currentlistitem_item_ids_tableall = iterator_item_ids_tableall.next().toString();
                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: iterator_item_ids_tableall.next().toString() = " + currentlistitem_item_ids_tableall);
                                         try {
@@ -368,8 +371,24 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): checking if SPAM : " + spam);
                                                 if (!spam) {
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS:  ----------");
-                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): not spam, meaning message is unclassified. Hence adding to missing items ids in smsinbox");
-                                                    missing_item_ids_in_smsinbox.add(currentlistitem_item_ids_tableall);
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): not spam, meaning message is unclassified. Hence first decide whether spam or ham.");
+                                                    //EDIT read the TABLE_ALL messages which have corress_inbox_id == UNCLASSIFIED
+                                                    // first process them, segregate whether spam or not, them put in CONTENTSMSINBOX
+//                                                    -----------------------
+//                                                    here comes the http request to backend server with the message as data
+//                                                    -----------------------
+
+                                                    //for now we will statically set them as SPAM or HAM
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): result_bool_spam : " + result_bool_spam);
+                                                    if (!result_bool_spam) { //add if result is false i.e not spam
+                                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): result says not spam, thus adding to missing_item_ids_in_smsinbox");
+                                                        missing_item_ids_in_smsinbox.add(currentlistitem_item_ids_tableall);
+                                                    }
+                                                    else{
+                                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): result says spam, so not adding to missing items ids smsinbox");
+                                                    }
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): setting result_bool_spam to " + result_bool_spam);
+                                                    result_bool_spam = !result_bool_spam; //since we dont know which ones are actually spam, we will set alternate messages as spam
                                                 }
                                                 else{
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): spam , so not adding to missing item ids in smsinbox");
@@ -517,8 +536,6 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             ContentValues values = new ContentValues();
                             values.clear();
 
-                            //EDIT read the TABLE_ALL messages which have corress_inbox_id == UNCLASSIFIED
-                            // first process them, segregate whether spam or not, them put in CONTENTSMSINBOX
 
                         }
                             DONE_TASK_UPDATE_MISSING_IDS = true;
