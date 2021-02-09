@@ -535,6 +535,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 //                            item_ids_inbox has all the _ids of contentsmsinbox, first item in this list is the largest _id
                             //we will keep this to check whether upcoming insertion into contetnsmsinbox was successfull
                             String latest_inboxid = item_ids_inbox.get(0).toString();
+                            // EDIT HERE
 
 
                         }
