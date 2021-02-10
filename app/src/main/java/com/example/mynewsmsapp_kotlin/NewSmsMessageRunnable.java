@@ -1,14 +1,11 @@
 package com.example.mynewsmsapp_kotlin;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.BaseColumns;
-import android.provider.Telephony;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 import java.lang.ref.WeakReference;
@@ -20,9 +17,9 @@ public class NewSmsMessageRunnable implements Runnable{
     public String address;
     public String date_sent;
     public String date;
-    public boolean spam = true;  //very important field. In future this will be changed after returning result from server
     public static final String UNCLASSIFIED = "-7";
     public static final String SPAM = "-9";
+    public boolean message_is_spam = true;  //very important field. In future this will be changed after returning result from server
 
     private SpamBusterdbHelper spamBusterdbHelper;
     private SQLiteDatabase db;
@@ -59,8 +56,15 @@ public class NewSmsMessageRunnable implements Runnable{
         }
         String newRowId_tableall_str = String.valueOf(newRowId_tableall);
 
+//        ----------------------------------------------------------------------
+//         here comes the http request to check whether messages is spam  or not
+        message_is_spam = !message_is_spam;
+        Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam : " + message_is_spam);
+//        -----------------------------------------------------------------------
+
         //insert in contentsmsminbox only if not spam
-        if (this.spam == false) {
+//        if (this.message_is_spam == false) {
+        if (message_is_spam == false) {
             Log.d(TAG, "NewSmsMessageRunnable: run(): getting inbox _id of latest sms from content://sms/inbox");
             String[] projection_sms_inbox = null;
             String selection_sms_inbox = null;
@@ -138,7 +142,7 @@ public class NewSmsMessageRunnable implements Runnable{
             }
         }
 
-        else {//if this.spam==true
+        else {//if this.message_is_spam==true
             values.clear();
             corress_inbox_id = SPAM;
             Log.d(TAG, "NewSmsMessageRunnable: run(): corress_inbox_id set to " + corress_inbox_id + "  (spam)");
@@ -199,5 +203,6 @@ public class NewSmsMessageRunnable implements Runnable{
                 db1.setTransactionSuccessful();
                 db1.endTransaction();
                 db1.close();
+
     }
 }

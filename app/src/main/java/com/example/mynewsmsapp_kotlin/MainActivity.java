@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -29,27 +28,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.DONE_TASK_GETPERSONS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_COMPARETOPID;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_SMSINBOX;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_IDS_TABLEALL;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS_IN_SMSINBOX;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_GET_MISSING_IDS_IN_TABLEALL;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_UPDATE_MISSING_IDS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DUMMY_VAL;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_COMPARE_TOP_ID;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_IDS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_GET_MISSING_IDS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_SYNCTABLES;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_UPDATE_MISSING_IDS;
-import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_NEWSMSREC;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -360,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
         newSmsMessageRunnable.address = address;
         newSmsMessageRunnable.date_sent = date_sent;
         newSmsMessageRunnable.date = date;
-        newSmsMessageRunnable.spam = true;//very important field. In future this will be changed after returning result from server
+        newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
         new Thread(newSmsMessageRunnable).start();
 //        handler = tableAllSyncInboxHandlerThread.getHandler();
 //        Message msg_newsmsrec = Message.obtain(handler);

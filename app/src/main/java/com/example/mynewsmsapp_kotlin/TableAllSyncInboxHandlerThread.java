@@ -379,14 +379,15 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                                         int indexof_currentcoressinboxids_tableall = item_coressinboxids_tableall.indexOf(currentlistitem_item_coressinboxids_tableall.toString());
                                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): index of currentlisitem_item_coressinboxids_tableall in item_coressinboxids_tableall : " + indexof_currentcoressinboxids_tableall);
                                                         String coressponsing_id_tableall = item_ids_tableall.get(indexof_currentcoressinboxids_tableall);
-                                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): adding coressponding _id in tableall : " + coressponsing_id_tableall + " to missing_ids_in_smsinbox");
-                                                        missing_item_ids_in_smsinbox.add(currentlistitem_item_coressinboxids_tableall);
+                                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): adding coressponding_id_tableall : " + coressponsing_id_tableall + " to missing_ids_in_smsinbox");
+                                                        missing_item_ids_in_smsinbox.add(coressponsing_id_tableall);
                                                     }
                                                     else{
                                                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): result says spam, so not adding to missing items ids smsinbox");
                                                     }
-                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): setting result_bool_spam to " + result_bool_spam);
+                                                    //this will get removed once we perform http request
                                                     result_bool_spam = !result_bool_spam; //since we dont know which ones are actually spam, we will set alternate messages as spam
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): setting result_bool_spam to " + result_bool_spam);
                                                 }
                                                 else{
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): spam , so not adding to missing item ids in smsinbox");
@@ -509,6 +510,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                             Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: not a new sms. Hence skipping insertion ");
                                         }
                                     } while (sms_inbox_cursor.moveToNext());
+
+
                                     Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: Done inserting values in TABLE_ALL! \n");
                                     Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
                                     Log.d(TAG, TAG_updateMissingValuesInDbTable + "  case TASK_UPDATE_MISSING_IDS: ");
@@ -532,10 +535,107 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             String printable_date;
                             content_resolver = MainActivity.instance().getContentResolver();
                             //everything in missing_item_ids_in_smsinbox is non-spam, so add to contentsmsinbox
-//                            item_ids_inbox has all the _ids of contentsmsinbox, first item in this list is the largest _id
+//                          missing_item_ids_in_smsinbox has all the _ids of TABLEALL where the coressinboxid is non-spam (after filtering)
+//                          item_ids_inbox has all the _ids of contentsmsinbox, first item in this list is the largest _id
                             //we will keep this to check whether upcoming insertion into contetnsmsinbox was successfull
                             String latest_inboxid = item_ids_inbox.get(0).toString();
-                            // EDIT HERE
+                            //for contentsmsinbox
+                            String[] projection_sms_inbox = null;
+                            String selection_sms_inbox = null;
+                            String[] selection_args_sms_inbox = null;
+                            String sort_order_sms_inbox = " _id DESC ";
+                            Uri uri = Uri.parse("content://sms/inbox");
+                            ContentValues values = new ContentValues();
+                            values.clear();
+                            ContentResolver contentResolver = MainActivity.instance().getContentResolver();
+                            Cursor sms_inbox_cursor;
+                            //first print missing_item_ids_in_smsinbox
+                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing missing_item_ids_in_smsinbox");
+                            for(int i=0; i<missing_item_ids_in_smsinbox.size(); i++){
+                                String current_id_tableall = missing_item_ids_in_smsinbox.get(i);
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): " + i + ": " + current_id_tableall);
+                                //for tableall
+                                String[] columns = {SpamBusterContract.TABLE_ALL._ID,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT};
+                                String selection = SpamBusterContract.TABLE_ALL._ID + "=?";
+                                String[] selection_args1 = {current_id_tableall};
+                                //get the sms in tableall where _id = current_id_tableall
+                                Cursor cursor = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME, columns, selection, selection_args1, null, null, null);
+                                int indexofid = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
+                                int indexofcoressinboxid = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
+                                int indexofaddress = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
+                                int indexofbody = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
+                                int indexofdate = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
+                                int indexofdatesent = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT);
+                                if(cursor.moveToFirst()){
+                                    do {
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): found the record with _id = " + current_id_tableall);
+                                        String id = cursor.getString(indexofid);
+                                        String coressinboxid = cursor.getString(indexofcoressinboxid); //will be -7 which means unclassified, but we found out that it is not spam.
+                                        String address = cursor.getString(indexofaddress);
+                                        String body = cursor.getString(indexofbody);
+                                        String date = cursor.getString(indexofdate);
+                                        String datesent = cursor.getString(indexofdatesent);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): corressinboxid = " + coressinboxid); //update it after inserting the message into contentsmsinbox
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): body = " + body);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): address = " + address);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): date = " + date);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): date_sent = " + datesent);
+
+                                        //preparing to insert into contentsmsinbox
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): preparing to insert into contentsmsinbox");
+                                        values.put("address", address);
+                                        values.put("person", "2");
+                                        values.put("date", date);
+                                        values.put("date_sent", datesent);
+                                        values.put("body", body);
+                                        contentResolver.insert(uri, values);
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): done. checking if insertion was successfull");
+                                        sms_inbox_cursor = contentResolver.query(uri, projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
+                                        int index_id = sms_inbox_cursor.getColumnIndex("_id");
+                                        if (sms_inbox_cursor.moveToFirst()) {
+                                            String corress_inbox_id = sms_inbox_cursor.getString(index_id);
+                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): new latest _id in contentsmsinbox is " + corress_inbox_id);
+                                            if (Integer.parseInt(corress_inbox_id) > Integer.parseInt(latest_inboxid)) {
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): insertion successfull!");
+                                                latest_inboxid = corress_inbox_id;
+                                            }
+                                            else{
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): insertion failed!");
+                                            }
+                                            sms_inbox_cursor.close();
+                                        }
+
+                                        //now update the TABLE_ALL value at _id = id with new corressinboxid = latest_inboxid;
+                                        values.clear();
+                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, latest_inboxid);
+                                        String whereclause = SpamBusterContract.TABLE_ALL._ID + "=?";
+                                        String[] whereargs = {id};
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): updating coressinboxid in tableall at _id = " + id);
+                                        db.beginTransaction();
+                                        int result = db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, whereclause, whereargs);
+                                        db.setTransactionSuccessful();
+                                        db.endTransaction();
+                                        if (result!=-1){
+                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): update successfull");
+                                        }
+                                        else{
+                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): update unsuccessfull");
+                                        }
+                                    item_ids_inbox.add(0, latest_inboxid);
+                                    }while (cursor.moveToNext());
+                                }
+                                else{
+                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): reading from TABLE_ALL unsuccessfull");
+                                }
+                                cursor.close();
+                            }
+
+
 
 
                         }
