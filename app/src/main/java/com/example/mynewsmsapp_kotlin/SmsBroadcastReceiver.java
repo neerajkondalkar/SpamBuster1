@@ -124,6 +124,31 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // indicate android that new activity is to be launched in a new task stack.
                     //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
                     context.startActivity(i);
+
+                    String sms_body = sms_message.getMessageBody().toString();
+                    String address = sms_message.getOriginatingAddress().toString();
+                    String date_sent = Long.toString(sms_message.getTimestampMillis());
+                    String date = Long.toString(System.currentTimeMillis());
+                    Log.d(TAG, "MainActivity: updateInbox(): sms_body: " + sms_body);
+                    Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
+                    Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
+                    Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
+                    SpamBusterdbHelper spamBusterdbHelper;
+                    NewSmsMessageRunnable newSmsMessageRunnable;
+                    if(MainActivity.active) {
+                        spamBusterdbHelper = MainActivity.instance().spamBusterdbHelper;
+                        newSmsMessageRunnable = new NewSmsMessageRunnable(MainActivity.instance(), spamBusterdbHelper);
+                    }
+                    else {
+                        spamBusterdbHelper = new SpamBusterdbHelper(context);
+                        newSmsMessageRunnable = new NewSmsMessageRunnable(context, spamBusterdbHelper);
+                    }
+                    newSmsMessageRunnable.sms_body = sms_body;
+                    newSmsMessageRunnable.address = address;
+                    newSmsMessageRunnable.date_sent = date_sent;
+                    newSmsMessageRunnable.date = date;
+                    newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
+                    new Thread(newSmsMessageRunnable).start();
                 }
 //                context.sendBroadcast(intent); //no need to forward the broadcast to other messaging apps as all apps receive this,
                                                 // but phone's inbuilt sms app ignores this when it itself isn't the default sms app

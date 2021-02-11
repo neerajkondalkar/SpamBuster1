@@ -2,6 +2,7 @@ package com.example.mynewsmsapp_kotlin;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import androidx.annotation.RequiresApi;
 import java.lang.ref.WeakReference;
 
 public class NewSmsMessageRunnable implements Runnable{
+    Context context;
     private final String TAG = " [MY_DEBUG] ";
     private WeakReference<MainActivity> activityWeakReference;
     public String sms_body;
@@ -24,17 +26,19 @@ public class NewSmsMessageRunnable implements Runnable{
 
     private SpamBusterdbHelper spamBusterdbHelper;
     private SQLiteDatabase db;
-    NewSmsMessageRunnable(MainActivity activity, SpamBusterdbHelper spamBusterdbHelper) {
+//    NewSmsMessageRunnable(MainActivity activity, SpamBusterdbHelper spamBusterdbHelper) {
+    NewSmsMessageRunnable(Context context, SpamBusterdbHelper spamBusterdbHelper) {
         this.spamBusterdbHelper = spamBusterdbHelper;
-        activityWeakReference = new WeakReference<MainActivity>(activity);
+        this.context = context;
+//        activityWeakReference = new WeakReference<MainActivity>(activity);
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void run() {
-        MainActivity activity = activityWeakReference.get();
-        if (activity == null || activity.isFinishing()) {
-            return;
-        }
+//        MainActivity activity = activityWeakReference.get();
+//        if (activity == null || activity.isFinishing()) {
+//            return;
+//        }
 //        this.spamBusterdbHelper = new SpamBusterdbHelper(activity);
         db = spamBusterdbHelper.getWritableDatabase();
         String corress_inbox_id = UNCLASSIFIED;
@@ -83,7 +87,8 @@ public class NewSmsMessageRunnable implements Runnable{
                 String[] selection_args_sms_inbox = null;
                 String sort_order_sms_inbox = " _id DESC ";
                 Uri uri = Uri.parse("content://sms/inbox");
-                ContentResolver contentResolver = activity.getContentResolver();
+//                ContentResolver contentResolver = activity.getContentResolver();
+                ContentResolver contentResolver = context.getContentResolver();
                 Cursor sms_inbox_cursor = contentResolver.query(uri, projection_sms_inbox, selection_sms_inbox, selection_args_sms_inbox, sort_order_sms_inbox);
                 String latest_inbox_id = "";
                 int index_id = sms_inbox_cursor.getColumnIndex("_id");
