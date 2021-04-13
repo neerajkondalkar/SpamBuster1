@@ -41,6 +41,7 @@ public class NewSmsMessageRunnable implements Runnable{
 //        }
 //        this.spamBusterdbHelper = new SpamBusterdbHelper(activity);
         db = spamBusterdbHelper.getWritableDatabase();
+        //first mark it as unclassified and then insert it in TABLE_ALL
         String corress_inbox_id = UNCLASSIFIED;
         Log.d(TAG, "NewSmsMessageRunnable: run():  ");
         ContentValues values = new ContentValues();
@@ -73,7 +74,7 @@ public class NewSmsMessageRunnable implements Runnable{
         else{
             Log.d(TAG, "NewSmsMessageRunnable: run(): message will be inserted in TABLE_HAM or TABLE_SPAM accordingly");
         }
-        this.message_is_spam = !this.message_is_spam;
+        this.message_is_spam = !this.message_is_spam;//to keep it changing alternatively
         this.message_is_spam = true;//temp code
         Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam currently set to  : " + this.message_is_spam);
 //        --------------

@@ -150,7 +150,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
                     new Thread(newSmsMessageRunnable).start();
                 }
-//                context.sendBroadcast(intent); //no need to forward the broadcast to other messaging apps as all apps receive this,
+//                context.sendBroadcast(intent); //no need to forward the broadcast to other messaging apps as all apps receive this SMS_RECEIVED,
                                                 // but phone's inbuilt sms app ignores this when it itself isn't the default sms app
                                                 //so inbuilt app won't receive new sms when our app is default
             }
