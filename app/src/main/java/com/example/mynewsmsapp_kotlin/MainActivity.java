@@ -173,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
         //enable toggle tableham on creation of activity
         toggleButton_tableham.setChecked(true);
         spamBusterdbHelper = new SpamBusterdbHelper(this);
+        //start background service
+        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
 //        ----------------------- DELETE DATABASE --------------------
         //to delete the database. so that everytime a new database is created
 //        try {

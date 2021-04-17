@@ -17,10 +17,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name=".ClassificationSyncService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <activity
             android:name=".ChatWindowActivity"
             android:label="@string/title_activity_chat_window"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
