@@ -13,6 +13,8 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import java.lang.ref.WeakReference;
 
+//import static com.example.mynewsmsapp_kotlin.ClassificationSyncService.executor;
+
 public class NewSmsMessageRunnable implements Runnable{
     Context context;
     private final String TAG = " [MY_DEBUG] ";
@@ -79,7 +81,7 @@ public class NewSmsMessageRunnable implements Runnable{
         this.http_req_success = false;
         Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + checkNetwork());
         //if no internet connection, then add message tableall id to TABLE_PENDING
-        if(!checkNetwork()){
+        //let all messages go in TABLE_PENDING, the classificationsyncservice will take care of the rest
             Log.d(TAG, "NewSmsMessageRunnable: run(): no internet connection detected, hence adding message tableall id  to TABLE_PENDING");
             values.clear();
             values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
@@ -93,7 +95,12 @@ public class NewSmsMessageRunnable implements Runnable{
             } else {
                 Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
             }
-        }
+            String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
+
+
+
+
+
 
         Log.d(TAG, "NewSmsMessageRunnable: run(): http_req_success is currently set to : " + this.http_req_success);
         if(!this.http_req_success){

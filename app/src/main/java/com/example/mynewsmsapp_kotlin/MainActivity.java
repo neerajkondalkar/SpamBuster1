@@ -249,6 +249,15 @@ public class MainActivity extends AppCompatActivity {
 
     //reads all sms from database and display all the sms using the array_adapter
     public void refreshSmsInbox() {
+
+        //DEBUG code start
+        String id_str = "1000";
+        String address = "9999988888";
+        String sms_body = "URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU";
+        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
+        predictspam.start();
+        //DEBUG code end
+
 //        ArrayList<String> sms_list = new ArrayList<String>();
         final String TAG_refreshSmsInbox = " refreshSmsInbox(): ";
         Log.d(TAG, TAG_refreshSmsInbox + " called ");
