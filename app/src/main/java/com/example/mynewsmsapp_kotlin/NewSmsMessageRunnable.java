@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -62,25 +64,37 @@ public class NewSmsMessageRunnable implements Runnable{
         }
         String newRowId_tableall_str = String.valueOf(newRowId_tableall);
 
+
+//        --------------------------------------------- START TAG2
         //inserting this new message into table_pending since it is pending to be classified
-        values.clear();
-        values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
-        Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL into TABLE_PENDING ...");
-        db.beginTransaction();
-        long newRowId_tablepending = db.insert(SpamBusterContract.TABLE_PENDING.TABLE_NAME, null, values);
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        if (newRowId_tablepending == -1) {
-            Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
-        } else {
-            Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
-        }
+        //put this code in http_req_success == false
+
+
+//        ---------------------------------------------- END TAG2
 
 //        STARTING FROM HERE TAG1
 //        all the code in TAG1 should be, in future, enclose by an if() statement to check http response was sucessfull or not.
 //        --------------
 //         here comes the http request to check whether messages is spam  or noet http_req_success accordingly
         this.http_req_success = false;
+        Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + checkNetwork());
+        //if no internet connection, then add message tableall id to TABLE_PENDING
+        if(!checkNetwork()){
+            Log.d(TAG, "NewSmsMessageRunnable: run(): no internet connection detected, hence adding message tableall id  to TABLE_PENDING");
+            values.clear();
+            values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
+            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL: " + newRowId_tableall + " into TABLE_PENDING ...");
+            db.beginTransaction();
+            long newRowId_tablepending = db.insert(SpamBusterContract.TABLE_PENDING.TABLE_NAME, null, values);
+            db.setTransactionSuccessful();
+            db.endTransaction();
+            if (newRowId_tablepending == -1) {
+                Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
+            } else {
+                Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
+            }
+        }
+
         Log.d(TAG, "NewSmsMessageRunnable: run(): http_req_success is currently set to : " + this.http_req_success);
         if(!this.http_req_success){
             Log.d(TAG, "NewSmsMessageRunnable: run(): message will only be present in TABLE ALL and NOT in TABLE_HAM or TABLE_SPAM");
@@ -238,5 +252,21 @@ public class NewSmsMessageRunnable implements Runnable{
             db1.close();
 
 
+    }
+
+    private boolean checkNetwork() {
+        boolean wifiAvailable = false;
+        boolean mobileAvailable = false;
+        ConnectivityManager conManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] networkInfo = conManager.getAllNetworkInfo();
+        for (NetworkInfo netInfo : networkInfo) {
+            if (netInfo.getTypeName().equalsIgnoreCase("WIFI"))
+                if (netInfo.isConnected())
+                    wifiAvailable = true;
+            if (netInfo.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (netInfo.isConnected())
+                    mobileAvailable = true;
+        }
+        return wifiAvailable || mobileAvailable;
     }
 }
