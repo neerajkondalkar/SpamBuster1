@@ -42,7 +42,10 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
-
+    private static final String SQL_CREATE_TABLEPENDING =
+            "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_PENDING.TABLE_NAME + " (" +
+                    SpamBusterContract.TABLE_PENDING._ID + " INTEGER PRIMARY KEY, " +
+                    SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL + " INTEGER )";
 
 //    private static final String SQL_DELETE_ENTRIES =
 //            "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_ALL.TABLE_NAME;
@@ -55,6 +58,9 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     private static final String SQL_DROP_TABLESPAM = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
     private static final String SQL_DELETE_ENTRIES_TABLESPAM = "DELETE FROM  " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
 
+    private static final String SQL_DROP_TABLEPENDING = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_PENDING.TABLE_NAME;
+    private static final String SQL_DELETE_ENTRIES_TABLEPENDING = "DELETE FROM  " + SpamBusterContract.TABLE_PENDING.TABLE_NAME;
+
     private static String selection_for_delete_tableall = SpamBusterContract.TABLE_ALL._ID + " LIKE ? ";
     private static String[] selection_args_for_delete_tableall = { "*" };
 
@@ -63,6 +69,9 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
     private static String selection_for_delete_tablespam = SpamBusterContract.TABLE_SPAM._ID + " LIKE ? ";
     private static String[] selection_args_for_delete_tablespam = { "*" };
+
+    private static String selection_for_delete_tablepending = SpamBusterContract.TABLE_PENDING._ID + " LIKE ? ";
+    private static String[] selection_args_for_delete_tablepending = { "*" };
 
     public  SpamBusterdbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -87,6 +96,12 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         //to delete database tables and entries everytime a new database is created
         deleted_rows = db.delete(SpamBusterContract.TABLE_SPAM.TABLE_NAME, selection_for_delete_tablespam, selection_args_for_delete_tablespam);
         db.execSQL(SQL_DELETE_ENTRIES_TABLESPAM);
+
+        db.execSQL(SQL_DROP_TABLEPENDING);
+        db.execSQL(SQL_CREATE_TABLEPENDING);
+        //to delete database tables and entries everytime a new database is created
+        deleted_rows = db.delete(SpamBusterContract.TABLE_PENDING.TABLE_NAME, selection_for_delete_tablepending, selection_args_for_delete_tablepending);
+        db.execSQL(SQL_DELETE_ENTRIES_TABLEPENDING);
     }
 
     @Override
@@ -104,6 +119,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         db.execSQL(SQL_DROP_TABLEALL);
         db.execSQL(SQL_DROP_TABLEHAM);
         db.execSQL(SQL_DROP_TABLESPAM);
+        db.execSQL(SQL_DROP_TABLEPENDING);
         onCreate(db);
     }
 
