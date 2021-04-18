@@ -49,7 +49,7 @@ public class PredictionProbingRunnable implements Runnable {
         else{
             URL url = null;
             try {
-                url = new URL("http://127.0.0.1:5000/predict");
+                url = new URL("http://192.168.146.2:5000/predict");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
