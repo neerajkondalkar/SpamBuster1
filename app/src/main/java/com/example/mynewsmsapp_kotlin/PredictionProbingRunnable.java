@@ -49,7 +49,7 @@ public class PredictionProbingRunnable implements Runnable {
         else{
             URL url = null;
             try {
-                url = new URL("http://192.168.146.2:5000/predict");
+                url = new URL("http://192.168.1.102:5000/predict");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -79,6 +79,9 @@ public class PredictionProbingRunnable implements Runnable {
 //            String message_body = "\"Hi, I am in a meeting. Will call back later.\"";
 //            message_body = "\"URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU\"";
 
+            id = "\"" + id + "\"";
+            number = "\"" + number + "\"";
+            message_body = "\"" + message_body + "\"";
             String jsonInputString = "{\"id\": " + id + ", \"number\": " + number + ", \"message_body\": "+ message_body + "}";
 
             try(OutputStream os = con.getOutputStream()){
