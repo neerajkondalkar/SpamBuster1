@@ -13,10 +13,6 @@ import java.util.concurrent.Executors;
 public class ClassificationSyncService extends Service {
 //    public Context context = getApplicationContext();
     private static final String TAG = "[MY_DEBUG]";
-//    public ExecutorService executor = Executors.newFixedThreadPool(5);
-//    Runnable predictionProbingRunnable = new PredictionProbingRunnable(newRowId_tablepending_str, address, sms_body);
-//        executor.execute(predictionProbingRunnable);
-
 
     public ClassificationSyncService() {
     }
@@ -32,7 +28,11 @@ public class ClassificationSyncService extends Service {
 //        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
 //        predictspam.start();
         Runnable worker = new PredictionProbingRunnable(this, id_str, address, sms_body);
-        executor.execute(worker);
+//        while(MainActivity.count_exec_service>0){
+            executor.execute(worker);
+//            MainActivity.count_exec_service--;
+
+//        }
 
 
         Toast.makeText(getApplicationContext(),"This is a Service running in Background",

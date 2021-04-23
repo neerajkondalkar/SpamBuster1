@@ -37,6 +37,7 @@ import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK
 // 1. Showing all messages to user
 // 2. A button to take user to ComposeSmsActivity to compose a new sms
 public class MainActivity extends AppCompatActivity {
+    public static  int count_exec_service = 1;
     private static final String TAG = "[MY_DEBUG] " + MainActivity.class.getSimpleName(); //for debugging
     private static final String KEY_LIST_CONTENTS = "ListContent"; //for SavedInstanceState and RestoreInstanceState which turned out of no use
     public static final int TABLE_ALL = 1;

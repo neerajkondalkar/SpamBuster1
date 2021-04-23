@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -71,18 +72,39 @@ public class PredictionProbingRunnable implements Runnable {
 
             con.setDoOutput(true);
 
-            //JSON String need to be constructed for the specific resource.
-            //We may construct complex JSON using any third-party JSON libraries such as jackson or org.json
-//            String id = "\"1000\"";
-//            String number = "\"9999977777\"";
+            String id = "1000";
+            String[] message_body = new String[5];
+            message_body[0] = "Hi, I am in a meeting. Will call back later.";
+            message_body[1] = "IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.";
+            message_body[2] = "A [redacted] loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.[redacted].co.uk to opt out reply stop";
+            message_body[3] = "You have still not claimed the compensation you are due for the accident you had. To start the process please reply YES. To opt out text STOP";
+            message_body[4] = "Our records indicate your Pension is under performing to see higher growth and up to 25% cash release reply PENSION for a free review. To opt out reply STOP";
+            // String number = "\"9999977777\"";
+            JSONArray ja = new JSONArray();
 
-//            String message_body = "\"Hi, I am in a meeting. Will call back later.\"";
-//            message_body = "\"URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU\"";
+            for(int i=0; i<5; i++){
+                JSONObject jo = new JSONObject();
+                Integer idint = Integer.parseInt(id) + i;
+                try {
+                    jo.put("id", String.valueOf(idint));
+                    jo.put("message_body", message_body[i]);
+                    ja.put(jo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
-            id = "\"" + id + "\"";
-            number = "\"" + number + "\"";
-            message_body = "\"" + message_body + "\"";
-            String jsonInputString = "{\"id\": " + id + ", \"number\": " + number + ", \"message_body\": "+ message_body + "}";
+            JSONObject mainObj = new JSONObject();
+            try {
+                mainObj.put("entries", ja);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String jsonInputString = mainObj.toString();
+
+            Log.d(TAG, "PredictionRunnable: run(): \"Printing json main object");
+            Log.d(TAG, "PredictionRunnable: run(): " + jsonInputString);
 
             try(OutputStream os = con.getOutputStream()){
                 byte[] input = new byte[0];
@@ -107,7 +129,6 @@ public class PredictionProbingRunnable implements Runnable {
                 e.printStackTrace();
             }
             System.out.println("[MY_DEBUG]");
-            System.out.println("[MY_DEBUG] message body : " + message_body);
             System.out.println("[MY_DEBUG] HTTP POST request done.");
             System.out.println("[MY_DEBUG] Response code: " + code);
 
@@ -127,9 +148,30 @@ public class PredictionProbingRunnable implements Runnable {
                     e.printStackTrace();
                 }
                 System.out.println("[MY_DEBUG] length of JSON obj : " + obj.length());
-                System.out.println("[MY_DEBUG] extracted id = " + obj.get("id"));
-                System.out.println("[MY_DEBUG] Extracted spam = " + obj.get("spam"));
-                System.out.println("[MY_DEBUG]");
+
+                JSONArray result_ja = (JSONArray) obj.get("result");
+                System.out.println("[MY_DEBUG] Printing <JSONOArray> result_ja :" + result_ja);
+                System.out.println("[MY_DEBUG] length of result_ja : " + result_ja.length());
+                System.out.println("[MY_DEBUG] looping through the json array ");
+
+                for(int i=0; i<result_ja.length(); i++){
+                    JSONObject tempjo = (JSONObject) result_ja.get(i);
+                    System.out.printf("[MY_DEBUG] [%d]  %s\n", i, tempjo.toString());
+                    try{
+                        System.out.println("[MY_DEBUG] extract ID and spam prediction from the JSON object");
+                        System.out.printf("[MY_DEBUG] [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
+                    }
+                    catch(Exception e){
+                        e.printStackTrace();
+                        try{
+                            System.out.println("[MY_DEBUG] got error : " + tempjo.get("error").toString());
+                        }
+                        catch(Exception e1){
+                            e1.printStackTrace();
+                        }
+                    }
+                    System.out.println("[MY_DEBUG]");
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (IOException e) {
