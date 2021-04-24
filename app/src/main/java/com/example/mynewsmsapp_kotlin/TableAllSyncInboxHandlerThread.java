@@ -325,9 +325,10 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 
 //------------------------------------------------------------------------------
 
-                   //get missing ids in smsinbox (present in tableall but absent in smsinbox)
+                        //get missing ids in smsinbox (present in tableall but absent in smsinbox)
                         // check if CONTENT_SMS_INBOX has all messages that are present in TABLE_ALL
                         // any message that is present in TABLE_ALL but not present in SMS/INBOX should be put in missing_ids_in_smsinbox;
+                        // the missing_ids_in_smsinbox has the _ids of TABLE_ALL where corress_inbox_id != SPAM && corress_inbox_id != UNCLASSIFIED (possible only after prediction)
                             missing_item_ids_in_smsinbox.clear();
                             ListIterator iterator_item_ids_tableall = item_coressinboxids_tableall.listIterator();
 
@@ -339,7 +340,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 if (smsinbox_is_empty){
 //                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): TABLE_CONTENT_SMS_INBOX is completely empty, so mark all IDs in TABLE_ALL as missing in TABLE_CONTENT_SMS_INBOX");
                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): TABLE_CONTENT_SMS_INBOX is completely empty");
-                                    //add IDs that are present in sms/inbox are missing in table_all
+                                    //add IDs that are present in table_all are missing in sms_inbox, we don't handle such situation rn
 //                                    missing_item_ids_in_smsinbox.addAll(item_ids_tableall);
                                 }
 //                                else {
