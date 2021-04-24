@@ -11,7 +11,21 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 
 //import static com.example.mynewsmsapp_kotlin.ClassificationSyncService.executor;
 
@@ -82,7 +96,7 @@ public class NewSmsMessageRunnable implements Runnable{
         Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + checkNetwork());
         //if no internet connection, then add message tableall id to TABLE_PENDING
         //let all messages go in TABLE_PENDING, the classificationsyncservice will take care of the rest
-            Log.d(TAG, "NewSmsMessageRunnable: run(): no internet connection detected, hence adding message tableall id  to TABLE_PENDING");
+            Log.d(TAG, "NewSmsMessageRunnable: run(): adding message tableall id  to TABLE_PENDING");
             values.clear();
             values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
             Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL: " + newRowId_tableall + " into TABLE_PENDING ...");
@@ -97,21 +111,37 @@ public class NewSmsMessageRunnable implements Runnable{
             }
             String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
 
+            int prediction = -1;
+            if(checkNetwork()){
+                prediction = makePrediction(newRowId_tablepending_str, sms_body);
+            }
+
+            if(prediction == -1){
+                http_req_success = false;
+            }
+            else if(prediction == 1){
+                http_req_success = true;
+                message_is_spam = true;
+            }
+            else if(prediction == 0){
+                http_req_success = true;
+                message_is_spam = false;
+            }
+            else{
+                //do nothing
+            }
 
 
-
-
-
-        Log.d(TAG, "NewSmsMessageRunnable: run(): http_req_success is currently set to : " + this.http_req_success);
+        Log.d(TAG, "NewSmsMessageRunnable: run(): http_req_success  : " + this.http_req_success);
         if(!this.http_req_success){
-            Log.d(TAG, "NewSmsMessageRunnable: run(): message will only be present in TABLE ALL and NOT in TABLE_HAM or TABLE_SPAM");
+            Log.d(TAG, "NewSmsMessageRunnable: run(): no internet connection detected, message will only be present in TABLE ALL and NOT in TABLE_HAM or TABLE_SPAM");
         }
         else{
-            Log.d(TAG, "NewSmsMessageRunnable: run(): message will be inserted in TABLE_HAM or TABLE_SPAM accordingly");
+            Log.d(TAG, "NewSmsMessageRunnable: run(): internet connection detected. Prediction API will beprobed and message will be inserted in TABLE_HAM or TABLE_SPAM accordingly");
         }
-        this.message_is_spam = !this.message_is_spam;//to keep it changing alternatively
-        this.message_is_spam = true;//temp code
-        Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam currently set to  : " + this.message_is_spam);
+//        this.message_is_spam = !this.message_is_spam;//to keep it changing alternatively
+//        this.message_is_spam = true;//temp code
+        Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam : " + this.message_is_spam);
 //        --------------
         if(this.http_req_success) {
         //insert in contentsmsminbox only if not spam
@@ -276,4 +306,166 @@ public class NewSmsMessageRunnable implements Runnable{
         }
         return wifiAvailable || mobileAvailable;
     }
+
+
+
+
+    //make prediction on this thread if possible
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private int makePrediction(String id_str, String sms_body_str){
+        http_req_success = checkNetwork();
+
+        if(!http_req_success){
+            Log.d(TAG + "[API]", "NewSmsMessageRunnable: run(): internet not available, skipping classification for now");
+            return -1;
+        }
+        else{
+            URL url = null;
+            try {
+                url = new URL("http://192.168.1.102:5000/predict");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            HttpURLConnection con = null;
+            try {
+                con = (HttpURLConnection)url.openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                con.setRequestMethod("POST");
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            }
+
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+
+            con.setDoOutput(true);
+
+//            String id = "1000";
+            String[] id = new String[1];
+            id[0] = id_str;
+//            String[] message_body = new String[5];
+            String[] message_body = new String[1];
+            message_body[0] = sms_body_str;
+//            message_body[0] = "Hi, I am in a meeting. Will call back later.";
+//            message_body[1] = "IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.";
+//            message_body[2] = "A [redacted] loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.[redacted].co.uk to opt out reply stop";
+//            message_body[3] = "You have still not claimed the compensation you are due for the accident you had. To start the process please reply YES. To opt out text STOP";
+//            message_body[4] = "Our records indicate your Pension is under performing to see higher growth and up to 25% cash release reply PENSION for a free review. To opt out reply STOP";
+            // String number = "\"9999977777\"";
+            JSONArray ja = new JSONArray();
+
+            for(int i=0; i<message_body.length; i++){
+                JSONObject jo = new JSONObject();
+//                Integer idint = Integer.parseInt(id) + i;
+                try {
+                    jo.put("id", id[i]);
+                    jo.put("message_body", message_body[i]);
+                    ja.put(jo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            JSONObject mainObj = new JSONObject();
+            try {
+                mainObj.put("entries", ja);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String jsonInputString = mainObj.toString();
+
+            Log.d(TAG + "[API]", "NewSmsMessageRunnable: makePrediction(): \"Printing json main object");
+            Log.d(TAG + "[API]", "NewSmsMessageRunnable: makePrediction(): " + jsonInputString);
+
+            try(OutputStream os = con.getOutputStream()){
+                byte[] input = new byte[0];
+                try {
+                    input = jsonInputString.getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    os.write(input, 0, input.length);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            int code = 0;
+            try {
+                code = con.getResponseCode();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): ");
+            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): HTTP POST request done.");
+            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Response code: " + code);
+
+            try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))){
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                // System.out.println(response.toString());
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Complete response:");
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): " + response.toString());
+                JSONObject obj = null;
+                try {
+                    obj = new JSONObject(response.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): length of JSON obj : " + obj.length());
+
+                JSONArray result_ja = (JSONArray) obj.get("result");
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Printing <JSONOArray> result_ja :" + result_ja);
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): length of result_ja : " + result_ja.length());
+                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): looping through the json array ");
+
+                for(int i=0; i<result_ja.length(); i++){
+                    JSONObject tempjo = (JSONObject) result_ja.get(i);
+                    System.out.printf("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): [%d]  %s\n", i, tempjo.toString());
+                    try{
+                        System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): extract ID and spam prediction from the JSON object");
+                        System.out.printf("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
+                        if(tempjo.get("spam").toString().equals("1")){
+                            return 1;
+                        }
+                        else if(tempjo.get("spam").toString().equals("0")){
+                            return 0;
+                        }
+                        else{
+                            return -1;
+                        }
+
+                    }
+                    catch(Exception e){
+                        e.printStackTrace();
+                        try{
+                            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): got error : " + tempjo.get("error").toString());
+                            return -1;
+                        }
+                        catch(Exception e1){
+                            e1.printStackTrace();
+                            return -1;
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return  -1;
+    }
 }
+

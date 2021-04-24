@@ -23,14 +23,14 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 public class PredictionProbingRunnable implements Runnable {
-    private static String TAG = "[MY_DEBUG]";
-    String id;
+    private static String TAG = "[MY_DEBUG] [API]";
+    String[] id;
     String number;
-    String message_body;
+    String[] message_body;
     //get the context from the backgorund service  ClassificationSyncService
     Context context;
 
-    PredictionProbingRunnable(Context context, String id, String number, String message_body){
+    PredictionProbingRunnable(Context context, String[] id, String number, String[] message_body){
         this.id = id;
         this.number = number;
         this.message_body = message_body;
@@ -72,21 +72,22 @@ public class PredictionProbingRunnable implements Runnable {
 
             con.setDoOutput(true);
 
-            String id = "1000";
-            String[] message_body = new String[5];
-            message_body[0] = "Hi, I am in a meeting. Will call back later.";
-            message_body[1] = "IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.";
-            message_body[2] = "A [redacted] loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.[redacted].co.uk to opt out reply stop";
-            message_body[3] = "You have still not claimed the compensation you are due for the accident you had. To start the process please reply YES. To opt out text STOP";
-            message_body[4] = "Our records indicate your Pension is under performing to see higher growth and up to 25% cash release reply PENSION for a free review. To opt out reply STOP";
+//            String id = "1000";
+//            String[] message_body = new String[5];
+//            message_body[0] = "Hi, I am in a meeting. Will call back later.";
+//            message_body[1] = "IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.";
+//            message_body[2] = "A [redacted] loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.[redacted].co.uk to opt out reply stop";
+//            message_body[3] = "You have still not claimed the compensation you are due for the accident you had. To start the process please reply YES. To opt out text STOP";
+//            message_body[4] = "Our records indicate your Pension is under performing to see higher growth and up to 25% cash release reply PENSION for a free review. To opt out reply STOP";
             // String number = "\"9999977777\"";
             JSONArray ja = new JSONArray();
 
-            for(int i=0; i<5; i++){
+            for(int i=0; i<id.length; i++){
                 JSONObject jo = new JSONObject();
-                Integer idint = Integer.parseInt(id) + i;
+//                Integer idint = Integer.parseInt(id) + i;
                 try {
-                    jo.put("id", String.valueOf(idint));
+//                    jo.put("id", String.valueOf(idint));
+                    jo.put("id", id[i]);
                     jo.put("message_body", message_body[i]);
                     ja.put(jo);
                 } catch (JSONException e) {

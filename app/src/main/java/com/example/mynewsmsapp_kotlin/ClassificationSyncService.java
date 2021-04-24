@@ -22,9 +22,9 @@ public class ClassificationSyncService extends Service {
         onTaskRemoved(intent);
         ExecutorService executor = Executors.newFixedThreadPool(5);
 
-        String id_str = "1000";
+        String[] id_str = {"1000"};
         String address = "9999988888";
-        String sms_body = "URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU";
+        String[] sms_body = {"URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU"};
 //        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
 //        predictspam.start();
         Runnable worker = new PredictionProbingRunnable(this, id_str, address, sms_body);
@@ -35,9 +35,12 @@ public class ClassificationSyncService extends Service {
 //        }
 
 
+
+
+
         Toast.makeText(getApplicationContext(),"This is a Service running in Background",
                 Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "ClassificationSyncService: onStartCommand(): Service is running in background");
+//        Log.d(TAG, "ClassificationSyncService: onStartCommand(): Service is running in background");
         return START_STICKY;
     }
     @Override
