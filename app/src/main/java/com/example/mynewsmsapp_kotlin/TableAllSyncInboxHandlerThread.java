@@ -363,7 +363,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS: not present in items_ids_inbox");
                                                 boolean spam = currentlistitem_item_coressinboxids_tableall.toString().equals(SPAM.toString()) ;
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): checking if SPAM : " + spam);
-                                                if (!spam) {
+                                                if (!spam) { // since not present in items_ids_inbox and not spam, means we are looking for corress_inbox_id == UNCLASSIFIED
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): case TASK_GET_MISSING_IDS:  ----------");
                                                     Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): not spam, meaning message is unclassified. Hence first decide whether spam or ham.");
 
