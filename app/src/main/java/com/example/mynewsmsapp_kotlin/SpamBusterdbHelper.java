@@ -42,7 +42,7 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
                     SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
-    private static final String SQL_CREATE_TABLEPENDING =
+    public static final String SQL_CREATE_TABLEPENDING =
             "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_PENDING.TABLE_NAME + " (" +
                     SpamBusterContract.TABLE_PENDING._ID + " INTEGER PRIMARY KEY, " +
                     SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL + " INTEGER )";

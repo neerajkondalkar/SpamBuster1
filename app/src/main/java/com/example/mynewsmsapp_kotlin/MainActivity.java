@@ -185,6 +185,12 @@ public class MainActivity extends AppCompatActivity {
 //            Log.d(TAG, TAG_onCreate + " Exception : " + e);
 //        }
 //        -----------------
+
+        //create TABLE_PENDING start
+//        SQLiteDatabase tempdb = spamBusterdbHelper.getWritableDatabase();
+//        tempdb.execSQL(SpamBusterdbHelper.SQL_CREATE_TABLEPENDING);
+        //create TABLE_PENDING end
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted
             EditText input;
@@ -252,11 +258,11 @@ public class MainActivity extends AppCompatActivity {
     public void refreshSmsInbox() {
 
         //DEBUG code start
-//        String id_str = "1000";
-//        String address = "9999988888";
-//        String sms_body = "URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU";
-//        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
-//        predictspam.start();
+        String id_str = "1000";
+        String address = "9999988888";
+        String sms_body = "URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU";
+        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
+        predictspam.start();
         //DEBUG code end
 
 //        ArrayList<String> sms_list = new ArrayList<String>();

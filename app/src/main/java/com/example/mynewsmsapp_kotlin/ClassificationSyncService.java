@@ -29,7 +29,7 @@ public class ClassificationSyncService extends Service {
 //        predictspam.start();
         Runnable worker = new PredictionProbingRunnable(this, id_str, address, sms_body);
 //        while(MainActivity.count_exec_service>0){
-            executor.execute(worker);
+//            executor.execute(worker);
 //            MainActivity.count_exec_service--;
 
 //        }
