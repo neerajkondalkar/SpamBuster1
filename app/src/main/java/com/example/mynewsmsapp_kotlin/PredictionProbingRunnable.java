@@ -161,6 +161,13 @@ public class PredictionProbingRunnable implements Runnable {
                     try{
                         System.out.println("[MY_DEBUG] extract ID and spam prediction from the JSON object");
                         System.out.printf("[MY_DEBUG] [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
+                        //if spam != -1
+                        //call postPredictionDbOperation(id, map_rev_tablepending.get(id), spam)
+
+
+                        // void postPredictionDbOperation(String id_tablepending, String id_tableall, spam)
+                        //      remove entry from TABLE_PENDING
+                        //      update corress_inbox_id in TABLE_ALL according to the spam value
                     }
                     catch(Exception e){
                         e.printStackTrace();

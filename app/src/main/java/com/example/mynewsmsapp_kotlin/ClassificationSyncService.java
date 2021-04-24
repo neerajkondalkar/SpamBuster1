@@ -34,6 +34,32 @@ public class ClassificationSyncService extends Service {
 
 //        }
 
+        // all this code will mostly go into TableAllSyncHandlerThread, in that case instead of spawning PredictionProbingRunnable, we will have the code as a method in TableAllSyncHandlerThread
+        // create String[] arrlist_to_predict_messsages
+        // create HashMap map_tablepending <String id_tableall, String id_tablepending>
+        // create HashMap map_rev_tablepending <String id_tablepending, String id_tableall>
+        // first extract TABLE_ALL ids where coress_inbox_id == UNCLASSIFIED
+        // put them in HashSet hashset_id_tableall
+        // then extract all the id_tableall, id_tablepending from TABLE_PENDING
+        // put all id_tableall in ArrayList arrlist_id_tableall. Also add entries into the map_tablepending <id_tableall, id_tablepending> and map_rev_tablepending<id_tablepending, id_tableall>
+        // iterate through the ArrayList arrlist_id_tableall
+        //      if arrlist_id_tableall(i) is not present in HashSet hashset_id_tableall (meaning it is already classified),
+        //              then remove arrlist_id_tableall(i) and spawn a runnable to remove that entry with corresponding id_tablepending (by getting from map_tablepending) from TABLE_PENDING
+        //      else if arrlist_id_tableall(i) is present in HashSet hashset_id_tableall(meaning it is not yet classified),
+        //              then query tableall for message_body and add the the corresponding messages_body  to index i of arrlist_to_predict_messages
+        // thus, all tableall ids to predict are in arrlist_id_tableall and all corressponding messages are in arrlist_to_predict_messages
+        // iterate through all ids and messages
+        //      put  map_tablepending.get(id_tableall[i]) in  strarr_ids[i] , and arrlist_to_predict_messages strarr_messages where
+        //      index should same for both strarr_ids and strarr_messages
+        // thus strarr_ids will have all the table_pending ids and strarr_messages will have all the messages which have to be predicted
+        // if strarr_ids and strarr_messages are not empty
+        //     spawn PredictionProbingRunnable(context, strarr_ids, "number", strarr_messages, map_rev_tablepending)
+        // strarr_id has id and predictionarr has the corressponding prediction, index matching, strarr_id[i] prediction is at predictionarr[i]
+        // loop through the predictionarr
+        //      if predictionarr[i] != -1,
+        //          then remove the strarr_id[i] from TABLE_PENDING
+        //          if predictionarr[i] == 1
+        //              then update TABLE_ALL corress_inbox_id =
 
 
 
