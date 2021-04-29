@@ -18,6 +18,7 @@ public final class SpamBusterContract {
         public static final String COLUMN_SMS_ADDRESS = "column_address";
         public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date"; //timestamp when it showed up on my inbox
         public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent"; //timestamp from the sender
+        public static final String COLUMN_SPAM = "column_spam"; //can have three values "UNCLASSIFIED", "SPAM", "HAM"
     }
 
     public static class TABLE_HAM implements BaseColumns{

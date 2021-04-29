@@ -190,6 +190,11 @@ public class MainActivity extends AppCompatActivity {
 //        SQLiteDatabase tempdb = spamBusterdbHelper.getWritableDatabase();
 //        tempdb.execSQL(SpamBusterdbHelper.SQL_CREATE_TABLEPENDING);
         //create TABLE_PENDING end
+        //alter TABLE_ALL to add column_spam START
+//        SQLiteDatabase tempdb = spamBusterdbHelper.getWritableDatabase();
+//        tempdb.execSQL(SpamBusterdbHelper.SQL_ALTER_TABLEALL_ADDCOLUMNSPAM);
+        //alter TABLE_ALL to add column_spam END
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted

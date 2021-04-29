@@ -8,6 +8,8 @@ import android.util.Log;
 
 import java.util.List;
 
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
+
 public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
     private  static final String TAG = "[MY_DEBUG] " + SpamBusterdbHelper.class.getSimpleName();
@@ -22,7 +24,8 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + " TEXT," +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " TEXT, " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT," +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " TEXT, " +
+                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " TEXT )";
 
     private static final String SQL_CREATE_TABLEHAM =
             "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_HAM.TABLE_NAME + " (" +
@@ -72,6 +75,11 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
 
     private static String selection_for_delete_tablepending = SpamBusterContract.TABLE_PENDING._ID + " LIKE ? ";
     private static String[] selection_args_for_delete_tablepending = { "*" };
+
+    public static String SQL_ALTER_TABLEALL_ADDCOLUMNSPAM =
+            "ALTER TABLE " + SpamBusterContract.TABLE_ALL.TABLE_NAME +
+                    " ADD " + SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " TEXT DEFAULT " + UNCLASSIFIED;
+
 
     public  SpamBusterdbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
