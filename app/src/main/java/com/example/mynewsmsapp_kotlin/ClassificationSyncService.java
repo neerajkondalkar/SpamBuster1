@@ -31,7 +31,6 @@ public class ClassificationSyncService extends Service {
 //        while(MainActivity.count_exec_service>0){
 //            executor.execute(worker);
 //            MainActivity.count_exec_service--;
-
 //        }
 
         // all this code will mostly go into TableAllSyncHandlerThread, in that case instead of spawning PredictionProbingRunnable, we will have the code as a method in TableAllSyncHandlerThread

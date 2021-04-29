@@ -118,8 +118,11 @@ public class NewSmsMessageRunnable implements Runnable{
 
             if(prediction == -1){
                 http_req_success = false;
+                Log.d(TAG, "NewSmsMessageRunnable: run(): API probing failed/no internet connection detected, message will only be present in TABLE ALL and NOT in TABLE_HAM or TABLE_SPAM");
             }
             else if(prediction == 1){
+                Log.d(TAG, "NewSmsMessageRunnable: run(): API probing successful");
+                Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam : " + this.message_is_spam);
                 http_req_success = true;
                 message_is_spam = true;
             }
@@ -131,17 +134,6 @@ public class NewSmsMessageRunnable implements Runnable{
                 //do nothing
             }
 
-
-        Log.d(TAG, "NewSmsMessageRunnable: run(): http_req_success  : " + this.http_req_success);
-        if(!this.http_req_success){
-            Log.d(TAG, "NewSmsMessageRunnable: run(): no internet connection detected, message will only be present in TABLE ALL and NOT in TABLE_HAM or TABLE_SPAM");
-        }
-        else{
-            Log.d(TAG, "NewSmsMessageRunnable: run(): internet connection detected. Prediction API will beprobed and message will be inserted in TABLE_HAM or TABLE_SPAM accordingly");
-        }
-//        this.message_is_spam = !this.message_is_spam;//to keep it changing alternatively
-//        this.message_is_spam = true;//temp code
-        Log.d(TAG, "NewSmsMessageRunnable: run(): message is spam : " + this.message_is_spam);
 //        --------------
         if(this.http_req_success) {
         //insert in contentsmsminbox only if not spam

@@ -258,11 +258,21 @@ public class MainActivity extends AppCompatActivity {
     public void refreshSmsInbox() {
 
         //DEBUG code start
-//        Log.d(TAG, "MainActivity: refreshSmsInbox(): Debug Probing prediction API");
-//        String[] id_str = {"1000"};
+        Log.d(TAG, "MainActivity: refreshSmsInbox(): Debug Probing prediction API");
+//        String[] id_str = new String[5];
+//        id_str[0] = "1000";
+//        id_str[1] = "1001";
+//        id_str[2] = "1002";
+//        id_str[3] = "1003";
+//        id_str[4] = "1004";
 //        String address = "9999988888";
-//        String[] sms_body = {"URGENT! Your Mobile No 07808726822 was awarded a L2,000 Bonus Caller Prize on 02/09/03! This is our 2nd attempt to contact YOU! Call 0871-872-9758 BOX95QU"};
-//        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, sms_body));
+//        String[] message_body = new String[5];
+//        message_body[0] = "Hi, I am in a meeting. Will call back later.";
+//        message_body[1] = "IMPORTANT - You could be entitled up to £3,160 in compensation from mis-sold PPI on a credit card or loan. Please reply PPI for info or STOP to opt out.";
+//        message_body[2] = "A [redacted] loan for £950 is approved for you if you receive this SMS. 1 min verification & cash in 1 hr at www.[redacted].co.uk to opt out reply stop";
+//        message_body[3] = "You have still not claimed the compensation you are due for the accident you had. To start the process please reply YES. To opt out text STOP";
+//        message_body[4] = "Our records indicate your Pension is under performing to see higher growth and up to 25% cash release reply PENSION for a free review. To opt out reply STOP";
+//        Thread predictspam = new Thread(new PredictionProbingRunnable(this, id_str, address, message_body));
 //        predictspam.start();
         //DEBUG code end
 
