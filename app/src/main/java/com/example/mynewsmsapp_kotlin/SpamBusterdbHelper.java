@@ -25,25 +25,25 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " TEXT, " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT," +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " TEXT, " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " TEXT )";
+                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " TEXT DEFAULT " + UNCLASSIFIED + " )";
 
-    private static final String SQL_CREATE_TABLEHAM =
-            "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_HAM.TABLE_NAME + " (" +
-                    SpamBusterContract.TABLE_HAM._ID + " INTEGER PRIMARY KEY, " +
-                    SpamBusterContract.TABLE_HAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
-                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_BODY + " TEXT," +
-                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_ADDRESS + " TEXT, " +
-                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
-                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
-
-    private static final String SQL_CREATE_TABLESPAM =
-            "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_SPAM.TABLE_NAME + " (" +
-                    SpamBusterContract.TABLE_SPAM._ID + " INTEGER PRIMARY KEY, " +
-                    SpamBusterContract.TABLE_SPAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
-                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_BODY + " TEXT," +
-                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_ADDRESS + " TEXT, " +
-                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
-                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
+//    private static final String SQL_CREATE_TABLEHAM =
+//            "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_HAM.TABLE_NAME + " (" +
+//                    SpamBusterContract.TABLE_HAM._ID + " INTEGER PRIMARY KEY, " +
+//                    SpamBusterContract.TABLE_HAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
+//                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_BODY + " TEXT," +
+//                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_ADDRESS + " TEXT, " +
+//                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
+//                    SpamBusterContract.TABLE_HAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
+//
+//    private static final String SQL_CREATE_TABLESPAM =
+//            "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_SPAM.TABLE_NAME + " (" +
+//                    SpamBusterContract.TABLE_SPAM._ID + " INTEGER PRIMARY KEY, " +
+//                    SpamBusterContract.TABLE_SPAM.COLUMN_CORRES_INBOX_ID + " TEXT, " +
+//                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_BODY + " TEXT," +
+//                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_ADDRESS + " TEXT, " +
+//                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE_SENT + " TEXT, " +
+//                    SpamBusterContract.TABLE_SPAM.COLUMN_SMS_EPOCH_DATE + " TEXT )" ;
 
     public static final String SQL_CREATE_TABLEPENDING =
             "CREATE TABLE IF NOT EXISTS " + SpamBusterContract.TABLE_PENDING.TABLE_NAME + " (" +
@@ -55,11 +55,11 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     private static final String SQL_DROP_TABLEALL = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_ALL.TABLE_NAME;
     private static final String SQL_DELETE_ENTRIES_TABLEALL = "DELETE FROM  " + SpamBusterContract.TABLE_ALL.TABLE_NAME;
 
-    private static final String SQL_DROP_TABLEHAM = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_HAM.TABLE_NAME;
-    private static final String SQL_DELETE_ENTRIES_TABLEHAM = "DELETE FROM  " + SpamBusterContract.TABLE_HAM.TABLE_NAME;
-
-    private static final String SQL_DROP_TABLESPAM = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
-    private static final String SQL_DELETE_ENTRIES_TABLESPAM = "DELETE FROM  " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
+//    private static final String SQL_DROP_TABLEHAM = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_HAM.TABLE_NAME;
+//    private static final String SQL_DELETE_ENTRIES_TABLEHAM = "DELETE FROM  " + SpamBusterContract.TABLE_HAM.TABLE_NAME;
+//
+//    private static final String SQL_DROP_TABLESPAM = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
+//    private static final String SQL_DELETE_ENTRIES_TABLESPAM = "DELETE FROM  " + SpamBusterContract.TABLE_SPAM.TABLE_NAME;
 
     private static final String SQL_DROP_TABLEPENDING = "DROP TABLE IF EXISTS " + SpamBusterContract.TABLE_PENDING.TABLE_NAME;
     private static final String SQL_DELETE_ENTRIES_TABLEPENDING = "DELETE FROM  " + SpamBusterContract.TABLE_PENDING.TABLE_NAME;
@@ -67,11 +67,11 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     private static String selection_for_delete_tableall = SpamBusterContract.TABLE_ALL._ID + " LIKE ? ";
     private static String[] selection_args_for_delete_tableall = { "*" };
 
-    private static String selection_for_delete_tableham = SpamBusterContract.TABLE_HAM._ID + " LIKE ? ";
-    private static String[] selection_args_for_delete_tableham = { "*" };
-
-    private static String selection_for_delete_tablespam = SpamBusterContract.TABLE_SPAM._ID + " LIKE ? ";
-    private static String[] selection_args_for_delete_tablespam = { "*" };
+//    private static String selection_for_delete_tableham = SpamBusterContract.TABLE_HAM._ID + " LIKE ? ";
+//    private static String[] selection_args_for_delete_tableham = { "*" };
+//
+//    private static String selection_for_delete_tablespam = SpamBusterContract.TABLE_SPAM._ID + " LIKE ? ";
+//    private static String[] selection_args_for_delete_tablespam = { "*" };
 
     private static String selection_for_delete_tablepending = SpamBusterContract.TABLE_PENDING._ID + " LIKE ? ";
     private static String[] selection_args_for_delete_tablepending = { "*" };
@@ -93,17 +93,17 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
         int deleted_rows = db.delete(SpamBusterContract.TABLE_ALL.TABLE_NAME, selection_for_delete_tableall, selection_args_for_delete_tableall);
         db.execSQL(SQL_DELETE_ENTRIES_TABLEALL);
 
-        db.execSQL(SQL_DROP_TABLEHAM);
-        db.execSQL(SQL_CREATE_TABLEHAM);
+//        db.execSQL(SQL_DROP_TABLEHAM);
+//        db.execSQL(SQL_CREATE_TABLEHAM);
         //to delete database tables and entries everytime a new database is created
-        deleted_rows = db.delete(SpamBusterContract.TABLE_HAM.TABLE_NAME, selection_for_delete_tableham, selection_args_for_delete_tableham);
-        db.execSQL(SQL_DELETE_ENTRIES_TABLEHAM);
-
-        db.execSQL(SQL_DROP_TABLESPAM);
-        db.execSQL(SQL_CREATE_TABLESPAM);
-        //to delete database tables and entries everytime a new database is created
-        deleted_rows = db.delete(SpamBusterContract.TABLE_SPAM.TABLE_NAME, selection_for_delete_tablespam, selection_args_for_delete_tablespam);
-        db.execSQL(SQL_DELETE_ENTRIES_TABLESPAM);
+//        deleted_rows = db.delete(SpamBusterContract.TABLE_HAM.TABLE_NAME, selection_for_delete_tableham, selection_args_for_delete_tableham);
+//        db.execSQL(SQL_DELETE_ENTRIES_TABLEHAM);
+//
+//        db.execSQL(SQL_DROP_TABLESPAM);
+//        db.execSQL(SQL_CREATE_TABLESPAM);
+//        //to delete database tables and entries everytime a new database is created
+//        deleted_rows = db.delete(SpamBusterContract.TABLE_SPAM.TABLE_NAME, selection_for_delete_tablespam, selection_args_for_delete_tablespam);
+//        db.execSQL(SQL_DELETE_ENTRIES_TABLESPAM);
 
         db.execSQL(SQL_DROP_TABLEPENDING);
         db.execSQL(SQL_CREATE_TABLEPENDING);
@@ -125,8 +125,8 @@ public class SpamBusterdbHelper  extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DROP_TABLEALL);
-        db.execSQL(SQL_DROP_TABLEHAM);
-        db.execSQL(SQL_DROP_TABLESPAM);
+//        db.execSQL(SQL_DROP_TABLEHAM);
+//        db.execSQL(SQL_DROP_TABLESPAM);
         db.execSQL(SQL_DROP_TABLEPENDING);
         onCreate(db);
     }

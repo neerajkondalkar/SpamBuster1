@@ -1,5 +1,6 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -26,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
 
 public class ChatWindowActivity extends AppCompatActivity {
     public static final String TAG = "[MY_DEBUG]";
@@ -90,7 +95,8 @@ public class ChatWindowActivity extends AppCompatActivity {
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + ", " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + ", " +
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE +
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + ", " +
+                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM +
                     " FROM " + SpamBusterContract.TABLE_ALL.TABLE_NAME +
                     " WHERE " + SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS +
                     " LIKE '%" + address + "'";
@@ -102,7 +108,8 @@ public class ChatWindowActivity extends AppCompatActivity {
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM
             };
             String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "%'";
 //            String[] selectionArgs = {"\'%" + address + "\'"};
@@ -127,6 +134,7 @@ public class ChatWindowActivity extends AppCompatActivity {
                 int index_sms_body = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
                 int index_sms_address = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
                 int index_sms_epoch_date = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE);
+                int index_spam = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SPAM);
                 try {
                     messages_list.clear();
                     do {
@@ -135,10 +143,26 @@ public class ChatWindowActivity extends AppCompatActivity {
                         String sms_body = cursor.getString(index_sms_body);
                         String sms_address = cursor.getString(index_sms_address);
                         String epoch_date = cursor.getString(index_sms_epoch_date);
+                        String spam_str = cursor.getString(index_spam);
+                        if (spam_str.equals(HAM)){
+                            spam_str = "HAM";
+                        }
+                        else if (spam_str.equals(SPAM)){
+                            spam_str = "SPAM";
+                        }
+                        else{
+                            spam_str = "UNCLASSIFIED";
+                        }
                         Long milli_seconds = Long.parseLong(epoch_date);
                         calendar.setTimeInMillis(milli_seconds);
                         String printable_date = formatter.format(calendar.getTime());
-                        String str = "ItemID = " + itemId + "\ncorress_inbox_id = " + corress_inbox_id + "\n SMS From: " + MainActivity.getContactName(activity, sms_address) + "\n Recieved at: " + printable_date + "\n" + sms_body;
+                        @SuppressLint("DefaultLocale")
+                        String str = String.format("itemID = %d\ncorressinboxid: %s\nSender: %s\nReceived at: %s\nMessage: %s,\nSpam: %s\n",
+                                itemId, corress_inbox_id, MainActivity.getContactName(activity, sms_address), printable_date,
+                                sms_body, spam_str);
+//                        String str = String.format("ItemID = " + itemId + "\ncorress_inbox_id = " +
+//                                corress_inbox_id + "\n SMS From: " + MainActivity.getContactName(activity, sms_address) +
+//                                "\n Recieved at: " + printable_date + "\n" + sms_body);
                         Log.d(TAG, "LoadMessagesRunnable: run(): Adding message " + str.substring(0, 10) + " to messages_list");
                         messages_list.add(str);
                     } while (cursor.moveToNext());

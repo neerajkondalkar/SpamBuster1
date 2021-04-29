@@ -439,13 +439,14 @@ public class MainActivity extends AppCompatActivity {
 
             while(true) {
                 if(DONE_TASK_GETPERSONS) {
+                    DONE_TASK_GETPERSONS = false;
                     activity.displayPersonsRunnable = new DisplayPersonsRunnable(activity, db);
                     activity.thread = new Thread(activity.displayPersonsRunnable);
                     activity.thread.start();
                     break;
                 }
             }
-            DONE_TASK_GETPERSONS = false;
+
 
             //carry out sync of tables everytime the app starts
 //            this.db_helper = activity.spamBusterdbHelper;

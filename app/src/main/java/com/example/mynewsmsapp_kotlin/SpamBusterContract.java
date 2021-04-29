@@ -18,26 +18,26 @@ public final class SpamBusterContract {
         public static final String COLUMN_SMS_ADDRESS = "column_address";
         public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date"; //timestamp when it showed up on my inbox
         public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent"; //timestamp from the sender
-        public static final String COLUMN_SPAM = "column_spam"; //can have three values "UNCLASSIFIED", "SPAM", "HAM"
+        public static final String COLUMN_SPAM = "column_spam"; //can have three values "UNCLASSIFIED", "SPAM", "HAM" i.e "-7", "-9" and "-11"
     }
 
-    public static class TABLE_HAM implements BaseColumns{
-        public static final String TABLE_NAME = "table_ham";
-        public static final String COLUMN_CORRES_INBOX_ID = "corres_inbox_id"; //corresponding _id in sms/inbox
-        public static final String COLUMN_SMS_BODY = "column_body";
-        public static final String COLUMN_SMS_ADDRESS = "column_address";
-        public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date";
-        public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent";
-    }
-
-    public static class TABLE_SPAM implements BaseColumns{
-        public static final String TABLE_NAME = "table_spam";
-        public static final String COLUMN_CORRES_INBOX_ID = "corres_inbox_id"; //corresponding _id in sms/inbox
-        public static final String COLUMN_SMS_BODY = "column_body";
-        public static final String COLUMN_SMS_ADDRESS = "column_address";
-        public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date";
-        public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent";
-    }
+//    public static class TABLE_HAM implements BaseColumns{
+//        public static final String TABLE_NAME = "table_ham";
+//        public static final String COLUMN_CORRES_INBOX_ID = "corres_inbox_id"; //corresponding _id in sms/inbox
+//        public static final String COLUMN_SMS_BODY = "column_body";
+//        public static final String COLUMN_SMS_ADDRESS = "column_address";
+//        public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date";
+//        public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent";
+//    }
+//
+//    public static class TABLE_SPAM implements BaseColumns{
+//        public static final String TABLE_NAME = "table_spam";
+//        public static final String COLUMN_CORRES_INBOX_ID = "corres_inbox_id"; //corresponding _id in sms/inbox
+//        public static final String COLUMN_SMS_BODY = "column_body";
+//        public static final String COLUMN_SMS_ADDRESS = "column_address";
+//        public static final String COLUMN_SMS_EPOCH_DATE = "epoch_date";
+//        public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent";
+//    }
 
     public static class TABLE_PENDING implements BaseColumns{
         public static final String TABLE_NAME = "table_pending";
