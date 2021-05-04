@@ -14,6 +14,7 @@ public class ClassificationSyncService extends Service {
 //    public Context context = getApplicationContext();
     private static final String TAG = "[MY_DEBUG]";
 
+
     public ClassificationSyncService() {
     }
 
@@ -80,4 +81,5 @@ public class ClassificationSyncService extends Service {
         startService(restartServiceIntent);
         super.onTaskRemoved(rootIntent);
     }
+
 }

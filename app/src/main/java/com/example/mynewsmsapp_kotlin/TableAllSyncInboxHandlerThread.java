@@ -11,6 +11,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -656,9 +657,12 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 
                             }
                             DONE_TASK_UPDATE_MISSING_IDS = true;
-                            break; // end of case TASK_UPDATE_MISSING_IDS
+//                            break; // end of case TASK_UPDATE_MISSING_IDS
                         }
                         db.close();
+//                        Toast.makeText(MainActivity.instance(), "Trying to make toast from TableAllSyncInboxHandlerThread", Toast.LENGTH_LONG);
+                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing Mainactivity.instance(): " + MainActivity.instance());
+                        break; //break from case TASK_SYNCTABLES
                 }
             }
 
