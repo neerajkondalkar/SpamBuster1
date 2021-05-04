@@ -34,7 +34,7 @@ public class ClassificationSyncService extends Service {
 //            MainActivity.count_exec_service--;
 //        }
 
-        // all this code will mostly go into TableAllSyncHandlerThread, in that case instead of spawning PredictionProbingRunnable, we will have the code as a method in TableAllSyncHandlerThread
+        // all this code will mostly go into TableAllSyncHandlerThread, in that case instead of spawning PredictionProbingRunnable, we will have the code from PredictionProbingRunnable as a method in TableAllSyncHandlerThread
         // create String[] arrlist_to_predict_messsages
         // create HashMap map_tablepending <String id_tableall, String id_tablepending>
         // create HashMap map_rev_tablepending <String id_tablepending, String id_tableall>

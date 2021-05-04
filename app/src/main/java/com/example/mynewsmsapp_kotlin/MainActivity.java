@@ -174,8 +174,10 @@ public class MainActivity extends AppCompatActivity {
         //enable toggle tableham on creation of activity
         toggleButton_tableham.setChecked(true);
         spamBusterdbHelper = new SpamBusterdbHelper(this);
+
         //start background service
-        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
+//        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
+
 //        ----------------------- DELETE DATABASE --------------------
         //to delete the database. so that everytime a new database is created
 //        try {
@@ -194,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
 //        SQLiteDatabase tempdb = spamBusterdbHelper.getWritableDatabase();
 //        tempdb.execSQL(SpamBusterdbHelper.SQL_ALTER_TABLEALL_ADDCOLUMNSPAM);
         //alter TABLE_ALL to add column_spam END
-
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //if permission to READ_SMS is not granted

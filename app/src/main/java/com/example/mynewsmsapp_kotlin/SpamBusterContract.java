@@ -39,9 +39,9 @@ public final class SpamBusterContract {
 //        public static final String COLUMN_SMS_EPOCH_DATE_SENT = "epoch_date_sent";
 //    }
 
-    public static class TABLE_PENDING implements BaseColumns{
-        public static final String TABLE_NAME = "table_pending";
-        public static final String COLUMN_ID_TABLEALL = "id_tableall"; //corresponding _id in TABLE_ALL
-    }
+//    public static class TABLE_PENDING implements BaseColumns{
+//        public static final String TABLE_NAME = "table_pending";
+//        public static final String COLUMN_ID_TABLEALL = "id_tableall"; //corresponding _id in TABLE_ALL
+//    }
 }
 

@@ -74,6 +74,9 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                 switch (msg.what) {
                     case TASK_SYNCTABLES:
 
+
+
+
                         //first check if any of the tables TABLE_ALL and CONTENTSMSINBOX are empty
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): Entered case TASK_SYNCTABLES");
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): using db_helper : " + db_helper);

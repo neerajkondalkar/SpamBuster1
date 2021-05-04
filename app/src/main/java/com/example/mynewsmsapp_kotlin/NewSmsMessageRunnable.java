@@ -99,24 +99,25 @@ public class NewSmsMessageRunnable implements Runnable{
         Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + checkNetwork());
         //if no internet connection, then add message tableall id to TABLE_PENDING
         //let all messages go in TABLE_PENDING, the classificationsyncservice will take care of the rest
-            Log.d(TAG, "NewSmsMessageRunnable: run(): adding message tableall id  to TABLE_PENDING");
-            values.clear();
-            values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
-            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL: " + newRowId_tableall + " into TABLE_PENDING ...");
-            db.beginTransaction();
-            long newRowId_tablepending = db.insert(SpamBusterContract.TABLE_PENDING.TABLE_NAME, null, values);
-            db.setTransactionSuccessful();
-            db.endTransaction();
-            if (newRowId_tablepending == -1) {
-                Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
-            } else {
-                Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
-            }
-            String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
+//            Log.d(TAG, "NewSmsMessageRunnable: run(): adding message tableall id  to TABLE_PENDING");
+//            values.clear();
+//            values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
+//            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL: " + newRowId_tableall + " into TABLE_PENDING ...");
+//            db.beginTransaction();
+//            long newRowId_tablepending = db.insert(SpamBusterContract.TABLE_PENDING.TABLE_NAME, null, values);
+//            db.setTransactionSuccessful();
+//            db.endTransaction();
+//            if (newRowId_tablepending == -1) {
+//                Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
+//            } else {
+//                Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
+//            }
+//            String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
 
             int prediction = -1;
             if(checkNetwork()){
-                prediction = makePrediction(newRowId_tablepending_str, sms_body);
+//                prediction = makePrediction(newRowId_tablepending_str, sms_body);
+                  prediction = makePrediction(newRowId_tableall_str, sms_body);
             }
 
             if(prediction == -1){
