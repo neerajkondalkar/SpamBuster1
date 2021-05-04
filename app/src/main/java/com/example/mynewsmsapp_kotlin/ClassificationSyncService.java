@@ -64,8 +64,7 @@ public class ClassificationSyncService extends Service {
 
 
 
-        Toast.makeText(getApplicationContext(),"This is a Service running in Background",
-                Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(),"This is a Service running in Background", Toast.LENGTH_SHORT).show();
 //        Log.d(TAG, "ClassificationSyncService: onStartCommand(): Service is running in background");
         return START_STICKY;
     }

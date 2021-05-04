@@ -99,7 +99,7 @@ public class ComposeSmsActivity extends AppCompatActivity {
                     if(!str_input_sms.isEmpty()) {
                         Log.d(TAG, TAG_onClickSendSms + "valid phone number and message");
                         sms_manager.sendTextMessage(str_input_contact, null, str_input_sms, null, null);
-                        Toast.makeText(this, "Message sent!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Message sent!", Toast.LENGTH_LONG).show();
                     }
                     else{
                         Log.d(TAG, TAG_onClickSendSms + "Error: message empty");
