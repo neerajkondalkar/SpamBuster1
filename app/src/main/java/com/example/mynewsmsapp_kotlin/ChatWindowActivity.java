@@ -90,16 +90,16 @@ public class ChatWindowActivity extends AppCompatActivity {
                 return;
             }
 
-            String sql_load_messages = " SELECT " +
-                    BaseColumns._ID + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + ", " +
-                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM +
-                    " FROM " + SpamBusterContract.TABLE_ALL.TABLE_NAME +
-                    " WHERE " + SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS +
-                    " LIKE '%" + address + "'";
+//            String sql_load_messages = " SELECT " +
+//                    BaseColumns._ID + ", " +
+//                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + ", " +
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + ", " +
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + ", " +
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + ", " +
+//                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM +
+//                    " FROM " + SpamBusterContract.TABLE_ALL.TABLE_NAME +
+//                    " WHERE " + SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS +
+//                    " LIKE '%" + address + "'";
 //            cursor = db1.execSQL(sql_load_messages);
 
 
