@@ -27,7 +27,7 @@ import java.util.Set;
 public class PredictionUtility {
     private static final String TAG = "[MY_DEBUG]";
     Context context;
-    Map<String, Integer> result_map;
+    HashMap<String, Integer> result_map;
     PredictionUtility(Context context) {
         this.context = context;
         result_map = new HashMap<>();
@@ -39,7 +39,7 @@ public class PredictionUtility {
 
         if(!http_req_success){
             Log.d(TAG + "[API]", "NewSmsMessageRunnable: run(): internet not available, skipping classification for now");
-            return null;
+            result_map = null;
         }
         else{
             URL url = null;
@@ -160,13 +160,16 @@ public class PredictionUtility {
                         System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): extract ID and spam prediction from the JSON object");
                         System.out.printf("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
                         if(tempjo.get("spam").toString().equals("1")){
-                            return 1;
+                            result_map.put(tempjo.get("id").toString(), 1);
+//                            return 1;
                         }
                         else if(tempjo.get("spam").toString().equals("0")){
-                            return 0;
+                            result_map.put(tempjo.get("id").toString(), 0);
+//                            return 0;
                         }
                         else{
-                            return -1;
+                            result_map.put(tempjo.getString("id"), -1);
+//                            return -1;
                         }
 
                     }
@@ -174,11 +177,15 @@ public class PredictionUtility {
                         e.printStackTrace();
                         try{
                             System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): got error : " + tempjo.get("error").toString());
-                            return -1;
+//                            result_map.put(tempjo.getString("id"), -1);
+//                            return -1;
+                            return null;
                         }
                         catch(Exception e1){
                             e1.printStackTrace();
-                            return -1;
+//                            result_map.put(tempjo.getString("id"), -1);
+//                            return -1;
+                            return null;
                         }
                     }
                 }
@@ -188,9 +195,7 @@ public class PredictionUtility {
                 e.printStackTrace();
             }
         }
-        return  -1;
-    }
-
-        return map;
+        return result_map;
     }
 }
+

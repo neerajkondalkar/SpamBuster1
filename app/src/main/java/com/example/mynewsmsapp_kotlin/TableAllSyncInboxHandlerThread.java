@@ -7,6 +7,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -71,6 +73,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
     @Override
     protected void onLooperPrepared() {
         handler = new Handler() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void handleMessage(@NonNull Message msg) {
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): A Message received !");
@@ -217,11 +220,9 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             List<String> list_unclassified_tableallid = new ArrayList<>();
                             Map<String, String> hashmap_tableallid_to_message_forclassification = new HashMap<>();
 
-                            Iterator<String> it_tableaddid = hashset_tableall_id.iterator();
-                            while (it_tableaddid.hasNext()){
-                                String tableallid = it_tableaddid.next();
+                            for (String tableallid : hashset_tableall_id) {
                                 //select only UNCLASSIFIED tableallids
-                                if(hashmap_tableallid_to_spam.get(tableallid) == UNCLASSIFIED){
+                                if (hashmap_tableallid_to_spam.get(tableallid).equals(UNCLASSIFIED)) {
                                     list_unclassified_tableallid.add(tableallid);
                                 }
                             }
@@ -255,114 +256,113 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 
                             //classify
                             Map<String, Integer> hashmap_classification_result = new PredictionUtility(MainActivity.instance()).makePrediction(hashmap_tableallid_to_message_forclassification);
-                            for(String tableallid : list_unclassified_tableallid){
-                                int spamresultint = hashmap_classification_result.get(tableallid).intValue();
-                                String spamresult;
-                                if(spamresultint == 1){
-                                    spamresult = SPAM;
-                                }
-                                else if(spamresultint == 0){
-                                    spamresult = HAM;
-                                }
-                                else{
-                                    spamresult = UNCLASSIFIED;
-                                }
+                            if(hashmap_classification_result != null){
+                                for(String tableallid : list_unclassified_tableallid) {
+                                    int spamresultint = hashmap_classification_result.get(tableallid);
+                                    String spamresult;
+                                    if (spamresultint == 1) {
+                                        spamresult = SPAM;
+                                    } else if (spamresultint == 0) {
+                                        spamresult = HAM;
+                                    } else {
+                                        spamresult = UNCLASSIFIED;
+                                    }
 
 
-                                //if HAM then insert into SMSINBOX, and update TABLEALL with corressinboxid = newrowsmsid
-                                if (spamresult.equals(HAM)){
-                                    //insert only if not present in SMSINBOX already
-                                    if (!hashset_smsinbox_id.contains(hashmap_tableallid_to_corressinboxid.get(tableallid))){
+                                    //if HAM then insert into SMSINBOX, and update TABLEALL with corressinboxid = newrowsmsid
+                                    if (spamresult.equals(HAM)) {
+                                        //insert only if not present in SMSINBOX already
+                                        if (!hashset_smsinbox_id.contains(hashmap_tableallid_to_corressinboxid.get(tableallid))) {
 
 
-                                        //first get the latest_smsinboxid, so that we can know insertion is successfull after inserting
-                                        String latest_smsinboxid = getLatestSMSINBOXid();
+                                            //first get the latest_smsinboxid, so that we can know insertion is successfull after inserting
+                                            String latest_smsinboxid = getLatestSMSINBOXid();
 
-                                        //now insert into SMSINBOX the HAM message
-                                        //for that we have to first read the address, body, date, date_sent from TABLEALL
-                                        db = db_helper.getReadableDatabase();
-                                        projection = new String[]{
-                                                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
-                                                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
-                                                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT
-                                        };
-                                        String selection = SpamBusterContract.TABLE_ALL._ID + "=?";
-                                        selection_args = new String[] { tableallid };
-                                        Cursor cursor = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
-                                                projection,             // The array of columns to return (pass null to get all)
-                                                selection,              // The columns for the WHERE clause
-                                                selection_args,          // The values for the WHERE clause
-                                                null,                   // don't group the rows
-                                                null,                   // don't filter by row groups
-                                                null               // The sort order
-                                        );
-                                        String temp_address_holder=null;
-                                        String temp_date_holder=null;
-                                        String temp_datesent_holder=null;
-                                        if (!cursor.moveToFirst()){
-                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): unable to read from TABLE_ALL, probably empty");
+                                            //now insert into SMSINBOX the HAM message
+                                            //for that we have to first read the address, body, date, date_sent from TABLEALL
+                                            db = db_helper.getReadableDatabase();
+                                            projection = new String[]{
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
+                                                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT
+                                            };
+                                            String selection = SpamBusterContract.TABLE_ALL._ID + "=?";
+                                            selection_args = new String[]{tableallid};
+                                            Cursor cursor = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                                                    projection,             // The array of columns to return (pass null to get all)
+                                                    selection,              // The columns for the WHERE clause
+                                                    selection_args,          // The values for the WHERE clause
+                                                    null,                   // don't group the rows
+                                                    null,                   // don't filter by row groups
+                                                    null               // The sort order
+                                            );
+                                            String temp_address_holder = null;
+                                            String temp_date_holder = null;
+                                            String temp_datesent_holder = null;
+                                            if (!cursor.moveToFirst()) {
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): unable to read from TABLE_ALL, probably empty");
+                                            } else {
+                                                temp_address_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
+                                                temp_date_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
+                                                temp_datesent_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT));
+                                            }
+                                            cursor.close();
+
+                                            //prepare to insert into SMSINBOX
+                                            ContentResolver contentResolver = MainActivity.instance().getContentResolver();
+                                            ContentValues values = new ContentValues();
+                                            values.clear();
+                                            values.put("address", temp_address_holder);
+                                            values.put("person", "2");
+                                            values.put("date", temp_date_holder);
+                                            values.put("date_sent", temp_datesent_holder);
+                                            values.put("body", hashmap_tableallid_to_message_forclassification.get(tableallid));
+                                            db = db_helper.getWritableDatabase();
+                                            Uri uri = Uri.parse("content://sms/inbox");
+                                            db.beginTransaction();
+                                            contentResolver.insert(uri, values);
+                                            db.setTransactionSuccessful();
+                                            db.endTransaction();
+
+                                            //again get latest smsinbox id to see if it is actually greater tahn our previous latest smsinboxid to confirm successfull insertion
+                                            String newlatestsmsinboxid = getLatestSMSINBOXid();
+                                            if (Integer.parseInt(newlatestsmsinboxid) > Integer.parseInt(latest_smsinboxid)) {
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): insertion in SMSINBOX successfull");
+                                            }
+
+                                            String corressinboxid = newlatestsmsinboxid;
+                                            //now update the TABLEALL with column_spam = HAM and column_corressinboxid = corressinboxid
+                                            values.clear();
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corressinboxid);
+                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
+                                            db.beginTransaction();
+                                            String[] whereArgs = new String[]{tableallid};
+                                            db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+                                            db.setTransactionSuccessful();
+                                            db.endTransaction();
+
                                         }
-                                        else{
-                                            temp_address_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
-                                            temp_date_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
-                                            temp_datesent_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT));
-                                        }
-                                        cursor.close();
 
-                                        //prepare to insert into SMSINBOX
-                                        ContentResolver contentResolver = MainActivity.instance().getContentResolver();
+                                    }
+
+                                    //else if SPAM, then just update TABLEALL with column_spam = SPAM
+                                    else if (spamresult.equals(SPAM)) {
                                         ContentValues values = new ContentValues();
                                         values.clear();
-                                        values.put("address", temp_address_holder);
-                                        values.put("person", "2");
-                                        values.put("date", temp_date_holder);
-                                        values.put("date_sent", temp_datesent_holder);
-                                        values.put("body", hashmap_tableallid_to_message_forclassification.get(tableallid));
-                                        db = db_helper.getWritableDatabase();
-                                        Uri uri = Uri.parse("content://sms/inbox");
-                                        db.beginTransaction();
-                                        contentResolver.insert(uri, values);
-                                        db.setTransactionSuccessful();
-                                        db.endTransaction();
-
-                                        //again get latest smsinbox id to see if it is actually greater tahn our previous latest smsinboxid to confirm successfull insertion
-                                        String newlatestsmsinboxid = getLatestSMSINBOXid();
-                                        if (Integer.parseInt(newlatestsmsinboxid) > Integer.parseInt(latest_smsinboxid)){
-                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): insertion in SMSINBOX successfull");
-                                        }
-
-                                        String corressinboxid = newlatestsmsinboxid;
-                                        //now update the TABLEALL with column_spam = HAM and column_corressinboxid = corressinboxid
-                                        values.clear();
-                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corressinboxid);
                                         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
                                         db.beginTransaction();
                                         String[] whereArgs = new String[]{tableallid};
                                         db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
                                         db.setTransactionSuccessful();
                                         db.endTransaction();
-
+                                    } else {
+                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): classification failed for tableallid : " + tableallid);
                                     }
-
-                                }
-                                //else if SPAM, then just update TABLEALL with column_spam = SPAM
-                                else if (spamresult.equals(SPAM)) {
-                                    ContentValues values = new ContentValues();
-                                    values.clear();
-                                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
-                                    db.beginTransaction();
-                                    String[] whereArgs = new String[]{tableallid};
-                                    db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
-                                    db.setTransactionSuccessful();
-                                    db.endTransaction();
-                                }
-                                else{
-                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): classification failed for tableallid : " + tableallid);
                                 }
                             }
-
-
-
+                            else{
+                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): API probing failed");
+                            }
                         }
                         else{
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): No internet connection detected");
