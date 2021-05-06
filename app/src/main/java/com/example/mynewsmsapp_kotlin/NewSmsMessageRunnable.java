@@ -96,7 +96,7 @@ public class NewSmsMessageRunnable implements Runnable{
 //        --------------
 //         here comes the http request to check whether messages is spam  or noet http_req_success accordingly
         this.http_req_success = false;
-        Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + checkNetwork());
+        Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + new SBNetworkUtility().checkNetwork(context));
         //if no internet connection, then add message tableall id to TABLE_PENDING
         //let all messages go in TABLE_PENDING, the classificationsyncservice will take care of the rest
 //            Log.d(TAG, "NewSmsMessageRunnable: run(): adding message tableall id  to TABLE_PENDING");
@@ -115,7 +115,7 @@ public class NewSmsMessageRunnable implements Runnable{
 //            String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
 
             int prediction = -1;
-            if(checkNetwork()){
+            if(new SBNetworkUtility().checkNetwork(context)){
 //                prediction = makePrediction(newRowId_tablepending_str, sms_body);
                   prediction = makePrediction(newRowId_tableall_str, sms_body);
             }
@@ -324,7 +324,7 @@ public class NewSmsMessageRunnable implements Runnable{
     //make prediction on this thread if possible
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private int makePrediction(String id_str, String sms_body_str){
-        http_req_success = checkNetwork();
+        http_req_success = new SBNetworkUtility().checkNetwork(context);
 
         if(!http_req_success){
             Log.d(TAG + "[API]", "NewSmsMessageRunnable: run(): internet not available, skipping classification for now");
