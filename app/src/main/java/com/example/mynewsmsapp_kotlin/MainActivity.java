@@ -64,9 +64,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean active = false;
     //will be used as requestCode parameter in method requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUESTCODEFORPERMISSIONS_READSMS_ENDOFPERMISSIONS);
     private static final int REQUESTCODEFORPERMISSIONS_READSMS_READCONTACTS_ENDOFPERMISSIONS = 27015; //only for READSMS permission
-    private ToggleButton toggleButton_tableall;
-    private ToggleButton toggleButton_tableham;
-    private ToggleButton toggleButton_tablespam;
+    private ToggleButton toggleButton_all;
+    private ToggleButton toggleButton_inbox;
+    private ToggleButton toggleButton_spam;
     protected static ArrayList<String> messages_list_tableall = new ArrayList();
     public SpamBusterdbHelper spamBusterdbHelper;
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,12 +168,47 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = (RecyclerView) findViewById(R.id.messages);
-        toggleButton_tableall = (ToggleButton) findViewById(R.id.all_sms_toggle);
-        toggleButton_tableham = (ToggleButton) findViewById(R.id.ham_sms_toggle);
-        toggleButton_tablespam = (ToggleButton) findViewById(R.id.spam_sms_toggle);
+        toggleButton_all = (ToggleButton) findViewById(R.id.all_sms_toggle);
+        toggleButton_inbox = (ToggleButton) findViewById(R.id.inbox_sms_toggle);
+        toggleButton_spam = (ToggleButton) findViewById(R.id.spam_sms_toggle);
         //enable toggle tableham on creation of activity
-        toggleButton_tableham.setChecked(true);
+        toggleButton_all.setChecked(true);
         spamBusterdbHelper = new SpamBusterdbHelper(this);
+
+        //setting onclick listeners
+        toggleButton_all.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (toggleButton_all.isChecked()){
+                    toggleButton_inbox.setChecked(false);
+                    toggleButton_spam.setChecked(false);
+                }
+            }
+        });
+        toggleButton_inbox.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (toggleButton_inbox.isChecked()){
+                    toggleButton_all.setChecked(false);
+                    toggleButton_spam.setChecked(false);
+                }
+            }
+        });
+        toggleButton_spam.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (toggleButton_spam.isChecked()){
+                    toggleButton_inbox.setChecked(false);
+                    toggleButton_all.setChecked(false);
+                }
+            }
+        });
 
         //start background service
 //        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
