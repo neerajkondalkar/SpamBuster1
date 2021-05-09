@@ -29,11 +29,19 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         sms_messages_list.clear();
     }
 
+    public void clearItems(){
+        sms_messages_list.clear();
+    }
+
     public void insertPerson(int position, String address) {
         final String TAG_insert = " insertPerson(): ";
         Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
         sms_messages_list.add(position, address);
         notifyDataSetChanged();
+    }
+
+    public  void addAllItems(ArrayList<String> list){
+        sms_messages_list.addAll(list);
     }
 
     public void insert(int position, String new_sms) {
