@@ -38,7 +38,7 @@ public class PredictionUtility {
         boolean http_req_success = new SBNetworkUtility().checkNetwork(context);
 
         if(!http_req_success){
-            Log.d(TAG + "[API]", "NewSmsMessageRunnable: run(): internet not available, skipping classification for now");
+            Log.d(TAG + "[API]", "PredictionUtility: run(): internet not available, skipping classification for now");
             result_map = null;
         }
         else{
@@ -102,8 +102,8 @@ public class PredictionUtility {
 
             String jsonInputString = mainObj.toString();
 
-            Log.d(TAG + "[API]", "NewSmsMessageRunnable: makePrediction(): \"Printing json main object");
-            Log.d(TAG + "[API]", "NewSmsMessageRunnable: makePrediction(): " + jsonInputString);
+            Log.d(TAG + "[API]", "PredictionUtility: makePrediction(): \"Printing json main object");
+            Log.d(TAG + "[API]", "PredictionUtility: makePrediction(): " + jsonInputString);
 
             try(OutputStream os = con.getOutputStream()){
                 byte[] input = new byte[0];
@@ -127,9 +127,9 @@ public class PredictionUtility {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): ");
-            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): HTTP POST request done.");
-            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Response code: " + code);
+            System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): ");
+            System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): HTTP POST request done.");
+            System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): Response code: " + code);
 
             try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))){
                 StringBuilder response = new StringBuilder();
@@ -138,27 +138,27 @@ public class PredictionUtility {
                     response.append(responseLine.trim());
                 }
                 // System.out.println(response.toString());
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Complete response:");
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): " + response.toString());
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): Complete response:");
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): " + response.toString());
                 JSONObject obj = null;
                 try {
                     obj = new JSONObject(response.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): length of JSON obj : " + obj.length());
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): length of JSON obj : " + obj.length());
 
                 JSONArray result_ja = (JSONArray) obj.get("result");
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): Printing <JSONOArray> result_ja :" + result_ja);
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): length of result_ja : " + result_ja.length());
-                System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): looping through the json array ");
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): Printing <JSONOArray> result_ja :" + result_ja);
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): length of result_ja : " + result_ja.length());
+                System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): looping through the json array ");
 
                 for(int i=0; i<result_ja.length(); i++){
                     JSONObject tempjo = (JSONObject) result_ja.get(i);
-                    System.out.printf("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): [%d]  %s\n", i, tempjo.toString());
+                    System.out.printf("[MY_DEBUG] [API] PredictionUtility: makePrediction(): [%d]  %s\n", i, tempjo.toString());
                     try{
-                        System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): extract ID and spam prediction from the JSON object");
-                        System.out.printf("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
+                        System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): extract ID and spam prediction from the JSON object");
+                        System.out.printf("[MY_DEBUG] [API] PredictionUtility: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString());
                         if(tempjo.get("spam").toString().equals("1")){
                             result_map.put(tempjo.get("id").toString(), 1);
 //                            return 1;
@@ -176,7 +176,7 @@ public class PredictionUtility {
                     catch(Exception e){
                         e.printStackTrace();
                         try{
-                            System.out.println("[MY_DEBUG] [API] NewSmsMessageRunnable: makePrediction(): got error : " + tempjo.get("error").toString());
+                            System.out.println("[MY_DEBUG] [API] PredictionUtility: makePrediction(): got error : " + tempjo.get("error").toString());
 //                            result_map.put(tempjo.getString("id"), -1);
 //                            return -1;
                             return null;

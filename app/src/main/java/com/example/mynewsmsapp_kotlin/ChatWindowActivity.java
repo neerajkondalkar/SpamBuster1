@@ -89,20 +89,34 @@ public class ChatWindowActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
+            //fill the messages_list
+            fillMessagesList(activity);
+            Log.d(TAG, "LoadMessagesRunnable: run(): Displaying all items in messages_list : ");
+            for (int i=0; i<messages_list.size(); i++){
+                Log.d(TAG, "LoadMessagesRunnable: run(): [" + i + "] : " + messages_list.get(i));
+            }
 
-//            String sql_load_messages = " SELECT " +
-//                    BaseColumns._ID + ", " +
-//                    SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID + ", " +
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY + ", " +
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + ", " +
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + ", " +
-//                    SpamBusterContract.TABLE_ALL.COLUMN_SPAM +
-//                    " FROM " + SpamBusterContract.TABLE_ALL.TABLE_NAME +
-//                    " WHERE " + SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS +
-//                    " LIKE '%" + address + "'";
-//            cursor = db1.execSQL(sql_load_messages);
+            //insert into adapter which can be access only from the main thread, so use main thread handler
+                try {
+                    //pass the Runnable to MainThread handler because UI elements(sms_adapter) are on MainThread
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            int j = 0;
+                            while (j < messages_list.size()) {
+                                activity.chatWindowSmsAdapter.insert(j, messages_list.get(j).toString());
+                                j++;
+                            }
+                        }
+                    });
+                }
+                catch (Exception e) {
+                    Log.d(TAG, "LoadMessagesRunnable: run(): Exception :" + e);
+                }
+            }
 
-
+        //will fill the messages_list
+        private void fillMessagesList(ChatWindowActivity activity){
             String[] projection = {
                     BaseColumns._ID,
                     SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
@@ -168,26 +182,6 @@ public class ChatWindowActivity extends AppCompatActivity {
                     } while (cursor.moveToNext());
                 } catch (Exception e) {
                     Log.d(TAG, "LoadMessagesRunnable: run(): Exception : " + e);
-                }
-                Log.d(TAG, "LoadMessagesRunnable: run(): Displaying all items in messages_list : ");
-                for (int i=0; i<messages_list.size(); i++){
-                    Log.d(TAG, "LoadMessagesRunnable: run(): [" + i + "] : " + messages_list.get(i));
-                }
-                try {
-                    //pass the Runnable to MainThread handler because UI elements(sms_adapter) are on MainThread
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            int j = 0;
-                            while (j < messages_list.size()) {
-                                activity.chatWindowSmsAdapter.insert(j, messages_list.get(j).toString());
-                                j++;
-                            }
-                        }
-                    });
-                }
-                catch (Exception e) {
-                    Log.d(TAG, "LoadMessagesRunnable: run(): Exception :" + e);
                 }
             }
         }
