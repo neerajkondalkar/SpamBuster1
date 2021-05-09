@@ -248,7 +248,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                 }
                                 else{
                                     do{
-                                        String temp_message_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
+                                        String temp_message_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
                                         hashmap_tableallid_to_message_forclassification.put(tableallid_unclass, temp_message_holder);
                                     }while (cursor.moveToNext());
                                 }
@@ -268,13 +268,10 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                         spamresult = UNCLASSIFIED;
                                     }
 
-
                                     //if HAM then insert into SMSINBOX, and update TABLEALL with corressinboxid = newrowsmsid
                                     if (spamresult.equals(HAM)) {
                                         //insert only if not present in SMSINBOX already
                                         if (!hashset_smsinbox_id.contains(hashmap_tableallid_to_corressinboxid.get(tableallid))) {
-
-
                                             //first get the latest_smsinboxid, so that we can know insertion is successfull after inserting
                                             String latest_smsinboxid = getLatestSMSINBOXid();
 
@@ -324,25 +321,37 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                             db.setTransactionSuccessful();
                                             db.endTransaction();
 
-                                            //again get latest smsinbox id to see if it is actually greater tahn our previous latest smsinboxid to confirm successfull insertion
+                                            //again get latest smsinbox id to see if it is actually greater than our previous latest smsinboxid to confirm successfull insertion
                                             String newlatestsmsinboxid = getLatestSMSINBOXid();
                                             if (Integer.parseInt(newlatestsmsinboxid) > Integer.parseInt(latest_smsinboxid)) {
                                                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): insertion in SMSINBOX successfull");
-                                            }
+                                                String corressinboxid = newlatestsmsinboxid;
 
-                                            String corressinboxid = newlatestsmsinboxid;
-                                            //now update the TABLEALL with column_spam = HAM and column_corressinboxid = corressinboxid
+                                                //now update the TABLEALL with column_spam = HAM and column_corressinboxid = corressinboxid
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): updating TABLE_ALL with the classified messages");
+                                                values.clear();
+                                                values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corressinboxid);
+                                                values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
+                                                db.beginTransaction();
+                                                String[] whereArgs = new String[]{tableallid};
+                                                db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+                                                db.setTransactionSuccessful();
+                                                db.endTransaction();
+                                            }
+                                        }
+                                        //else the messages which were originally present in SMSINBOX but unclassified(because the messaegs resided in the phone before the app was installed)
+                                        // these messages need to be classified but not put in SMSINBOX even if HAM, which in this case they are since we are inside the spamresult==HAM condition
+                                        // only update TABLEALL with column_spam = HAM
+                                        else{
+                                            ContentValues values = new ContentValues();
                                             values.clear();
-                                            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corressinboxid);
                                             values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
                                             db.beginTransaction();
                                             String[] whereArgs = new String[]{tableallid};
                                             db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
                                             db.setTransactionSuccessful();
                                             db.endTransaction();
-
                                         }
-
                                     }
 
                                     //else if SPAM, then just update TABLEALL with column_spam = SPAM

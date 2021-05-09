@@ -190,9 +190,13 @@ public class PredictionUtility {
                     }
                 }
             } catch (JSONException e) {
+                Log.d(TAG, "PredictionUtility: makePrediction(): JSONException occured, returning null hashmap");
                 e.printStackTrace();
+                return null;
             } catch (IOException e) {
+                Log.d(TAG, "PredictionUtility: makePrediction(): IOException occured, returning null hashmap");
                 e.printStackTrace();
+                return null;
             }
         }
         return result_map;
