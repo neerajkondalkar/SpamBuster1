@@ -5,19 +5,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
-import android.os.strictmode.SqliteObjectLeakedViolation;
 import android.provider.BaseColumns;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
@@ -25,12 +19,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
-import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
 
 public class ChatWindowActivity extends AppCompatActivity {
     public static final String TAG = "[MY_DEBUG]";
@@ -39,6 +32,7 @@ public class ChatWindowActivity extends AppCompatActivity {
     protected RecyclerView messages_chatwindow;
     private Handler main_handler = new Handler();
     protected static ArrayList<String> messages_list = new ArrayList<>();
+    public static Map<Integer, String> hashmap_indexofmessage_to_tableallid_ChatWindowActivity = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,6 +172,8 @@ public class ChatWindowActivity extends AppCompatActivity {
 //                                corress_inbox_id + "\n SMS From: " + MainActivity.getContactName(activity, sms_address) +
 //                                "\n Recieved at: " + printable_date + "\n" + sms_body);
                         Log.d(TAG, "LoadMessagesRunnable: run(): Adding message " + str.substring(0, 10) + " to messages_list");
+                        //messages_list.size() gives the next index which is about to be filled
+                        hashmap_indexofmessage_to_tableallid_ChatWindowActivity.put(messages_list.size(), String.valueOf(itemId));
                         messages_list.add(str);
                     } while (cursor.moveToNext());
                 } catch (Exception e) {

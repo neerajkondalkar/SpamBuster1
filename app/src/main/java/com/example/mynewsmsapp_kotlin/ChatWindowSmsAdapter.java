@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_indexofmessage_to_tableallid_ChatWindowActivity;
+
 public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] ";
 
@@ -81,12 +83,15 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
 
         @Override
         public void onClick(View v) {
+//            int position = getLayoutPosition();
+//            String person_name = MainActivity.getContactName(context, sms_messages_list.get(position));
+//            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
+//            Intent start_chat_windows_activity = new Intent(MainActivity.instance(), ChatWindowActivity.class);
+//            start_chat_windows_activity.putExtra("address", sms_messages_list.get(position));
+//            context.startActivity(start_chat_windows_activity);
             int position = getLayoutPosition();
-            String person_name = MainActivity.getContactName(context, sms_messages_list.get(position));
-            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
-            Intent start_chat_windows_activity = new Intent(MainActivity.instance(), ChatWindowActivity.class);
-            start_chat_windows_activity.putExtra("address", sms_messages_list.get(position));
-            context.startActivity(start_chat_windows_activity);
+            String tableallID = hashmap_indexofmessage_to_tableallid_ChatWindowActivity.get(position);
+            Log.d(TAG, String.format(" click at position: %d,   itemID : %s \n", position, tableallID));
         }
     }
 }
