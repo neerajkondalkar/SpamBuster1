@@ -1,6 +1,7 @@
 package com.example.mynewsmsapp_kotlin;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -33,6 +34,14 @@ public class ChatWindowActivity extends AppCompatActivity {
     private Handler main_handler = new Handler();
     protected static ArrayList<String> messages_list = new ArrayList<>();
     public static Map<Integer, String> hashmap_indexofmessage_to_tableallid_ChatWindowActivity = new HashMap<>();
+    private static ChatWindowActivity inst;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        inst = this;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,4 +191,9 @@ public class ChatWindowActivity extends AppCompatActivity {
             }
         }
     }
+
+    public static ChatWindowActivity instance(){
+        return inst;
+    }
+
 }

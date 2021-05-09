@@ -1,11 +1,17 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +87,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
             itemView.setOnClickListener(this);
         }
 
+        @SuppressLint("DefaultLocale")
         @Override
         public void onClick(View v) {
 //            int position = getLayoutPosition();
@@ -92,6 +99,33 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
             int position = getLayoutPosition();
             String tableallID = hashmap_indexofmessage_to_tableallid_ChatWindowActivity.get(position);
             Log.d(TAG, String.format(" click at position: %d,   itemID : %s \n", position, tableallID));
+            Toast.makeText(context, String.format(" click at position: %d,   itemID : %s", position, tableallID), Toast.LENGTH_LONG).show();
+            showDialog();
         }
+
+    private void showDialog(){
+        final AlertDialog.Builder alert = new AlertDialog.Builder(context);
+        View mView = ChatWindowActivity.instance().getLayoutInflater().inflate(R.layout.dummy_dialogue,null);
+        Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel);
+        Button btn_okay = (Button)mView.findViewById(R.id.btn_okay);
+        alert.setView(mView);
+        final AlertDialog alertDialog = alert.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        btn_okay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "You clicked OK", Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
     }
+    }
+
 }
