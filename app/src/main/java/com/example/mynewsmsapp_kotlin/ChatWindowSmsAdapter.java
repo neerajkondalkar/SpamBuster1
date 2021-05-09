@@ -24,6 +24,10 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_indexofmessage_to_tableallid_ChatWindowActivity;
+import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_tableallid_to_spam_ChatWindowActivity;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
 
 public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] ";
@@ -98,9 +102,24 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
 //            context.startActivity(start_chat_windows_activity);
             int position = getLayoutPosition();
             String tableallID = hashmap_indexofmessage_to_tableallid_ChatWindowActivity.get(position);
-            Log.d(TAG, String.format(" click at position: %d,   itemID : %s \n", position, tableallID));
-            Toast.makeText(context, String.format(" click at position: %d,   itemID : %s", position, tableallID), Toast.LENGTH_LONG).show();
-            showDialog();
+            String spam = hashmap_tableallid_to_spam_ChatWindowActivity.get(tableallID);
+            String spam_status;
+            if(spam.equals(SPAM)){
+                spam_status = "SPAM";
+            }
+            else if(spam.equals(HAM)){
+                spam_status = "HAM";
+            }
+            else{
+                spam_status = "UNCLASSIFIED";
+            }
+            Log.d(TAG, String.format(" click at position: %d,   itemID : %s ,   spam = %s\n", position, tableallID, spam));
+            Toast.makeText(context, String.format(" click at position: %d,   itemID : %s, it is %s", position, tableallID, spam_status), Toast.LENGTH_LONG).show();
+
+            //show dialog only if SPAM or HAM,  and not UNCLASSIFIED (maybe later we can put that)
+            if(!spam.equals(UNCLASSIFIED)) {
+                showDialog();
+            }
         }
 
     private void showDialog(){

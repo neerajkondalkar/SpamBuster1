@@ -34,6 +34,7 @@ public class ChatWindowActivity extends AppCompatActivity {
     private Handler main_handler = new Handler();
     protected static ArrayList<String> messages_list = new ArrayList<>();
     public static Map<Integer, String> hashmap_indexofmessage_to_tableallid_ChatWindowActivity = new HashMap<>();
+    public static Map<String, String> hashmap_tableallid_to_spam_ChatWindowActivity = new HashMap<>();
     private static ChatWindowActivity inst;
 
     @Override
@@ -160,11 +161,12 @@ public class ChatWindowActivity extends AppCompatActivity {
                         String sms_body = cursor.getString(index_sms_body);
                         String sms_address = cursor.getString(index_sms_address);
                         String epoch_date = cursor.getString(index_sms_epoch_date);
-                        String spam_str = cursor.getString(index_spam);
-                        if (spam_str.equals(HAM)){
+                        String spam = cursor.getString(index_spam);
+                        String spam_str;
+                        if (spam.equals(HAM)){
                             spam_str = "HAM";
                         }
-                        else if (spam_str.equals(SPAM)){
+                        else if (spam.equals(SPAM)){
                             spam_str = "SPAM";
                         }
                         else{
@@ -184,6 +186,7 @@ public class ChatWindowActivity extends AppCompatActivity {
                         //messages_list.size() gives the next index which is about to be filled
                         hashmap_indexofmessage_to_tableallid_ChatWindowActivity.put(messages_list.size(), String.valueOf(itemId));
                         messages_list.add(str);
+                        hashmap_tableallid_to_spam_ChatWindowActivity.put(String.valueOf(itemId), spam);
                     } while (cursor.moveToNext());
                 } catch (Exception e) {
                     Log.d(TAG, "LoadMessagesRunnable: run(): Exception : " + e);
