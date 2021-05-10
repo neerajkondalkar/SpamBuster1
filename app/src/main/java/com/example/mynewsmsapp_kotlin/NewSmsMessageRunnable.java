@@ -27,6 +27,8 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import static com.example.mynewsmsapp_kotlin.MainActivity.getContactName;
+
 //import static com.example.mynewsmsapp_kotlin.ClassificationSyncService.executor;
 
 public class NewSmsMessageRunnable implements Runnable{
@@ -69,7 +71,16 @@ public class NewSmsMessageRunnable implements Runnable{
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, sms_body);  // insert value sms_body in COLUMN_SMS_BODY
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
         values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT, date_sent);  // insert value date_str in COLUMN_SMS_EPOCH_DATE
-        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, UNCLASSIFIED);
+        //if sender is in our contacts, it means their message can be trusted as HAM
+        if(!getContactName(context, address).equals(address)){
+            Log.d(TAG, String.format("NewSmsMessageRunnable: run(): sender '%s' is in our address book named '%s', hence declaring as HAM",
+                    address, getContactName(context, address)));
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
+            message_is_spam = false;
+        }
+        else {
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, UNCLASSIFIED);
+        }
         Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message in TABLE_ALL...");
         db.beginTransaction();
         //insert null value in corressinboxid
@@ -83,39 +94,12 @@ public class NewSmsMessageRunnable implements Runnable{
         }
         String newRowId_tableall_str = String.valueOf(newRowId_tableall);
 
-
-//        --------------------------------------------- START TAG2
-        //inserting this new message into table_pending since it is pending to be classified
-        //put this code in http_req_success == false
-
-
-//        ---------------------------------------------- END TAG2
-
-//        STARTING FROM HERE TAG1
-//        all the code in TAG1 should be, in future, enclose by an if() statement to check http response was sucessfull or not.
-//        --------------
-//         here comes the http request to check whether messages is spam  or noet http_req_success accordingly
         this.http_req_success = false;
         Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + new SBNetworkUtility().checkNetwork(context));
-        //if no internet connection, then add message tableall id to TABLE_PENDING
-        //let all messages go in TABLE_PENDING, the classificationsyncservice will take care of the rest
-//            Log.d(TAG, "NewSmsMessageRunnable: run(): adding message tableall id  to TABLE_PENDING");
-//            values.clear();
-//            values.put(SpamBusterContract.TABLE_PENDING.COLUMN_ID_TABLEALL, newRowId_tableall);
-//            Log.d(TAG, "NewSmsMessageRunnable: run(): Inserting the new message id_TABLE_ALL: " + newRowId_tableall + " into TABLE_PENDING ...");
-//            db.beginTransaction();
-//            long newRowId_tablepending = db.insert(SpamBusterContract.TABLE_PENDING.TABLE_NAME, null, values);
-//            db.setTransactionSuccessful();
-//            db.endTransaction();
-//            if (newRowId_tablepending == -1) {
-//                Log.d(TAG, "NewSmsMessageRunnable: run(): insert failed!");
-//            } else {
-//                Log.d(TAG, "  Insert Complete! returned newRowId_tablepending] = " + newRowId_tablepending);
-//            }
-//            String newRowId_tablepending_str = String.valueOf(newRowId_tablepending);
-
             int prediction = -1;
-            if(new SBNetworkUtility().checkNetwork(context)){
+            //if we have already declared the message as HAM (message from sender in our contact list), then we don't need to predict
+            //by default message_is_spam is true, we only set it to false when the message is from sender from our address book
+            if(new SBNetworkUtility().checkNetwork(context) && message_is_spam){
 //                prediction = makePrediction(newRowId_tablepending_str, sms_body);
                   prediction = makePrediction(newRowId_tableall_str, sms_body);
             }

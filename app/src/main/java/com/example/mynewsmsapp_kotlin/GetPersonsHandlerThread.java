@@ -184,7 +184,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                             current_address = current_address.substring(current_address.length() - 10, current_address.length());
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                         }
-                                        if (!inbox_list.contains(current_address)) {
+                                        if (!inbox_list.contains(current_address) && !spam_list.contains(current_address)) {
                                             inbox_list.add(current_address);
                                         }
                                     } while (cursor.moveToNext());
@@ -265,6 +265,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                     }
                                     if(!spam_list.contains(current_address)) {
                                         spam_list.add(current_address);
+                                        inbox_list.remove(current_address);
                                     }
                                 }while (cursor.moveToNext());
                                 persons_list.addAll(spam_list);

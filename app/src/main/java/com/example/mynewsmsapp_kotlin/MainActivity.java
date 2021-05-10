@@ -35,6 +35,7 @@ import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_ALL;
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_INBOX;
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_SPAM;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_SYNCTABLES;
+import static java.lang.Thread.currentThread;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -356,18 +357,19 @@ public class MainActivity extends AppCompatActivity {
 
     public static String getContactName(Context context, String phone_number) {
         final String TAG_getContactName = " getContactName(): ";
-        Log.d(TAG, TAG_getContactName + " called ");
+//        Log.d(TAG, TAG_getContactName + " called ");
         ContentResolver content_resolver = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone_number));
         Cursor cursor = content_resolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
         final int index_displayname = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
         if (cursor == null) {
+//            Log.d(TAG, "MainActivity: getContactName(): address: " + phone_number + " not present in address book");
             return phone_number;
         }
         String name = phone_number;
         if (cursor.moveToNext()) {
             name = cursor.getString(index_displayname);
-            Log.d(TAG, TAG_getContactName + "name = " + name);
+//            Log.d(TAG, "MainActivity: getContactName(): address " + phone_number + " found in address book with name " + name);
         }
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
@@ -494,6 +496,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            MainActivity.instance().getSpam();
+            MainActivity.instance().getInbox();
 
             //carry out sync of tables everytime the app starts
 //            this.db_helper = activity.spamBusterdbHelper;
@@ -557,8 +561,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //called when toggleAll is clicked
-    private void showAll() {
+    //we call this implicitly, whether or not the user had toggled the button
+    private void getAll(){
         if (!LOADED_ALL) {
             Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
             msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
@@ -580,14 +584,39 @@ public class MainActivity extends AppCompatActivity {
             persons_list.clear();
             persons_list.addAll(all_list);
         }
+    }
+
+    //called when toggleAll is clicked
+    private void showAll() {
+//        if (!LOADED_ALL) {
+//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
+//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
+//            int table1 = TABLE_ALL;
+//            msg_getpersons.arg1 = table1;
+//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
+//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
+//            msg_getpersons.sendToTarget();
+//            while (true) {
+//                if (DONE_TASK_GETPERSONS) {
+//                    DONE_TASK_GETPERSONS = false;
+//                    break;
+//                }
+//            }
+//            LOADED_ALL = true;
+//        } else {
+//            persons_list.clear();
+//            persons_list.addAll(all_list);
+//        }
+        getAll();
         //show persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);
         this.thread.start();
     }
 
-    //called when toggleInbox is clicked
-    private void showInbox(){
+    private void getInbox(){
         if(!LOADED_INBOX) {
             Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
             msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
@@ -610,14 +639,40 @@ public class MainActivity extends AppCompatActivity {
             persons_list.clear();
             persons_list.addAll(inbox_list);
         }
+    }
+
+    //called when toggleInbox is clicked
+    private void showInbox(){
+//        if(!LOADED_INBOX) {
+//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
+//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
+//            int table1 = TABLE_HAM;
+//            msg_getpersons.arg1 = table1;
+//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
+//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
+//            msg_getpersons.sendToTarget();
+//            while (true) {
+//                if (DONE_TASK_GETPERSONS) {
+//                    DONE_TASK_GETPERSONS = false;
+//                    break;
+//                }
+//            }
+//            LOADED_INBOX = true;
+//        }
+//        else{
+//            persons_list.clear();
+//            persons_list.addAll(inbox_list);
+//        }
+        getInbox();
         //display persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);
         this.thread.start();
     }
 
-    //called when toggleSPam is cliekd
-    private void showSpam(){
+    private void getSpam(){
         if(!LOADED_SPAM) {
             Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
             msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
@@ -640,6 +695,33 @@ public class MainActivity extends AppCompatActivity {
             persons_list.clear();
             persons_list.addAll(spam_list);
         }
+    }
+
+    //called when toggleSPam is cliekd
+    private void showSpam(){
+//        if(!LOADED_SPAM) {
+//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
+//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
+//            int table1 = TABLE_SPAM;
+//            msg_getpersons.arg1 = table1;
+//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
+//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
+//            msg_getpersons.sendToTarget();
+//            while (true) {
+//                if (DONE_TASK_GETPERSONS) {
+//                    DONE_TASK_GETPERSONS = false;
+//                    break;
+//                }
+//            }
+//            LOADED_SPAM = true;
+//        }
+//        else{
+//            persons_list.clear();
+//            persons_list.addAll(spam_list);
+//        }
+        getSpam();
         //display persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);

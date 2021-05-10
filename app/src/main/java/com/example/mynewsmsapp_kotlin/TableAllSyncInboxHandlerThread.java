@@ -30,6 +30,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import static com.example.mynewsmsapp_kotlin.MainActivity.getContactName;
 import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_sync_tableall;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
@@ -203,7 +204,13 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE, date);
                                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY, body);
                                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT, date_sent);
-                                    values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, UNCLASSIFIED);
+                                    //if sender is in our contacts, it means their message can be trusted as HAM
+                                    if(!getContactName(MainActivity.instance(), address).equals(address)){
+                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
+                                    }
+                                    else {
+                                        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, UNCLASSIFIED);
+                                    }
                                     db1.beginTransaction();
                                     long newtableallrowid = db1.insert(SpamBusterContract.TABLE_ALL.TABLE_NAME, null, values);
                                     db1.setTransactionSuccessful();
@@ -216,7 +223,13 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                         String newtableallrowid_str = String.valueOf(newtableallrowid);
                                         hashmap_tableallid_to_corressinboxid.put(newtableallrowid_str, missingcorressinboxid);
                                         hashmap_corressinboxid_to_tableallid.put(missingcorressinboxid, newtableallrowid_str);
-                                        hashmap_tableallid_to_spam.put(newtableallrowid_str, UNCLASSIFIED);
+                                        //if sender is in our contacts, it means their message can be trusted as HAM
+                                        if(!getContactName(MainActivity.instance(), address).equals(address)) {
+                                            hashmap_tableallid_to_spam.put(newtableallrowid_str, HAM);
+                                        }
+                                        else {
+                                            hashmap_tableallid_to_spam.put(newtableallrowid_str, UNCLASSIFIED);
+                                        }
                                     }
                                 } while (cursor_check_sms_id.moveToNext());
                             }
