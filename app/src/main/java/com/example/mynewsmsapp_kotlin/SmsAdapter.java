@@ -31,11 +31,12 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     public void clearItems(){
         sms_messages_list.clear();
+        notifyDataSetChanged();
     }
 
     public void insertPerson(int position, String address) {
         final String TAG_insert = " insertPerson(): ";
-        Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
+//        Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
         sms_messages_list.add(position, address);
         notifyDataSetChanged();
     }
@@ -46,16 +47,16 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     public void insert(int position, String new_sms) {
         final String TAG_insert = " insert(): ";
-        Log.d(TAG, TAG_insert + " called ");
-        Log.d(TAG, "SmsAdapter: insert(): adding a new message in adapter at index + " + position);
+//        Log.d(TAG, TAG_insert + " called ");
+//        Log.d(TAG, "SmsAdapter: insert(): adding a new message in adapter at index + " + position);
         sms_messages_list.add(position, new_sms);
         notifyDataSetChanged();
     }
 
     public void append(int position, Collection new_messages){
         final String TAG_append = " append(): ";
-        Log.d(TAG, TAG_append + " called ");
-        Log.d(TAG, "SmsAdapter: append(): appending at index " + position);
+//        Log.d(TAG, TAG_append + " called ");
+//        Log.d(TAG, "SmsAdapter: append(): appending at index " + position);
         sms_messages_list.addAll(position, new_messages);
         notifyDataSetChanged();
     }

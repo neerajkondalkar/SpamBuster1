@@ -84,27 +84,27 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                     int index_sms_address = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
                                     do {
                                         String current_address = cursor.getString(index_sms_address);
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
                                         Pattern pattern = Pattern.compile("^\\+\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                         Matcher matcher = pattern.matcher(current_address);
                                         boolean matchFound = matcher.find();
                                         if (matchFound) {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
                                             //strip the first few digits based on length of string
                                         } else {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
                                         }
                                         Pattern pattern1 = Pattern.compile("^\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                         matcher = pattern1.matcher(current_address);
                                         matchFound = matcher.find();
                                         if (matchFound) {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
                                         } else {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
                                         }
                                         if (current_address.length() > 10) {
                                             current_address = current_address.substring(current_address.length() - 10, current_address.length());
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                         }
                                         if (!all_list.contains(current_address)) {
                                             all_list.add(current_address);
@@ -162,27 +162,27 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                     int index_sms_address = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
                                     do {
                                         String current_address = cursor.getString(index_sms_address);
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
                                         Pattern pattern = Pattern.compile("^\\+\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                         Matcher matcher = pattern.matcher(current_address);
                                         boolean matchFound = matcher.find();
                                         if (matchFound) {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
                                             //strip the first few digits based on length of string
                                         } else {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
                                         }
                                         Pattern pattern1 = Pattern.compile("^\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                         matcher = pattern1.matcher(current_address);
                                         matchFound = matcher.find();
                                         if (matchFound) {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
                                         } else {
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
                                         }
                                         if (current_address.length() > 10) {
                                             current_address = current_address.substring(current_address.length() - 10, current_address.length());
-                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                         }
                                         if (!inbox_list.contains(current_address)) {
                                             inbox_list.add(current_address);
@@ -241,27 +241,27 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                 int index_sms_address = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS);
                                 do{
                                     String current_address = cursor.getString(index_sms_address);
-                                    Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
+//                                    Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): " + current_address);
                                     Pattern pattern = Pattern.compile("^\\+\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                     Matcher matcher = pattern.matcher(current_address);
                                     boolean matchFound = matcher.find();
                                     if(matchFound) {
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with +91");
                                         //strip the first few digits based on length of string
                                     } else {
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with +91");
                                     }
                                     Pattern pattern1 = Pattern.compile("^\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                     matcher = pattern1.matcher(current_address);
                                     matchFound = matcher.find();
                                     if(matchFound) {
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
                                     } else {
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
                                     }
                                     if(current_address.length() > 10) {
                                         current_address = current_address.substring(current_address.length() - 10, current_address.length());
-                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
+//                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                     }
                                     if(!spam_list.contains(current_address)) {
                                         spam_list.add(current_address);

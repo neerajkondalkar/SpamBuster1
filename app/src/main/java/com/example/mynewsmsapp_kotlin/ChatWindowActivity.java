@@ -95,14 +95,15 @@ public class ChatWindowActivity extends AppCompatActivity {
             }
             //fill the messages_list
             fillMessagesList(activity);
-            Log.d(TAG, "LoadMessagesRunnable: run(): Displaying all items in messages_list : ");
-            for (int i=0; i<messages_list.size(); i++){
-                Log.d(TAG, "LoadMessagesRunnable: run(): [" + i + "] : " + messages_list.get(i));
-            }
+//            Log.d(TAG, "LoadMessagesRunnable: run(): Displaying all items in messages_list : ");
+//            for (int i=0; i<messages_list.size(); i++){
+//                Log.d(TAG, "LoadMessagesRunnable: run(): [" + i + "] : " + messages_list.get(i));
+//            }
 
             //insert into adapter which can be access only from the main thread, so use main thread handler
                 try {
                     //pass the Runnable to MainThread handler because UI elements(sms_adapter) are on MainThread
+                    Log.d(TAG, "LoadMessagesRunnable: run(): filling the ChatWindowSMSAdapter");
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -147,6 +148,7 @@ public class ChatWindowActivity extends AppCompatActivity {
             if (!cursor.moveToFirst()) {
                 Log.d(TAG, "LoadMessagesRunnable: run(): TABLE ALL empty!");
             } else {
+                Log.d(TAG, "LoadMessagesRunnable: fillMessagesList(): filling message_list for ChatWindowSmsAdater");
                 int index_id = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID);
                 int index_corres_id = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID);
                 int index_sms_body = cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY);
@@ -182,7 +184,7 @@ public class ChatWindowActivity extends AppCompatActivity {
 //                        String str = String.format("ItemID = " + itemId + "\ncorress_inbox_id = " +
 //                                corress_inbox_id + "\n SMS From: " + MainActivity.getContactName(activity, sms_address) +
 //                                "\n Recieved at: " + printable_date + "\n" + sms_body);
-                        Log.d(TAG, "LoadMessagesRunnable: run(): Adding message " + str.substring(0, 10) + " to messages_list");
+//                        Log.d(TAG, "LoadMessagesRunnable: run(): Adding message " + str.substring(0, 10) + " to messages_list");
                         //messages_list.size() gives the next index which is about to be filled
                         hashmap_indexofmessage_to_tableallid_ChatWindowActivity.put(messages_list.size(), String.valueOf(itemId));
                         messages_list.add(str);

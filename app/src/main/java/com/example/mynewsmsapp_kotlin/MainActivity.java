@@ -539,10 +539,13 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             //first clear the sms adapter
                             activity.sms_adapter.clearItems();
-                            //persons_list is global static which has addresses of ALL persons and is filled by class GetPersonsHandlerThread
-                            for(int i=0; i<persons_list.size(); i++) {
-                                Log.d(TAG, "DisplayPersonsRunnable: run(): inserting " + getContactName(activity, persons_list.get(i)) + " in sms_adapter");
-                                activity.sms_adapter.insertPerson(i,  persons_list.get(i));
+                            if(persons_list.size()!=0) {
+                                Log.d(TAG, "DisplayPersonsRunnable: run(): inserting persons_list into the sms adapter");
+                                //persons_list is global static which has addresses of ALL persons and is filled by class GetPersonsHandlerThread
+                                for (int i = 0; i < persons_list.size(); i++) {
+//                                    Log.d(TAG, "DisplayPersonsRunnable: run(): inserting " + getContactName(activity, persons_list.get(i)) + " in sms_adapter");
+                                    activity.sms_adapter.insertPerson(i, persons_list.get(i));
+                                }
                             }
 //                            activity.sms_adapter.addAllItems(persons_list);
                         }

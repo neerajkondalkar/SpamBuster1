@@ -42,16 +42,16 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
     }
 
     public void insertPerson(int position, String address) {
-        final String TAG_insert = " insertPerson(): ";
-        Log.d(TAG, "ChatWindowSmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
+//        final String TAG_insert = " insertPerson(): ";
+//        Log.d(TAG, "ChatWindowSmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
         sms_messages_list.add(position, address);
         notifyDataSetChanged();
     }
 
     public void insert(int position, String new_sms) {
         final String TAG_insert = " insert(): ";
-        Log.d(TAG, TAG_insert + " called ");
-        Log.d(TAG, "ChatWindowSmsAdapter: insert(): adding a new message in adapter at index + " + position);
+//        Log.d(TAG, TAG_insert + " called ");
+//        Log.d(TAG, "ChatWindowSmsAdapter: insert(): adding a new message in adapter at index + " + position);
         sms_messages_list.add(position, new_sms);
         notifyDataSetChanged();
     }
@@ -59,7 +59,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
     public void append(int position, Collection new_messages){
         final String TAG_append = " append(): ";
         Log.d(TAG, TAG_append + " called ");
-        Log.d(TAG, "ChatWindowSmsAdapter: append(): appending at index " + position);
+//        Log.d(TAG, "ChatWindowSmsAdapter: append(): appending at index " + position);
         sms_messages_list.addAll(position, new_messages);
         notifyDataSetChanged();
     }
@@ -118,15 +118,25 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
 
             //show dialog only if SPAM or HAM,  and not UNCLASSIFIED (maybe later we can put that)
             if(!spam.equals(UNCLASSIFIED)) {
-                showDialog();
+                showDialog(spam);
             }
         }
 
-    private void showDialog(){
+    private void showDialog(String spam){
+            final String option;
+        String option1;
+        if(spam.equals(SPAM)){
+            option1 = "INBOX";
+        }
+        else{
+            option1 = "SPAM";
+        }
+        option = option1;
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
         View mView = ChatWindowActivity.instance().getLayoutInflater().inflate(R.layout.dummy_dialogue,null);
         Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel);
-        Button btn_okay = (Button)mView.findViewById(R.id.btn_okay);
+        Button btn_option = (Button)mView.findViewById(R.id.btn_okay);
+        btn_option.setText("Move to " + option);
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
         alertDialog.setCanceledOnTouchOutside(false);
@@ -136,10 +146,10 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
                 alertDialog.dismiss();
             }
         });
-        btn_okay.setOnClickListener(new View.OnClickListener() {
+        btn_option.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "You clicked OK", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "You clicked on option " + option, Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
         });
