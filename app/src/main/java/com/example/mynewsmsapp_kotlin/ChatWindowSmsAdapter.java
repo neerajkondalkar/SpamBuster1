@@ -25,6 +25,7 @@ import java.util.List;
 
 import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_indexofmessage_to_tableallid_ChatWindowActivity;
 import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_tableallid_to_spam_ChatWindowActivity;
+import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_list;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
@@ -118,11 +119,11 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
 
             //show dialog only if SPAM or HAM,  and not UNCLASSIFIED (maybe later we can put that)
             if(!spam.equals(UNCLASSIFIED)) {
-                showDialog(spam);
+                showDialog(tableallID, spam);
             }
         }
 
-    private void showDialog(String spam){
+    private void showDialog(final String tableallid, final String spam){
             final String option;
         String option1;
         if(spam.equals(SPAM)){
@@ -140,6 +141,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
         alertDialog.setCanceledOnTouchOutside(false);
+        //cancel button just exits the dialog box
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,11 +152,25 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
             @Override
             public void onClick(View v) {
                 Toast.makeText(context, "You clicked on option " + option, Toast.LENGTH_SHORT).show();
+                //if option=="SPAM"
+                if(option.equals("SPAM")){
+                    //spawn a  runnable to update the TABLEALL with column_spam = "SPAM"
+                    moveToSpam(tableallid);
+                }
+                else{
+                    moveToInbox(tableallid);
+                }
                 alertDialog.dismiss();
             }
         });
         alertDialog.show();
     }
-    }
 
+    private  void moveToSpam(String id) {
+        new Thread(new MoveToRunnable(context, id, SPAM)).start();
+    }
+    private  void moveToInbox(String id){
+            new Thread(new MoveToRunnable(context, id, HAM)).start();
+    }
+    }
 }

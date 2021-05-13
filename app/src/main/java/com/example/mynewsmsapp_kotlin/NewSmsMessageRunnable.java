@@ -192,7 +192,7 @@ public class NewSmsMessageRunnable implements Runnable{
             } else {//if this.message_is_spam==true
                 //and now update the corress_inbox_id of that message in table_all; change it to spam i.e -9
                 values.clear();
-                //corressinboxid will be null
+                //corressinboxid will remain null
                 values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, SPAM);
                 db.beginTransaction();
                 Log.d(TAG, "NewSmsMessageRunnable: run(): updating column_spam at _id '" + newRowId_tableall_str + "' in table_all to " + SPAM);
