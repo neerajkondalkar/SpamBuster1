@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
+    public static HashMap<String, Integer> map_address_to_position = new HashMap<>();
 
     ArrayList<String> sms_messages_list = new ArrayList<>();
     Context context;
@@ -38,6 +40,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         final String TAG_insert = " insertPerson(): ";
 //        Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
         sms_messages_list.add(position, address);
+        map_address_to_position.put(address, Integer.valueOf(position));
         notifyDataSetChanged();
     }
 

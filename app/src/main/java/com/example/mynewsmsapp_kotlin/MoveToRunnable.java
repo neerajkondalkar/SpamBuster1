@@ -5,10 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
-import android.provider.Telephony;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
@@ -77,12 +78,20 @@ public class MoveToRunnable implements Runnable {
                 String temp_body_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
 
                 //insert into SMSINBOX
-                try {
-                    String corressinboxid = SmsInboxUtility.getInstance().
-                            insertIntoSmsInbox(new MySmsMessage(temp_address_holder, temp_date_holder,
-                                    temp_datesent_holder, temp_body_holder));
 
-                    //if successfull, update TABLEALL
+                    //insert only if not already present in SMSINBOX
+//                    Set<String> set_corressinboxids = DbOperationsUtility.getInstance().getAllCorressInboxIdsFromTableAll(sqLiteOpenHelper);
+//                    Set<String> set_smsinboxids = DbOperationsUtility.getInstance().getInboxIdsfromSmsInbox(sqLiteOpenHelper);
+                String corressinboxid = DbOperationsUtility.getInstance().getCorressInboxIdFromTableAll(sqLiteOpenHelper, id);
+                try {
+                    //only if there is no such corressinboxid fo that TABLE_ALL ID, can we insert the message to SMSINBOX
+                    if(corressinboxid==null) {
+                        corressinboxid = DbOperationsUtility.getInstance().
+                                insertIntoSmsInbox(new MySmsMessage(temp_address_holder, temp_date_holder,
+                                        temp_datesent_holder, temp_body_holder));
+                    }
+
+                    //if insertion in SMSINBOX is successfull OR  the message was already present in SMSINBOX, then update TABLEALL
                     values.clear();
                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, corressinboxid);
                     values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
@@ -93,8 +102,9 @@ public class MoveToRunnable implements Runnable {
                     db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
                     db.setTransactionSuccessful();
                     db.endTransaction();
+
                 }
-                //if insertion fails, then don't update TABLEALL
+                //if insertion in SMSINBOX fails, then don't update TABLEALL
                 catch (InsertionFailedException e){
                     Log.d(TAG, "MoveToRunnable: run(): Insertion into SMSINBOX failed");
                     Log.d(TAG, "MoveToRunnable: run(): Move to INBOX failed!");
