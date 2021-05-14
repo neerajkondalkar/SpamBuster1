@@ -125,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
-
 
     @Override
     protected void onDestroy() {
@@ -398,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //to update the array adapter view so that the index 0 of list view will show the latest sms received
-    public void updateInbox(final String sms_message_str, SmsMessage sms_message) {
+    public void updateInbox(final String sms_message_str, MySmsMessage mySmsMessage) {
         Handler handler;
         final String TAG_updateInbox = " updateInbox(): ";
         Log.d(TAG, TAG_updateInbox + " called ");
@@ -412,20 +410,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //add code to store sms_message inside the sms/inbox and database table
-        String sms_body = sms_message.getMessageBody().toString();
-        String address = sms_message.getOriginatingAddress().toString();
-        String date_sent = Long.toString(sms_message.getTimestampMillis());
-        String date = Long.toString(System.currentTimeMillis());
+        String sms_body = mySmsMessage.getBody();
+        String address = mySmsMessage.getAddress();
+        String date_sent = mySmsMessage.getDatesent();
+        String date = mySmsMessage.getDate();
         Log.d(TAG, "MainActivity: updateInbox(): sms_body: " + sms_body);
         Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
         Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
         Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
-        NewSmsMessageRunnable newSmsMessageRunnable = new NewSmsMessageRunnable(this, spamBusterdbHelper);
-        newSmsMessageRunnable.sms_body = sms_body;
-        newSmsMessageRunnable.address = address;
-        newSmsMessageRunnable.date_sent = date_sent;
-        newSmsMessageRunnable.date = date;
-        newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
+        NewSmsMessageRunnable newSmsMessageRunnable = new NewSmsMessageRunnable(this, spamBusterdbHelper, mySmsMessage);
+//        newSmsMessageRunnable.sms_body = sms_body;
+//        newSmsMessageRunnable.address = address;
+//        newSmsMessageRunnable.date_sent = date_sent;
+//        newSmsMessageRunnable.date = date;
+//        newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
         new Thread(newSmsMessageRunnable).start();
     }
 
@@ -588,27 +586,6 @@ public class MainActivity extends AppCompatActivity {
 
     //called when toggleAll is clicked
     private void showAll() {
-//        if (!LOADED_ALL) {
-//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
-//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
-//            int table1 = TABLE_ALL;
-//            msg_getpersons.arg1 = table1;
-//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
-//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
-//            msg_getpersons.sendToTarget();
-//            while (true) {
-//                if (DONE_TASK_GETPERSONS) {
-//                    DONE_TASK_GETPERSONS = false;
-//                    break;
-//                }
-//            }
-//            LOADED_ALL = true;
-//        } else {
-//            persons_list.clear();
-//            persons_list.addAll(all_list);
-//        }
         getAll();
         //show persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
@@ -643,28 +620,6 @@ public class MainActivity extends AppCompatActivity {
 
     //called when toggleInbox is clicked
     private void showInbox(){
-//        if(!LOADED_INBOX) {
-//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
-//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
-//            int table1 = TABLE_HAM;
-//            msg_getpersons.arg1 = table1;
-//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
-//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
-//            msg_getpersons.sendToTarget();
-//            while (true) {
-//                if (DONE_TASK_GETPERSONS) {
-//                    DONE_TASK_GETPERSONS = false;
-//                    break;
-//                }
-//            }
-//            LOADED_INBOX = true;
-//        }
-//        else{
-//            persons_list.clear();
-//            persons_list.addAll(inbox_list);
-//        }
         getInbox();
         //display persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
@@ -699,35 +654,12 @@ public class MainActivity extends AppCompatActivity {
 
     //called when toggleSPam is cliekd
     private void showSpam(){
-//        if(!LOADED_SPAM) {
-//            Message msg_getpersons = Message.obtain(getPersonsHandlerThread.getHandler());
-//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
-//            int table1 = TABLE_SPAM;
-//            msg_getpersons.arg1 = table1;
-//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
-//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
-//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
-//            msg_getpersons.sendToTarget();
-//            while (true) {
-//                if (DONE_TASK_GETPERSONS) {
-//                    DONE_TASK_GETPERSONS = false;
-//                    break;
-//                }
-//            }
-//            LOADED_SPAM = true;
-//        }
-//        else{
-//            persons_list.clear();
-//            persons_list.addAll(spam_list);
-//        }
         getSpam();
         //display persons
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);
         this.thread.start();
     }
-
 } //MainActivity class ends
 
 

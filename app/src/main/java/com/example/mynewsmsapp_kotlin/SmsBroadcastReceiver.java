@@ -1,5 +1,6 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public long date;
     public long date_sent;
 
+    @SuppressLint("SimpleDateFormat")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -46,17 +48,21 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             if (intent_extras != null) {
                 //get only the raw pdus i.e the SMS for now, later we will also extract the 'format' value
                 Object[] sms = (Object[]) intent_extras.get(SMS_BUNDLE);
-                Log.d(TAG, TAG_onReceive + "Value of sms = " + sms + " which is of type " + sms.getClass());
+//                Log.d(TAG, TAG_onReceive + "Value of sms = " + sms + " which is of type " + sms.getClass());
 
                 String sms_message_str = "";
                 String sender_number = ""; //for Toad.makeText()   to show sender number or name
+                String sms_body = "";
+                String address="";
+                long timestampMillis=0;
+                int protocol_id=0;
 
-                Log.d(TAG, TAG_onReceive + " sms_message_str = " + sms_message_str);
+//                Log.d(TAG, TAG_onReceive + " sms_message_str = " + sms_message_str);
                 for (int i = 0; i < sms.length; i++) {
-                    Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
-                    Log.d(TAG, TAG_onReceive + "i = " + i);
+//                    Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
+//                    Log.d(TAG, TAG_onReceive + "i = " + i);
 
-                    Log.d(TAG, TAG_onReceive + "sms[i] = " + sms[i].toString());
+//                    Log.d(TAG, TAG_onReceive + "sms[i] = " + sms[i].toString());
 
 //                    Log.d(TAG, TAG_onReceive + " All fields in intent_extras:  ");
 
@@ -70,26 +76,27 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, TAG_onReceive + " sms_message = " + sms_message);
 
                     //toString() is redundant
-                    String sms_body = sms_message.getMessageBody().toString();
+                    sms_body = sms_body + sms_message.getMessageBody().toString();
                     Log.d(TAG, TAG_onReceive + "sms_body = " + sms_body);
 
                     //toString() is redundant
-                    String address = sms_message.getOriginatingAddress().toString();
+                    address = sms_message.getOriginatingAddress().toString();
                     Log.d(TAG, TAG_onReceive + "address = " + address);
 
-                    long timestampMillis = sms_message.getTimestampMillis();
+                    timestampMillis = sms_message.getTimestampMillis();
                     Log.d(TAG, TAG_onReceive + " timestampmillis = " + timestampMillis);
 
-                    int protocol_id = sms_message.getProtocolIdentifier();
+                    protocol_id = sms_message.getProtocolIdentifier();
                     Log.d(TAG, "SmsBroadcastReceiver: onReceive(): protocol identifier = " + Integer.toString(protocol_id));
-
+                }
                     Calendar calendar = Calendar.getInstance();
-                    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-                    String printable_date = "";
+                    DateFormat formatter;
+                formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+                String printable_date = "";
                     calendar.setTimeInMillis(timestampMillis);
                     printable_date = formatter.format(calendar.getTime());
-                    sms_message_str += "SMS from: " + MainActivity.getContactName(context, address) + "\n";
-                    sms_message_str += "Received at : " + printable_date + "\n";
+                    sms_message_str = "SMS from: " + MainActivity.getContactName(context, address) + "\n";
+                    sms_message_str = "Received at : " + printable_date + "\n";
                     sms_message_str += sms_body;
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
                     sender_number = address; // for Toast.makeText()   to show sender number or name
@@ -99,8 +106,10 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     //Log.d(TAG, "SmsBroadcastReceiver: onReceive(): currentTimeinMillis = " + currentTimeinMillis);
                     //date_sent = timestampMillis;
                     //date = currentTimeinMillis;
-                }
+
                 Toast.makeText(context, "Message received from + " + MainActivity.getContactName(context, sender_number), Toast.LENGTH_SHORT).show();
+                //pack into custom MySmsMessage
+                MySmsMessage mySmsMessage = new MySmsMessage(address, String.valueOf(date), String.valueOf(date_sent), sms_body);
 
                 //if there is alread yan instance of MainActivy then don't create an instance
                 if (MainActivity.active) {
@@ -111,7 +120,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     //to update the current array adapter view so that the index 0 of list view will show the latest sms received
 //                    inst.updateInbox(sms_message_str);
                     try {
-                        inst.updateInbox(sms_message_str, sms_message);
+                        inst.updateInbox(sms_message_str, mySmsMessage);
                     }
                     catch(Exception e){
                         Log.d(TAG, TAG_onReceive + " exception : " + e);
@@ -125,29 +134,29 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     //we also used android:launchMode="singleInstance" in Manifest so that there is only one instance of MainActivity at any given time.
                     context.startActivity(i);
 
-                    String sms_body = sms_message.getMessageBody().toString();
-                    String address = sms_message.getOriginatingAddress().toString();
-                    String date_sent = Long.toString(sms_message.getTimestampMillis());
-                    String date = Long.toString(System.currentTimeMillis());
-                    Log.d(TAG, "MainActivity: updateInbox(): sms_body: " + sms_body);
-                    Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
-                    Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
-                    Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
+//                    sms_body = sms_message.getMessageBody().toString();
+//                    address = sms_message.getOriginatingAddress().toString();
+//                    String date_sent = Long.toString(sms_message.getTimestampMillis());
+//                    String date = Long.toString(System.currentTimeMillis());
+//                    Log.d(TAG, "MainActivity: updateInbox(): sms_body: " + sms_body);
+//                    Log.d(TAG, "MainActivity: updateInbox(): address: " + address);
+//                    Log.d(TAG, "MainActivity: updateInbox(): date_sent: " + date_sent);
+//                    Log.d(TAG, "MainActivity: updateInbox(): date (received): " + date);
                     SpamBusterdbHelper spamBusterdbHelper;
                     NewSmsMessageRunnable newSmsMessageRunnable;
                     if(MainActivity.active) {
                         spamBusterdbHelper = MainActivity.instance().spamBusterdbHelper;
-                        newSmsMessageRunnable = new NewSmsMessageRunnable(MainActivity.instance(), spamBusterdbHelper);
+                        newSmsMessageRunnable = new NewSmsMessageRunnable(MainActivity.instance(), spamBusterdbHelper, mySmsMessage);
                     }
                     else {
                         spamBusterdbHelper = new SpamBusterdbHelper(context);
-                        newSmsMessageRunnable = new NewSmsMessageRunnable(context, spamBusterdbHelper);
+                        newSmsMessageRunnable = new NewSmsMessageRunnable(context, spamBusterdbHelper, mySmsMessage);
                     }
-                    newSmsMessageRunnable.sms_body = sms_body;
-                    newSmsMessageRunnable.address = address;
-                    newSmsMessageRunnable.date_sent = date_sent;
-                    newSmsMessageRunnable.date = date;
-                    newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
+//                    newSmsMessageRunnable.sms_body = sms_body;
+//                    newSmsMessageRunnable.address = address;
+//                    newSmsMessageRunnable.date_sent = date_sent;
+//                    newSmsMessageRunnable.date = date;
+//                    newSmsMessageRunnable.message_is_spam = true;//very important field. In future this will be changed after returning result from server
                     new Thread(newSmsMessageRunnable).start();
                 }
 //                context.sendBroadcast(intent); //no need to forward the broadcast to other messaging apps as all apps receive this SMS_RECEIVED,

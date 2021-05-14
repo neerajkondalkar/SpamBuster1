@@ -177,12 +177,12 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                         matchFound = matcher.find();
                                         if (matchFound) {
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
+                                            if (current_address.length() > 10) {
+                                                current_address = current_address.substring(current_address.length() - 10, current_address.length());
+//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
+                                            }
                                         } else {
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
-                                        }
-                                        if (current_address.length() > 10) {
-                                            current_address = current_address.substring(current_address.length() - 10, current_address.length());
-//                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                         }
                                         if (!inbox_list.contains(current_address) && !spam_list.contains(current_address)) {
                                             inbox_list.add(current_address);

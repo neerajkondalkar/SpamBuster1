@@ -35,22 +35,26 @@ public class NewSmsMessageRunnable implements Runnable{
     Context context;
     private final String TAG = " [MY_DEBUG] ";
     private WeakReference<MainActivity> activityWeakReference;
-    public String sms_body;
-    public String address;
-    public String date_sent;
-    public String date;
+    private String sms_body;
+    private String address;
+    private String date_sent;
+    private String date;
     public static final String UNCLASSIFIED = "-7";
     public static final String HAM = "-11";
     public static final String SPAM = "-9";
-    public boolean message_is_spam = true;  //very important field. In future this will be changed after returning result from server
+    private boolean message_is_spam = true;  //very important field.
     private boolean http_req_success = false;
 
     private SpamBusterdbHelper spamBusterdbHelper;
     private SQLiteDatabase db;
 //    NewSmsMessageRunnable(MainActivity activity, SpamBusterdbHelper spamBusterdbHelper) {
-    NewSmsMessageRunnable(Context context, SpamBusterdbHelper spamBusterdbHelper) {
+    NewSmsMessageRunnable(Context context, SpamBusterdbHelper spamBusterdbHelper, MySmsMessage mySmsMessage) {
         this.spamBusterdbHelper = spamBusterdbHelper;
         this.context = context;
+        this.sms_body = mySmsMessage.getBody();
+        this.address = mySmsMessage.getAddress();
+        this.date = mySmsMessage.getDate();
+        this.date_sent = mySmsMessage.getDatesent();
 //        activityWeakReference = new WeakReference<MainActivity>(activity);
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
