@@ -151,14 +151,14 @@ public class PredictionUtility {
                 JSONArray result_ja = (JSONArray) obj.get("result");
                 Log.d(TAG, " [API] PredictionUtility: makePrediction(): Printing <JSONOArray> result_ja :" + result_ja);
                 Log.d(TAG, " [API] PredictionUtility: makePrediction(): length of result_ja : " + result_ja.length());
-                Log.d(TAG, " [API] PredictionUtility: makePrediction(): looping through the json array ");
+//                Log.d(TAG, " [API] PredictionUtility: makePrediction(): looping through the json array ");
 
                 for(int i=0; i<result_ja.length(); i++){
                     JSONObject tempjo = (JSONObject) result_ja.get(i);
-                    Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s\n", i, tempjo.toString()));
+//                    Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s\n", i, tempjo.toString()));
                     try{
-                        Log.d(TAG, " [API] PredictionUtility: makePrediction(): extract ID and spam prediction from the JSON object");
-                        Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString()));
+//                        Log.d(TAG, " [API] PredictionUtility: makePrediction(): extract ID and spam prediction from the JSON object");
+//                        Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString()));
                         if(tempjo.get("spam").toString().equals("1")){
                             result_map.put(tempjo.get("id").toString(), 1);
 //                            return 1;
