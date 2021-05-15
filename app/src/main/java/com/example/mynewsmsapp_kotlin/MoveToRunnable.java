@@ -1,5 +1,6 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -88,7 +89,7 @@ public class MoveToRunnable implements Runnable {
                     if(corressinboxid==null) {
                         corressinboxid = DbOperationsUtility.getInstance().
                                 insertIntoSmsInbox(new MySmsMessage(temp_address_holder, temp_date_holder,
-                                        temp_datesent_holder, temp_body_holder));
+                                        temp_datesent_holder, temp_body_holder), context);
                     }
 
                     //if insertion in SMSINBOX is successfull OR  the message was already present in SMSINBOX, then update TABLEALL

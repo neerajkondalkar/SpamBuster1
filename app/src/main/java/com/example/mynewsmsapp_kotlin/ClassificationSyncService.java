@@ -11,11 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ClassificationSyncService extends Service {
-//    public Context context = getApplicationContext();
+//    private Context context = getApplicationContext();
     private static final String TAG = "[MY_DEBUG]";
-
-    public ClassificationSyncService() {
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
@@ -80,4 +77,7 @@ public class ClassificationSyncService extends Service {
         super.onTaskRemoved(rootIntent);
     }
 
+//    public static ClassificationSyncService getInstance(){
+//        return classificationSyncService;
+//    }
 }

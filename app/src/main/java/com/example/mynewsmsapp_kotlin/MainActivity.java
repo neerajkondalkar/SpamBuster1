@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //start background service
-//        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
+        startService(new Intent(getApplicationContext(),ClassificationSyncService.class));
 
 //        ----------------------- DELETE DATABASE --------------------
         //to delete the database. so that everytime a new database is created

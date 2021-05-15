@@ -1,11 +1,13 @@
 package com.example.mynewsmsapp_kotlin;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +23,7 @@ import java.util.List;
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
     public static HashMap<String, Integer> map_address_to_position = new HashMap<>();
-
+    public static HashMap<Integer, String> map_position_to_address = new HashMap<>();
     ArrayList<String> sms_messages_list = new ArrayList<>();
     Context context;
 
@@ -40,7 +42,8 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         final String TAG_insert = " insertPerson(): ";
 //        Log.d(TAG, "SmsAdapter: insertPerson(): adding a new item: " + address + " in adapter at index + " + position);
         sms_messages_list.add(position, address);
-        map_address_to_position.put(address, Integer.valueOf(position));
+        map_address_to_position.put(address, position);
+        map_position_to_address.put(position, address);
         notifyDataSetChanged();
     }
 
@@ -53,6 +56,12 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 //        Log.d(TAG, TAG_insert + " called ");
 //        Log.d(TAG, "SmsAdapter: insert(): adding a new message in adapter at index + " + position);
         sms_messages_list.add(position, new_sms);
+        notifyDataSetChanged();
+    }
+
+    public void removePerson(int position){
+        Log.d(TAG, "SmsAdapter: removePerson(): removing the person'conversation at position : " + position);
+        sms_messages_list.remove(position);
         notifyDataSetChanged();
     }
 
@@ -83,12 +92,13 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     }
 
     //inner class
-    public class SmsViewHolder extends  RecyclerView.ViewHolder implements View.OnClickListener{
+    public class SmsViewHolder extends  RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         TextView sms_text;
         public SmsViewHolder(@NonNull View itemView) {
             super(itemView);
             sms_text = itemView.findViewById(R.id.sms_text);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -99,6 +109,52 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
             Intent start_chat_windows_activity = new Intent(MainActivity.instance(), ChatWindowActivity.class);
             start_chat_windows_activity.putExtra("address", sms_messages_list.get(position));
             context.startActivity(start_chat_windows_activity);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            int position = getLayoutPosition();
+            Toast.makeText(context, String.format("long pressed on position:%d where address is %s", position, map_position_to_address.get(position)), Toast.LENGTH_SHORT).show();
+            showDialog(map_position_to_address.get(position));
+            return true;
+        }
+
+        private void showDialog(final String address){
+            final AlertDialog.Builder alert = new AlertDialog.Builder(context);
+            View mView = MainActivity.instance().getLayoutInflater().inflate(R.layout.longclickdialog,null);
+            Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel_convo);
+            Button btn_delete = (Button)mView.findViewById(R.id.btn_delete_convo);
+            TextView txt_title = (TextView)mView.findViewById(R.id.txt_longclickdialogtitle);
+            txt_title.setText(String.format("Delete conversation of %s ?", MainActivity.getContactName(context, address)));
+            alert.setView(mView);
+            final AlertDialog alertDialog = alert.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            btn_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "Cancelled delete operation", Toast.LENGTH_SHORT).show();
+                    alertDialog.dismiss();
+                }
+            });
+            btn_delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "Messages will be deleted!", Toast.LENGTH_SHORT).show();
+                    deleteConvo(address);
+                    removePerson(map_address_to_position.get(address));
+                    alertDialog.dismiss();
+                }
+            });
+            alertDialog.show();
+        }
+
+        private void deleteConvo(final String address){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    DbOperationsUtility.getInstance().deleteConversation(address, context);
+                }
+            }).start();
         }
     }
 }

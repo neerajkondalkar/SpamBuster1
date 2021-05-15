@@ -18,6 +18,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,7 +139,9 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         View mView = ChatWindowActivity.instance().getLayoutInflater().inflate(R.layout.dummy_dialogue,null);
         Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel);
         Button btn_option = (Button)mView.findViewById(R.id.btn_okay);
-        btn_option.setText("Move to " + option);
+        TextView txt_title = (TextView)mView.findViewById(R.id.txt_movetotitle);
+//        Button btn_delete = (Button)mView.findViewById(R.id.btn_delete);
+        txt_title.setText(String.format("Move message id: %s to %s ?", tableallid, option));
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
         alertDialog.setCanceledOnTouchOutside(false);
@@ -163,14 +167,23 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
                 alertDialog.dismiss();
             }
         });
+//        btn_delete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                deleteMessage(tableallid);
+//            }
+//        });
         alertDialog.show();
     }
 
     private  void moveToSpam(String id) {
-        new Thread(new MoveToRunnable(context, id, SPAM)).start();
+            new Thread(new MoveToRunnable(context, id, SPAM)).start();
     }
     private  void moveToInbox(String id){
             new Thread(new MoveToRunnable(context, id, HAM)).start();
+    }
+    private void deleteMessage(String id){
+            
     }
     }
 }
