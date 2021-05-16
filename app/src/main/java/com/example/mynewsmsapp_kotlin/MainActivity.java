@@ -34,6 +34,7 @@ import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.DONE_TASK_G
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_ALL;
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_INBOX;
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_SPAM;
+import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_SYNCTABLES;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_SYNCTABLES;
 import static java.lang.Thread.currentThread;
 
@@ -461,8 +462,75 @@ public class MainActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing()) {
                 return;
             }
+//
+////            this.db_helper = new SpamBusterdbHelper(activity);
+//            this.db_helper1 = activity.spamBusterdbHelper;
+//            //get persons list and put in persons_list
+//            activity.getPersonsHandlerThread = new GetPersonsHandlerThread(db_helper1);
+//            this.getPersonsHandlerThread = activity.getPersonsHandlerThread;
+//            this.getPersonsHandlerThread.start();
+//            try {
+//                Thread.sleep(200);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            this.handler1 = getPersonsHandlerThread.getHandler();
+//            Message msg_getpersons = Message.obtain(handler1);
+//            msg_getpersons.what = GetPersonsHandlerThread.TASK_GET_PERSONS;
+//            int table1 = TABLE_ALL;
+//            msg_getpersons.arg1 = table1;
+//            Log.d(TAG, "DbOperationsRunnable: run(): preparing message msg_getperson with following attributes:");
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.what = " + msg_getpersons.what);
+//            Log.d(TAG, "DbOperationsRunnable: run(): msg_getpersons.arg1 = " + msg_getpersons.arg1);
+//            Log.d(TAG, "DbOperationsRunnable: run(): sending message...");
+//            msg_getpersons.sendToTarget();
+//
+//            while(true) {
+//                if(DONE_TASK_GETPERSONS) {
+//                    DONE_TASK_GETPERSONS = false;
+//                    activity.displayPersonsRunnable = new DisplayPersonsRunnable(activity);
+//                    activity.thread = new Thread(activity.displayPersonsRunnable);
+//                    activity.thread.start();
+//                    break;
+//                }
+//            }
+            showPersonsList();
 
-//            this.db_helper = new SpamBusterdbHelper(activity);
+            MainActivity.instance().getSpam();
+            MainActivity.instance().getInbox();
+
+            //carry out sync of tables everytime the app starts
+//            this.db_helper = activity.spamBusterdbHelper;
+            activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper1);
+            this.tableAllSyncInboxHandlerThread = activity.tableAllSyncInboxHandlerThread;
+            this.tableAllSyncInboxHandlerThread.start();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.handler = tableAllSyncInboxHandlerThread.getHandler();
+            Message msg_synctables = Message.obtain(handler);
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables initialized");
+            msg_synctables.what = TASK_SYNCTABLES;
+            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_synctables.what = " + msg_synctables);
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables preparation complete");
+            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables sent!");
+            msg_synctables.sendToTarget();
+            while(true) {
+                if(DONE_TASK_SYNCTABLES) {
+                    DONE_TASK_SYNCTABLES = false;
+                    showPersonsList();
+                    break;
+                }
+            }
+        }
+
+        private void showPersonsList(){
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
             this.db_helper1 = activity.spamBusterdbHelper;
             //get persons list and put in persons_list
             activity.getPersonsHandlerThread = new GetPersonsHandlerThread(db_helper1);
@@ -493,28 +561,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
             }
-
-            MainActivity.instance().getSpam();
-            MainActivity.instance().getInbox();
-
-            //carry out sync of tables everytime the app starts
-//            this.db_helper = activity.spamBusterdbHelper;
-            activity.tableAllSyncInboxHandlerThread = new TableAllSyncInboxHandlerThread(db_helper1);
-            this.tableAllSyncInboxHandlerThread = activity.tableAllSyncInboxHandlerThread;
-            this.tableAllSyncInboxHandlerThread.start();
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            this.handler = tableAllSyncInboxHandlerThread.getHandler();
-            Message msg_synctables = Message.obtain(handler);
-            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables initialized");
-            msg_synctables.what = TASK_SYNCTABLES;
-            Log.d(TAG, "DbOperationsRunnable: run(): setting msg_synctables.what = " + msg_synctables);
-            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables preparation complete");
-            Log.d(TAG, "DbOperationsRunnable: run(): msg_synctables sent!");
-            msg_synctables.sendToTarget();
         }
     }
 

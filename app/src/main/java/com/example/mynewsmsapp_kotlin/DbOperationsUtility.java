@@ -13,6 +13,8 @@ import android.util.Log;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
+
 //this class needs to be singleton class
 public class DbOperationsUtility {
     private static final String TAG = "[MY_DEBUG]";
@@ -63,7 +65,7 @@ public class DbOperationsUtility {
             return latest_topid;
         }
         else{
-            throw new InsertionFailedException();
+            throw new InsertionFailedException("SMSINBOX");
         }
     }
 
@@ -256,5 +258,101 @@ public class DbOperationsUtility {
         }
         cursor_check_sms_id.close();
         return idsfromaddress;
+    }
+
+    public MySmsMessage getMessageFromTablallId(String tableallid, SpamBusterdbHelper spamBusterdbHelper){
+        MySmsMessage mySmsMessage = null;
+        Log.d(TAG, "DbOperationsUtility: getAllCorressInboxIdsFromTableAll(): reading corressinboxid from TABLEALL for tableallid: " + tableallid);
+//        SQLiteDatabase db = db_helper.getReadableDatabase();
+        SQLiteDatabase db = spamBusterdbHelper.getReadableDatabase();
+        String[] projection_id = {
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT,
+                SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS
+        };
+        String selection_id = SpamBusterContract.TABLE_ALL._ID + " =?";
+        String[] selection_args = {tableallid};
+        String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
+        Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                projection_id,             // The array of columns to return (pass null to get all)
+                selection_id,              // The columns for the WHERE clause
+                selection_args,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sort_order               // The sort order
+        );
+        String temp_address = null;
+        String temp_date = null;
+        String temp_datesent = null;
+        String temp_body=null;
+        if (!cursor_read_id.moveToFirst()) {
+            Log.d(TAG, "DbOperationsUtility: getAllCorressInboxIdsFromTableAll(): could not retrieve corressinboxid for tableallid: " + tableallid);
+        }
+        else {
+                temp_address = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS));
+                temp_date = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
+                temp_datesent = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE_SENT));
+                temp_body = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
+                mySmsMessage = new MySmsMessage(temp_address, temp_date, temp_datesent, temp_body);
+        }
+        cursor_read_id.close();
+        db.close();
+        return mySmsMessage;
+    }
+
+    //will return true if updation was successfull, else false
+    public boolean updateMessageInTableAll(MySmsMessage mySmsMessage, SpamBusterdbHelper spamBusterdbHelper){
+        SQLiteDatabase db = spamBusterdbHelper.getWritableDatabase();
+        values.clear();
+        Log.d(TAG, "NewSmsMessageRunnable: run(): corress_inbox_id set to " + mySmsMessage.getCorressinboxid());
+        if(mySmsMessage.getCorressinboxid()!=null) {
+            Log.d(TAG, "NewSmsMessageRunnable: run(): updating corress_inbox_id at _id '" + mySmsMessage.getTableallid() + "' in table_all to " + mySmsMessage.getCorressinboxid());
+            values.put(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID, mySmsMessage.getCorressinboxid());
+        }
+        else{
+            Log.d(TAG, "DbOperationsUtility: updateMessageInTableAll(): corressinbox id is null, will not be updated");
+        }
+        values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, mySmsMessage.getSpam());
+        String[] whereArgs = new String[]{mySmsMessage.getTableallid()};
+        db.beginTransaction();
+        db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+        //check if tableall is updated with the required value (code in newsmsrunnable)
+        boolean updated = false;
+        Log.d(TAG, "DbOperationsUtility: updateMessageInTableAll(): checking if TABLEALL has been updated");
+        db = spamBusterdbHelper.getReadableDatabase();
+        db.beginTransaction();
+        String[] projection_id = {
+                SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID,
+                SpamBusterContract.TABLE_ALL.COLUMN_SPAM
+        };
+        String selection_id = SpamBusterContract.TABLE_ALL._ID + " =?";
+        String[] selection_args = {mySmsMessage.getTableallid()};
+        Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                projection_id,             // The array of columns to return (pass null to get all)
+                selection_id,              // The columns for the WHERE clause
+                selection_args,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                null               // The sort order
+        );
+        if (cursor_read_id.moveToFirst()) {
+            String corressinboxid = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
+            String spam = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SPAM));
+            if(((corressinboxid==null && mySmsMessage.getCorressinboxid()==null) || corressinboxid.equals(mySmsMessage.getCorressinboxid()) )
+                    && spam.equals(mySmsMessage.getSpam())){
+                updated = true;
+            }
+        }
+        else{
+            Log.d(TAG, "DbOperationsUtility: updateMessageInTableAll(): error reading TABLEALL");
+        }
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        db.close();
+        return updated;
     }
 }

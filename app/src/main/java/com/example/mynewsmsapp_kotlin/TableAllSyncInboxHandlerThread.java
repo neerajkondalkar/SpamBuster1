@@ -49,6 +49,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
     private List<String> missing_item_ids_in_smsinbox = new ArrayList<String>();
 
     public static final int TASK_SYNCTABLES = 16;
+    public static boolean DONE_TASK_SYNCTABLES = false;
     public static final int TASK_COMPARE_TOP_ID = 11;
     public static boolean DONE_TASK_COMPARETOPID = false;
     public static final int TASK_GET_IDS = 12;
@@ -77,6 +78,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void handleMessage(@NonNull Message msg) {
+                Context context = MainActivity.instance();
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): A Message received !");
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): what = " + msg.what);
                 Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): arg1 = " + msg.arg1);
@@ -277,8 +279,45 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 //                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): mapping TABLEALL ids to messages ");
                                     do{
                                         String temp_message_holder = cursor.getString(cursor.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_BODY));
-                                        hashmap_tableallid_to_message_forclassification.put(tableallid_unclass, temp_message_holder);
+                                        //do not put OTP message for classification
+                                        //check if it is an OTP
+                                        //if message is OTP, this means it should be declared HAM
+                                        if(MySmsMessage.isMessageOTP(temp_message_holder)) {
+                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): Message is an OTP so do not send for prediction. Declaring HAM");
+                                            //get the address, date, date_sent of the tableallid
+                                            MySmsMessage mySmsMessage = DbOperationsUtility.getInstance().getMessageFromTablallId(tableallid_unclass, db_helper);
+                                            //insert into SMSINBOX, get latestinboxid
+                                            try {
+                                                //get corressinboxid of the message from SMSINBOX
+                                                String newinboxid = hashmap_tableallid_to_corressinboxid.get(tableallid_unclass);
+                                                //insert in SMSINBOX only if not already present in SMSINBOX
+                                                if(!hashset_smsinbox_id.contains(hashmap_tableallid_to_corressinboxid.get(tableallid_unclass))) {
+                                                    newinboxid = DbOperationsUtility.getInstance().insertIntoSmsInbox(mySmsMessage, context);
+                                                }
+                                                //prepare mySmsMessage to be inserted into TABLEALL
+                                                mySmsMessage.setTableallid(tableallid_unclass);
+                                                mySmsMessage.setCorressinboxid(newinboxid);
+                                                mySmsMessage.setSpam(HAM);
+                                                //update  TABLEALL with spam=HAM and corressinboxid=latestinboxid
+                                                //if updation was successfull, then remove the tableallid from list_unclassified_tableallid
+                                                if(DbOperationsUtility.getInstance().updateMessageInTableAll(mySmsMessage, db_helper)){
+                                                    list_unclassified_tableallid.remove(mySmsMessage.getTableallid());
+                                                }
+                                                else{
+//                                                    This means message has been successfully inserted in SMSINBOX, but in TABLEALL it is still marked as UNCLASSIFIED
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): could not update TABLEALL, maybe next restart of app will do the trick");
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): This means message has been successfully inserted in SMSINBOX, but in TABLEALL it is still marked as UNCLASSIFIED");
+                                                }
+                                            }
+                                            catch (InsertionFailedException e){
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): the OTP could not be inserted in SMSINBOX. Not updating TABLEALL either");
+                                            }
+                                        }
+                                        //else, if message is not OTP, then we have to prepare for classification
+                                        else {
+                                            hashmap_tableallid_to_message_forclassification.put(tableallid_unclass, temp_message_holder);
 //                                        Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): " + tableallid_unclass + " : " + temp_message_holder);
+                                        }
                                     }while (cursor.moveToNext());
                                 }
                             }
@@ -378,11 +417,27 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                                             ContentValues values = new ContentValues();
                                             values.clear();
                                             values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
-                                            db.beginTransaction();
-                                            String[] whereArgs = new String[]{tableallid};
-                                            db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
-                                            db.setTransactionSuccessful();
-                                            db.endTransaction();
+                                            Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): updating TABLEALL ID: " + tableallid + " to HAM");
+                                            try {
+//                                                db.beginTransaction();
+//                                                String[] whereArgs = new String[]{tableallid};
+//                                                db.update(SpamBusterContract.TABLE_ALL.TABLE_NAME, values, SpamBusterContract.TABLE_ALL._ID + "=?", whereArgs);
+//                                                db.setTransactionSuccessful();
+//                                                db.endTransaction();
+                                                MySmsMessage mySmsMessage = new MySmsMessage();
+                                                mySmsMessage.setTableallid(tableallid);
+                                                mySmsMessage.setCorressinboxid(hashmap_tableallid_to_corressinboxid.get(tableallid));
+                                                mySmsMessage.setSpam(HAM);
+                                                if(DbOperationsUtility.getInstance().updateMessageInTableAll(mySmsMessage, db_helper)){
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): updated TABLEALL");
+                                                }
+                                                else{
+                                                    Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): Could not update TABLEALL");
+                                                }
+                                            }
+                                            catch (IllegalStateException e){
+                                                Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): could not update TABLEALL");
+                                            }
                                         }
                                     }
 
@@ -412,6 +467,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                         db.close();
 //                        Toast.makeText(MainActivity.instance(), "Trying to make toast from TableAllSyncInboxHandlerThread", Toast.LENGTH_LONG);
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing Mainactivity.instance(): " + MainActivity.instance());
+                        DONE_TASK_SYNCTABLES = true;
                         break; //break from case TASK_SYNCTABLES
                 }
                 }
