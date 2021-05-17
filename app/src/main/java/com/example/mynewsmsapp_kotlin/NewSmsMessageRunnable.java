@@ -104,15 +104,10 @@ public class NewSmsMessageRunnable implements Runnable{
             int prediction = -1;
 
             //if message has the word OTP in it, then declare it as HAM
-            String[] checkotpstr = sms_body.split(" ");
-            for(String str : checkotpstr){
-                if (str.equalsIgnoreCase("otp")){
-                    http_req_success = true;
-                    message_is_spam = false;
-                    prediction = 0;
-                    Log.d(TAG, "NewSmsMessageRunnable: run(): Message is an OTP. So declaring it as HAM right away!");
-                    break;
-                }
+            if(MySmsMessage.isMessageOTP(sms_body)) {
+                http_req_success = true;
+                message_is_spam = false;
+                prediction = 0;
             }
 
             //if we have already declared the message as HAM (message from sender in our contact list), then we don't need to predict

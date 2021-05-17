@@ -706,6 +706,10 @@ public class MainActivity extends AppCompatActivity {
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);
         this.thread.start();
     }
+
+    public Handler getHandler(){
+        return this.main_handler;
+    }
 } //MainActivity class ends
 
 

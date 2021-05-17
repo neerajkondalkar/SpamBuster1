@@ -84,7 +84,7 @@ public class MySmsMessage {
     public static boolean isMessageOTP(String message){
         String[] checkotpstr = message.split(" ");
         for(String str : checkotpstr){
-            if (str.equalsIgnoreCase("otp")){
+            if (str.equalsIgnoreCase("otp") && (checkotpstr.length < 25)){
                 return true;
             }
         }

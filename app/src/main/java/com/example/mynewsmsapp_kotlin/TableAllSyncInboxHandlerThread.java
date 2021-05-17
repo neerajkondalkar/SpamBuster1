@@ -464,7 +464,7 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
                             Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): No internet connection detected");
                         }
 
-                        db.close();
+//                        db.close();
 //                        Toast.makeText(MainActivity.instance(), "Trying to make toast from TableAllSyncInboxHandlerThread", Toast.LENGTH_LONG);
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing Mainactivity.instance(): " + MainActivity.instance());
                         DONE_TASK_SYNCTABLES = true;

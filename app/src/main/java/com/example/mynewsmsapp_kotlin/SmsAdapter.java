@@ -3,6 +3,7 @@ package com.example.mynewsmsapp_kotlin;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +48,15 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         notifyDataSetChanged();
     }
 
+    private void  refreshMapAddressPosition(){
+        map_address_to_position.clear();
+        map_position_to_address.clear();
+        for(int i=0; i<sms_messages_list.size(); i++){
+            map_position_to_address.put(i, sms_messages_list.get(i));
+            map_address_to_position.put(sms_messages_list.get(i), i);
+        }
+    }
+
     public  void addAllItems(ArrayList<String> list){
         sms_messages_list.addAll(list);
     }
@@ -62,6 +72,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     public void removePerson(int position){
         Log.d(TAG, "SmsAdapter: removePerson(): removing the person'conversation at position : " + position);
         sms_messages_list.remove(position);
+        refreshMapAddressPosition();
         notifyDataSetChanged();
     }
 
@@ -141,7 +152,6 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
                 public void onClick(View v) {
                     Toast.makeText(context, "Messages will be deleted!", Toast.LENGTH_SHORT).show();
                     deleteConvo(address);
-                    removePerson(map_address_to_position.get(address));
                     alertDialog.dismiss();
                 }
             });
@@ -152,7 +162,20 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    DbOperationsUtility.getInstance().deleteConversation(address, context);
+                    if(DbOperationsUtility.getInstance().deleteConversation(address, context)){
+                        Log.d(TAG, "SmsViewHolder: run(): Conversation of " + address + " deleted successfully");
+                        Handler handler = MainActivity.instance().getHandler();
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainActivity.instance(), "Conversation of " + address + " deleted successfully!", Toast.LENGTH_SHORT).show();
+                                removePerson(getLayoutPosition());
+                            }
+                        });
+                    }
+                    else{
+                        Log.d(TAG, "SmsViewHolder: run(): Conversation of " + address + " could not be deleted");
+                    }
                 }
             }).start();
         }

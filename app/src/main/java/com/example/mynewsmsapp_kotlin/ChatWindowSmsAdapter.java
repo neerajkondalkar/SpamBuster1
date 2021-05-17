@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,6 +68,11 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         notifyDataSetChanged();
     }
 
+    public void removeMessage(int position){
+        sms_messages_list.remove(position);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public SmsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -97,12 +103,6 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         @SuppressLint("DefaultLocale")
         @Override
         public void onClick(View v) {
-//            int position = getLayoutPosition();
-//            String person_name = MainActivity.getContactName(context, sms_messages_list.get(position));
-//            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
-//            Intent start_chat_windows_activity = new Intent(MainActivity.instance(), ChatWindowActivity.class);
-//            start_chat_windows_activity.putExtra("address", sms_messages_list.get(position));
-//            context.startActivity(start_chat_windows_activity);
             int position = getLayoutPosition();
             String tableallID = hashmap_indexofmessage_to_tableallid_ChatWindowActivity.get(position);
             String spam = hashmap_tableallid_to_spam_ChatWindowActivity.get(tableallID);
@@ -140,7 +140,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel);
         Button btn_option = (Button)mView.findViewById(R.id.btn_okay);
         TextView txt_title = (TextView)mView.findViewById(R.id.txt_movetotitle);
-//        Button btn_delete = (Button)mView.findViewById(R.id.btn_delete);
+        Button btn_delete = (Button)mView.findViewById(R.id.btn_delete);
         txt_title.setText(String.format("Move message id: %s to %s ?", tableallid, option));
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
@@ -167,12 +167,13 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
                 alertDialog.dismiss();
             }
         });
-//        btn_delete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                deleteMessage(tableallid);
-//            }
-//        });
+        btn_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteMessage(tableallid);
+                alertDialog.dismiss();
+            }
+        });
         alertDialog.show();
     }
 
@@ -182,8 +183,26 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
     private  void moveToInbox(String id){
             new Thread(new MoveToRunnable(context, id, HAM)).start();
     }
-    private void deleteMessage(String id){
-            
+    private void deleteMessage(final String id){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if(DbOperationsUtility.getInstance().deleteMessage(id, context)){
+                        Log.d(TAG, "SmsViewHolder: run(): Message with id:" + id + " has been deleted successfully!");
+                        Handler handler = ChatWindowActivity.instance().getHandler();
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(ChatWindowActivity.instance(), "Message with id:" + id + " has been deleted successfully!", Toast.LENGTH_SHORT).show();
+                                removeMessage(getLayoutPosition());
+                            }
+                        });
+                    }
+                    else{
+                        Log.d(TAG, "SmsViewHolder: run(): Could not delete message with id:" + id);
+                    }
+                }
+            }).start();
     }
     }
 }

@@ -7,13 +7,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 
 //this class needs to be singleton class
 public class DbOperationsUtility {
@@ -95,7 +92,7 @@ public class DbOperationsUtility {
             temp_corres_inbox_id_holder = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_CORRES_INBOX_ID));
         }
         cursor_read_id.close();
-        db.close();
+//        db.close();
         return temp_corres_inbox_id_holder;
     }
 
@@ -131,7 +128,7 @@ public class DbOperationsUtility {
                 } while (cursor_read_id.moveToNext());
             }
             cursor_read_id.close();
-            db.close();
+//            db.close();
         }
         return set_corressinboxids;
     }
@@ -195,13 +192,14 @@ public class DbOperationsUtility {
                 } while (cursor_read_id.moveToNext());
             }
             cursor_read_id.close();
-            db.close();
+//            db.close();
         }
         return hashset_tableall_ids;
     }
 
-    public void deleteConversation(String address, Context context){
+    public boolean deleteConversation(String address, Context context){
         //delete from TABLEALL
+        boolean deletionsuccess = false;
         SpamBusterdbHelper spamBusterdbHelper = new SpamBusterdbHelper(context);
         SQLiteDatabase db = spamBusterdbHelper.getWritableDatabase();
         ContentResolver contentResolver = context.getContentResolver();
@@ -222,10 +220,11 @@ public class DbOperationsUtility {
             Uri uri = Uri.parse("content://sms");
             contentResolver.delete(uri, whereClause, whereArgs);
             //check if deleted from SMSINBOX
-            Set<String> ids = getMessageIdsFromAddress(address);
+            Set<String> ids = getMessageInboxIdsFromAddress(address);
             if(ids.isEmpty()) {
                 //if empty set is returned then it means conversation is successfully deleted from SMSINBOX
                 db.setTransactionSuccessful();
+                deletionsuccess = true;
                 Log.d(TAG, "DbOperationsUtility: deleteConversation(): successfully deleted conversation from SMSINBOX of address " + address);
             }
             else{
@@ -233,9 +232,61 @@ public class DbOperationsUtility {
             }
         }
         db.endTransaction();
+        return deletionsuccess;
+//        db.close();
     }
 
-    public Set<String> getMessageIdsFromAddress(String address){
+    //will delete the message with tableallid from both TABLEALL and SMSINBOX
+    public boolean deleteMessage(String tableallid, Context context){
+        //delete from TABLEALL
+        boolean deletionsuccess = false;
+        SpamBusterdbHelper spamBusterdbHelper = new SpamBusterdbHelper(context);
+        SQLiteDatabase db = spamBusterdbHelper.getWritableDatabase();
+        ContentResolver contentResolver = context.getContentResolver();
+        String whereClause = SpamBusterContract.TABLE_ALL._ID + " =?";
+        String[] whereArgs = new String[] {tableallid};
+//        String [] whereArgs = null;
+        Log.d(TAG, "DbOperationsUtility: deleteConversation(): deleting message with id: " + tableallid + " from TABLEALL");
+        db.beginTransaction();
+        int numberOFEntriesDeleted = db.delete(SpamBusterContract.TABLE_ALL.TABLE_NAME, whereClause, whereArgs);
+        if(numberOFEntriesDeleted<=0){
+            Log.d(TAG, "DbOperationsUtility: deleteConversation(): Could not delete from TABLEALL.");
+        }
+        else{
+            Log.d(TAG, "DbOperationsUtility: deleteConversation(): successfully deleted message with id:" + tableallid + " from TABLEALL");
+            // now delete from SMSINBOX
+            whereClause = "_id=?";
+            String corressinboxid = getCorressInboxIdFromTableAll(spamBusterdbHelper, tableallid);
+            if(corressinboxid==null){
+                Log.d(TAG, "DbOperationsUtility: deleteMessage(): corressinboxid = null");
+                Log.d(TAG, "DbOperationsUtility: deleteMessage(): This means we dont need to delete it from SMSINBOX as it is not there in SMSINBOX");
+                db.setTransactionSuccessful();
+                deletionsuccess = true;
+            }
+            else {
+                Log.d(TAG, "DbOperationsUtility: deleteMessage(): attempting to delete message from SMSINBOX with inboxid :" + corressinboxid);
+                whereArgs = new String[]{corressinboxid};
+                Uri uri = Uri.parse("content://sms");
+                contentResolver.delete(uri, whereClause, whereArgs);
+                //check if deleted from SMSINBOX
+                Set<String> ids = getInboxIdsfromSmsInbox(spamBusterdbHelper);
+                if (!ids.contains(corressinboxid)) {
+                    //if empty set is returned then it means conversation is successfully deleted from SMSINBOX
+                    db.setTransactionSuccessful();
+                    deletionsuccess = true;
+                    Log.d(TAG, "DbOperationsUtility: deleteConversation(): successfully deleted message from SMSINBOX with inboxid " + corressinboxid);
+                } else {
+                    Log.d(TAG, "DbOperationsUtility: deleteConversation(): Coulbt not delete message from SMSINBOX. Rolling back changes done in TABLEALL");
+                }
+            }
+        }
+        db.endTransaction();
+        return deletionsuccess;
+//        db.close();
+    }
+
+
+    public Set<String> getMessageInboxIdsFromAddress(String address){
         Set<String> idsfromaddress = new HashSet<>();
         Log.d(TAG, "DbOperationsUtility: getMessageIdsFromAddress(): reading IDs from SMSINBOX where address = " + address);
         ContentResolver content_resolver = MainActivity.instance().getContentResolver();
@@ -297,7 +348,7 @@ public class DbOperationsUtility {
                 mySmsMessage = new MySmsMessage(temp_address, temp_date, temp_datesent, temp_body);
         }
         cursor_read_id.close();
-        db.close();
+//        db.close();
         return mySmsMessage;
     }
 
@@ -352,7 +403,7 @@ public class DbOperationsUtility {
         }
         db.setTransactionSuccessful();
         db.endTransaction();
-        db.close();
+//        db.close();
         return updated;
     }
 }

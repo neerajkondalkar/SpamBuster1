@@ -197,6 +197,10 @@ public class ChatWindowActivity extends AppCompatActivity {
         }
     }
 
+    public Handler getHandler(){
+        return this.main_handler;
+    }
+
     public static ChatWindowActivity instance(){
         return inst;
     }

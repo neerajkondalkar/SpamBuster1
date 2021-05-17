@@ -73,7 +73,7 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                         projection,             // The array of columns to return (pass null to get all)
                                         selection,              // The columns for the WHERE clause
                                         selectionArgs,          // The values for the WHERE clause
-                                        groupBy,                   // don't group the rows
+                                        groupBy,                   // group by address
                                         null,                   // don't filter by row groups
                                         sortOrder               // The sort order
                                 );
@@ -175,6 +175,8 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                         Pattern pattern1 = Pattern.compile("^\\d{1,3}\\d{10}", Pattern.CASE_INSENSITIVE);
                                         matcher = pattern1.matcher(current_address);
                                         matchFound = matcher.find();
+                                        //if it is a number, then crop it down to 10 digits so that both the numbers starting with +(XX) and
+                                        // the ones not starting with +XX, both map to same number
                                         if (matchFound) {
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number starts with 91");
                                             if (current_address.length() > 10) {
@@ -184,7 +186,8 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                         } else {
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
                                         }
-                                        if (!inbox_list.contains(current_address) && !spam_list.contains(current_address)) {
+//                                        if (!inbox_list.contains(current_address) && !spam_list.contains(current_address)) {
+                                        if(!inbox_list.contains(current_address)){
                                             inbox_list.add(current_address);
                                         }
                                     } while (cursor.moveToNext());
@@ -263,9 +266,13 @@ public class GetPersonsHandlerThread extends HandlerThread {
                                         current_address = current_address.substring(current_address.length() - 10, current_address.length());
 //                                        Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): Stripped number = " + current_address);
                                     }
-                                    if(!spam_list.contains(current_address)) {
+                                    //remove any address which has even one HAM message
+                                    if(inbox_list.contains(current_address)){
+                                        spam_list.remove(current_address);
+                                    }
+                                    if(!spam_list.contains(current_address) && !inbox_list.contains(current_address)) {
                                         spam_list.add(current_address);
-                                        inbox_list.remove(current_address);
+//                                        inbox_list.remove(current_address);
                                     }
                                 }while (cursor.moveToNext());
                                 persons_list.addAll(spam_list);
