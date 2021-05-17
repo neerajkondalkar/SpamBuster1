@@ -417,7 +417,7 @@ public class DbOperationsUtility {
         List<String> idstodelete = getSpamIdsToAutoDelete(context, duration);
 //        Log.d(TAG, "DbOperationsUtility: autoDelete(): SPAM ids that need to be deleted:");
         for(String id : idstodelete){
-//            Log.d(TAG, "DbOperationsUtility: autoDelete(): " + id);
+            Log.d(TAG, "DbOperationsUtility: autoDelete(): " + id);
             // uncomment to delete
             //            deleteMessage(id, context);
         }

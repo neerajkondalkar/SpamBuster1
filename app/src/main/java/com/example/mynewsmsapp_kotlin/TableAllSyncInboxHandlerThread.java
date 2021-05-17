@@ -468,6 +468,9 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 //                        db.close();
 //                        Toast.makeText(MainActivity.instance(), "Trying to make toast from TableAllSyncInboxHandlerThread", Toast.LENGTH_LONG);
 
+                        //auto-delete SPAM after certain amount of time mentioned in shared preferences
+                        //for now just show the IDs which are prone to autodeletion
+                        DbOperationsUtility.getInstance().autoDelete(context, auto_delete_duration);
 
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing Mainactivity.instance(): " + MainActivity.instance());
                         DONE_TASK_SYNCTABLES = true;

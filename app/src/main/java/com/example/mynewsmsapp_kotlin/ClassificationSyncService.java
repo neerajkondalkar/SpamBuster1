@@ -21,13 +21,13 @@ public class ClassificationSyncService extends Service {
         onTaskRemoved(intent);
             //auto-delete SPAM after certain amount of time mentioned in shared preferences
             //for now just show the differences in dates of all ID
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-//                    Log.d(TAG, "ClassificationSyncService: run(): check for autodelete of spam");
-                    DbOperationsUtility.getInstance().autoDelete(getApplicationContext(), auto_delete_duration);
-                }
-            }).start();
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+////                    Log.d(TAG, "ClassificationSyncService: run(): check for autodelete of spam");
+//                    DbOperationsUtility.getInstance().autoDelete(getApplicationContext(), auto_delete_duration);
+//                }
+//            }).start();
 //        Toast.makeText(getApplicationContext(),"This is a Service running in Background", Toast.LENGTH_SHORT).show();
 //        Log.d(TAG, "ClassificationSyncService: onStartCommand(): Service is running in background");
         return START_STICKY;
