@@ -7,7 +7,7 @@
         android:id="@+id/txt_autodelete_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Set auto-delete time"
+        android:text="Messages in SPAM will be deleted after"
         android:textSize="22sp"
         android:textAlignment="center"
         android:gravity="center_horizontal" />

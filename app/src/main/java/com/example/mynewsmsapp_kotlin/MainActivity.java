@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Editable;
 import android.util.Log;
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private Handler main_handler = new Handler();
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
     public static boolean inbox_sync_tableall = false;   //shows whether our CONTENT_SMS_INBOX is in sync with TABLE_ALL
+    SharedPreferences autodelete_settings;
+
     private Thread thread;
     ArrayList<String> sms_messages_list = new ArrayList<>();
     RecyclerView messages;
@@ -187,6 +191,19 @@ public class MainActivity extends AppCompatActivity {
         //enable toggle tableham on creation of activity
         toggleButton_all.setChecked(true);
         spamBusterdbHelper = new SpamBusterdbHelper(this);
+
+        autodelete_settings = PreferenceManager.getDefaultSharedPreferences(this);
+        //set deault autodelete if not set by user to 28 days
+        String current_duration = autodelete_settings.getString("autodelete_dur", "");
+        if (current_duration.equals("")) {
+            Log.d(TAG, "MainActivity: onCreate(): autodelete duration is empty. setting to default 28");
+            if(setAutoDeletePreference(28)){
+                Log.d(TAG, "MainActivity: onCreate(): Could not set default autodelete duration ");
+            }
+            else{
+                Log.d(TAG, "MainActivity: onCreate(): Autodelete duration set to default 28");
+            }
+        }
 
         //setting onclick listeners
         toggleButton_all.setOnClickListener(new View.OnClickListener()
@@ -727,6 +744,11 @@ public class MainActivity extends AppCompatActivity {
         Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel_autodelete);
         Button btn_okay = (Button)mView.findViewById(R.id.btn_okay_autodelete);
         final EditText et_autodelete_duration = (EditText)mView.findViewById(R.id.et_autodelete_duration);
+        String current_duration = autodelete_settings.getString("autodelete_dur", "");
+        if(!current_duration.equals("")){
+            et_autodelete_duration.setHint("Current value: " + current_duration + " days");
+            btn_okay.setText("Update");
+        }
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
         alertDialog.setCanceledOnTouchOutside(false);
@@ -744,7 +766,12 @@ public class MainActivity extends AppCompatActivity {
                 String str_duration = readval.toString();
                 switch (checkDurationValidity(str_duration)){
                     case VALID_DURATION:
-                        Toast.makeText(MainActivity.instance(), "Valid duration entered!", Toast.LENGTH_SHORT).show();
+                        if(setAutoDeletePreference(Integer.parseInt(str_duration))){
+                            Toast.makeText(MainActivity.instance(), "Autodelete set to " + str_duration, Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            Toast.makeText(MainActivity.instance(), "Could not update autodelete duration settings", Toast.LENGTH_SHORT).show();
+                        }
                         alertDialog.dismiss();
                         break;
                     case INVALID_DURATION_DAYS:
@@ -786,6 +813,19 @@ public class MainActivity extends AppCompatActivity {
         }
         return errorCode;
     }
+
+    private boolean setAutoDeletePreference(int defaultduration) {
+            SharedPreferences.Editor editor = autodelete_settings.edit();
+            editor.putString("autodelete_dur", String.valueOf(defaultduration));
+            editor.apply();
+            //check if updated
+            String current_duration = autodelete_settings.getString("autodelete_dur", "");
+            if(current_duration.equals(String.valueOf(defaultduration))){
+                Log.d(TAG, "MainActivity: setDefaultAutoDeleteIfNotPresent(): success");
+                return true;
+            }
+            return false;
+        }
 
     public Handler getHandler(){
         return this.main_handler;
