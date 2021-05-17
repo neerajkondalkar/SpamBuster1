@@ -30,6 +30,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import static com.example.mynewsmsapp_kotlin.MainActivity.auto_delete_duration;
 import static com.example.mynewsmsapp_kotlin.MainActivity.getContactName;
 import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_sync_tableall;
 import static com.example.mynewsmsapp_kotlin.MainActivity.table_all_sync_inbox;
@@ -466,6 +467,8 @@ public class TableAllSyncInboxHandlerThread  extends HandlerThread {
 
 //                        db.close();
 //                        Toast.makeText(MainActivity.instance(), "Trying to make toast from TableAllSyncInboxHandlerThread", Toast.LENGTH_LONG);
+
+
                         Log.d(TAG, "TableAllSyncInboxHandlerThread: handleMessage(): printing Mainactivity.instance(): " + MainActivity.instance());
                         DONE_TASK_SYNCTABLES = true;
                         break; //break from case TASK_SYNCTABLES

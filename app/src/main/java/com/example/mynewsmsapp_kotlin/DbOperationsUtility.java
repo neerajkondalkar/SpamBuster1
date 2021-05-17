@@ -9,8 +9,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
 
 //this class needs to be singleton class
 public class DbOperationsUtility {
@@ -405,5 +411,64 @@ public class DbOperationsUtility {
         db.endTransaction();
 //        db.close();
         return updated;
+    }
+
+    public void autoDelete(Context context, String duration){
+        List<String> idstodelete = getSpamIdsToAutoDelete(context, duration);
+//        Log.d(TAG, "DbOperationsUtility: autoDelete(): SPAM ids that need to be deleted:");
+        for(String id : idstodelete){
+//            Log.d(TAG, "DbOperationsUtility: autoDelete(): " + id);
+            // uncomment to delete
+            //            deleteMessage(id, context);
+        }
+    }
+
+    private List<String> getSpamIdsToAutoDelete(Context context, String duration){
+        List<String> idstodelete = new ArrayList<>();
+            SpamBusterdbHelper spamBusterdbHelper = new SpamBusterdbHelper(context);
+//            SQLiteDatabase db = db_helper.getReadableDatabase();
+            SQLiteDatabase db = spamBusterdbHelper.getReadableDatabase();
+            String[] projection_id = {
+                    SpamBusterContract.TABLE_ALL._ID,
+                    SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE
+            };
+            String selection_id = SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " =?";
+            String[] selection_args = {SPAM};
+            String sort_order = SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE + " DESC";
+            Cursor cursor_read_id = db.query(SpamBusterContract.TABLE_ALL.TABLE_NAME,   // The table to query
+                    projection_id,             // The array of columns to return (pass null to get all)
+                    selection_id,              // The columns for the WHERE clause
+                    selection_args,          // The values for the WHERE clause
+                    null,                   // don't group the rows
+                    null,                   // don't filter by row groups
+                    sort_order               // The sort order
+            );
+            if (!cursor_read_id.moveToFirst()) {
+                Log.d(TAG, "DbOperationsUtility: showDateDiff(): TABLEALL is empty");
+            } else {
+                String current_date = String.valueOf(Calendar.getInstance().getTimeInMillis());
+//                Log.d(TAG, "DbOperationsUtility: showDateDiff(): Current date: " + current_date);
+                long durationinmillis = TimeUnit.MILLISECONDS.convert(Long.parseLong(duration), TimeUnit.DAYS);
+//                Log.d(TAG, "DbOperationsUtility: showDateDiff(): Duration allowed: " + durationinmillis + " i.e " + duration + " days");
+                do {
+                    String temp_id = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL._ID));
+                    String temp_date = cursor_read_id.getString(cursor_read_id.getColumnIndexOrThrow(SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE));
+//                    Log.d(TAG, "DbOperationsUtility: showDateDiff(): date : " + temp_date);
+                    Long diff = Long.parseLong(current_date) - Long.parseLong(temp_date);
+                    String difference = String.valueOf(diff);
+                    Long timetodelete_long = durationinmillis - Long.parseLong(difference);
+                    String timelefttodelete = String.valueOf(timetodelete_long);
+//                    Log.d(TAG, String.format("DbOperationsUtility: showDateDiff(): id:%s  difference in date:%s  time left to delete %s",
+//                            temp_id, difference, timelefttodelete));
+                    long days_todelete = TimeUnit.MILLISECONDS.toDays(timetodelete_long);
+//                    Log.d(TAG, "DbOperationsUtility: showDateDiff(): Time left to delete in days " + days_todelete  + " for ID : " + temp_id);
+                    if(days_todelete<=0) {
+                        idstodelete.add(temp_id);
+                    }
+                } while (cursor_read_id.moveToNext());
+            }
+            cursor_read_id.close();
+//            db.close();
+        return idstodelete;
     }
 }

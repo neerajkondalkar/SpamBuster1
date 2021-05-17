@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
     public static boolean inbox_sync_tableall = false;   //shows whether our CONTENT_SMS_INBOX is in sync with TABLE_ALL
     SharedPreferences autodelete_settings;
-
+    public static String auto_delete_duration;
     private Thread thread;
     ArrayList<String> sms_messages_list = new ArrayList<>();
     RecyclerView messages;
@@ -140,14 +140,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         final String TAG_onStop = " onDestroy(): ";
         Log.d(TAG, TAG_onStop + " called ");
-        super.onDestroy();
         active = false; //indicate that activity is killed, check bottom of SmsBroadcastReceiver.onReceive() method
         try {
             tableAllSyncInboxHandlerThread.quit();
+            getPersonsHandlerThread.quit();
         } catch (Exception e) {
             Log.d(TAG, "MainActivity: onDestroy(): exception " + e);
         }
-        spamBusterdbHelper.close();
+        finally {
+            spamBusterdbHelper.close();
+            super.onDestroy();
+        }
     }
 
 
@@ -203,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
             else{
                 Log.d(TAG, "MainActivity: onCreate(): Autodelete duration set to default 28");
             }
+        }
+        else{
+            auto_delete_duration = current_duration;
         }
 
         //setting onclick listeners
@@ -822,6 +828,7 @@ public class MainActivity extends AppCompatActivity {
             String current_duration = autodelete_settings.getString("autodelete_dur", "");
             if(current_duration.equals(String.valueOf(defaultduration))){
                 Log.d(TAG, "MainActivity: setDefaultAutoDeleteIfNotPresent(): success");
+                auto_delete_duration = current_duration;
                 return true;
             }
             return false;
