@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler main_handler = new Handler();
     public static boolean table_all_sync_inbox = false;   //shows whether our TABLE_ALL is in sync with inbuilt sms/inbox
     public static boolean inbox_sync_tableall = false;   //shows whether our CONTENT_SMS_INBOX is in sync with TABLE_ALL
-    SharedPreferences autodelete_settings;
+    private SharedPreferences autodelete_settings;
     public static String auto_delete_duration;
     private Thread thread;
     ArrayList<String> sms_messages_list = new ArrayList<>();
@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton_inbox;
     private ToggleButton toggleButton_spam;
     private ImageButton btn_preferences;
+    public static int toggled_section = TABLE_ALL;
     protected static ArrayList<String> messages_list_tableall = new ArrayList();
     public SpamBusterdbHelper spamBusterdbHelper;
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -220,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 if (toggleButton_all.isChecked()){
                     toggleButton_inbox.setChecked(false);
                     toggleButton_spam.setChecked(false);
+                    toggled_section = TABLE_ALL;
                     showAll();
                 }
             }
@@ -232,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
                 if (toggleButton_inbox.isChecked()) {
                     toggleButton_all.setChecked(false);
                     toggleButton_spam.setChecked(false);
+                    toggled_section = TABLE_HAM;
                     showInbox();
                 }
             }
@@ -244,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                 if (toggleButton_spam.isChecked()){
                     toggleButton_inbox.setChecked(false);
                     toggleButton_all.setChecked(false);
+                    toggled_section = TABLE_SPAM;
                     showSpam();
                 }
             }

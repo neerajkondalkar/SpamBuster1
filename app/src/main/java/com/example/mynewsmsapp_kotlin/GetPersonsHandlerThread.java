@@ -187,8 +187,13 @@ public class GetPersonsHandlerThread extends HandlerThread {
 //                                            Log.d(TAG, "GetPersonsHandlerThread: handleMessage(): number does not start with 91");
                                         }
 //                                        if (!inbox_list.contains(current_address) && !spam_list.contains(current_address)) {
+                                        //insert if not present
                                         if(!inbox_list.contains(current_address)){
                                             inbox_list.add(current_address);
+                                            //if the address was there in spam_list, then remove it from there.
+                                            if(spam_list.contains(current_address)){
+                                                spam_list.remove(current_address);
+                                            }
                                         }
                                     } while (cursor.moveToNext());
                                     //fill persons_list with all_list because persons_list is what is going to be displayed in the adapter

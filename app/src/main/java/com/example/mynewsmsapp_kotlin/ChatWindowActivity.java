@@ -23,6 +23,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_ALL;
+import static com.example.mynewsmsapp_kotlin.MainActivity.TABLE_HAM;
+import static com.example.mynewsmsapp_kotlin.MainActivity.toggled_section;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
 
@@ -130,7 +133,18 @@ public class ChatWindowActivity extends AppCompatActivity {
                     SpamBusterContract.TABLE_ALL.COLUMN_SMS_EPOCH_DATE,
                     SpamBusterContract.TABLE_ALL.COLUMN_SPAM
             };
-            String selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "%'";
+            String selection;
+            if(toggled_section == TABLE_ALL) {
+                 selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "%'";
+            }
+            else if(toggled_section==TABLE_HAM){
+                selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "%' AND "
+                        + SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " LIKE '" + HAM + "'";
+            }
+            else{ //if TABLE_SPAM
+                selection = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "%' AND "
+                        + SpamBusterContract.TABLE_ALL.COLUMN_SPAM + " LIKE '" + SPAM + "'";
+            }
 //            String[] selectionArgs = {"\'%" + address + "\'"};
             String[] selectionArgs = null;
 // How you want the results sorted in the resulting Cursor
