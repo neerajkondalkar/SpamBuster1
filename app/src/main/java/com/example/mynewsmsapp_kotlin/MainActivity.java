@@ -1,6 +1,7 @@
 package com.example.mynewsmsapp_kotlin;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +14,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.ContactsContract;
-import android.telephony.SmsMessage;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -36,7 +39,6 @@ import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_INBO
 import static com.example.mynewsmsapp_kotlin.GetPersonsHandlerThread.LOADED_SPAM;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.DONE_TASK_SYNCTABLES;
 import static com.example.mynewsmsapp_kotlin.TableAllSyncInboxHandlerThread.TASK_SYNCTABLES;
-import static java.lang.Thread.currentThread;
 
 // This activity is used for:
 // 1. Showing all messages to user
@@ -50,12 +52,13 @@ public class MainActivity extends AppCompatActivity {
     public static final int TABLE_SPAM = 3;
     public static final int TABLE_CONTENTSMSINBOX = 4;       //same as TABLE_CONTENT_SMS_INBOX
     public static final int TABLE_CONTENT_SMS_INBOX = 4;     //same as TABLE_CONTENTSMSINBOX
-
     public static final ArrayList<String> persons_list = new ArrayList<>();
     public static final ArrayList<String> all_list = new ArrayList<>();
     public static final ArrayList<String> spam_list = new ArrayList<>();
     public static final ArrayList<String> inbox_list = new ArrayList<>();
-
+    private static final int VALID_DURATION = 0;
+    private static final int INVALID_DURATION_DAYS = -6065;
+    private static final int INVALID_DURATION_NOTINTEGER = -6066;
 
     private GetPersonsHandlerThread getPersonsHandlerThread;
 
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton_all;
     private ToggleButton toggleButton_inbox;
     private ToggleButton toggleButton_spam;
+    private ImageButton btn_preferences;
     protected static ArrayList<String> messages_list_tableall = new ArrayList();
     public SpamBusterdbHelper spamBusterdbHelper;
     //    ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -179,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
         toggleButton_all = (ToggleButton) findViewById(R.id.all_sms_toggle);
         toggleButton_inbox = (ToggleButton) findViewById(R.id.inbox_sms_toggle);
         toggleButton_spam = (ToggleButton) findViewById(R.id.spam_sms_toggle);
+        btn_preferences = (ImageButton) findViewById(R.id.button_preferences);
         //enable toggle tableham on creation of activity
         toggleButton_all.setChecked(true);
         spamBusterdbHelper = new SpamBusterdbHelper(this);
@@ -218,6 +223,15 @@ public class MainActivity extends AppCompatActivity {
                     toggleButton_all.setChecked(false);
                     showSpam();
                 }
+            }
+        });
+
+        btn_preferences.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                preferencesDialog();
             }
         });
 
@@ -705,6 +719,72 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.instance().displayPersonsRunnable = new DisplayPersonsRunnable(MainActivity.instance());
         this.thread = new Thread(MainActivity.instance().displayPersonsRunnable);
         this.thread.start();
+    }
+
+    private void preferencesDialog(){
+        final AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.instance());
+        View mView = MainActivity.instance().getLayoutInflater().inflate(R.layout.setting_autodelete,null);
+        Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel_autodelete);
+        Button btn_okay = (Button)mView.findViewById(R.id.btn_okay_autodelete);
+        final EditText et_autodelete_duration = (EditText)mView.findViewById(R.id.et_autodelete_duration);
+        alert.setView(mView);
+        final AlertDialog alertDialog = alert.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        //cancel button just exits the dialog box
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        btn_okay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Editable readval = et_autodelete_duration.getText();
+                String str_duration = readval.toString();
+                switch (checkDurationValidity(str_duration)){
+                    case VALID_DURATION:
+                        Toast.makeText(MainActivity.instance(), "Valid duration entered!", Toast.LENGTH_SHORT).show();
+                        alertDialog.dismiss();
+                        break;
+                    case INVALID_DURATION_DAYS:
+                        Toast.makeText(MainActivity.instance(), "Number of days should be between 7 and 60", Toast.LENGTH_SHORT).show();
+                        break;
+                    case INVALID_DURATION_NOTINTEGER:
+                        Toast.makeText(MainActivity.instance(), "Invalid duration entered", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                Log.d(TAG, "MainActivity: onClick(): duration entered by user: " + str_duration);
+            }
+        });
+        alertDialog.show();
+    }
+
+    private int checkDurationValidity(String val){
+        int errorCode = VALID_DURATION;
+        if(val.length() == 0){
+            errorCode = INVALID_DURATION_NOTINTEGER;
+        }
+        else {
+            for (int i = 0; i < val.length(); i++) {
+                if (!Character.isDigit(val.charAt(i))) {
+                    Toast.makeText(MainActivity.instance(), "Incorrect value entered. Please enter only digits", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "MainActivity: onClick(): non-digit character encountered. Invalid");
+                    errorCode = INVALID_DURATION_NOTINTEGER;
+                    break;
+                }
+            }
+            if (errorCode == VALID_DURATION) {
+                Log.d(TAG, "MainActivity: onClick(): digits entered ");
+                if (Integer.parseInt(val) >= 7 && Integer.parseInt(val) <= 60) {
+                    Log.d(TAG, "MainActivity: validDurationEntered(): valid duration entered");
+                } else {
+                    Log.d(TAG, "MainActivity: validDurationEntered(): Invald duration. Should be greater than 7 and less than 60");
+                    errorCode = INVALID_DURATION_DAYS;
+                }
+            }
+        }
+        return errorCode;
     }
 
     public Handler getHandler(){

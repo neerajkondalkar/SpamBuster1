@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp">
+    <TextView
+        android:id="@+id/txt_autodelete_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set auto-delete time"
+        android:textSize="22sp"
+        android:textAlignment="center"
+        android:gravity="center_horizontal" />
+
+    <EditText
+        android:id="@+id/et_autodelete_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Number of days"
+        android:textSize="22sp"
+        android:textAlignment="center"
+        android:gravity="center_horizontal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp">
+
+        <Button
+            android:id="@+id/btn_cancel_autodelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="Cancel"
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_okay_autodelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="Okay"
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
+
+
+    </LinearLayout>
+</LinearLayout>
