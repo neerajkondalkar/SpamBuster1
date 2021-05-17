@@ -2,33 +2,24 @@ package com.example.mynewsmsapp_kotlin;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_indexofmessage_to_tableallid_ChatWindowActivity;
 import static com.example.mynewsmsapp_kotlin.ChatWindowActivity.hashmap_tableallid_to_spam_ChatWindowActivity;
-import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_list;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.HAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.UNCLASSIFIED;
@@ -136,7 +127,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         }
         option = option1;
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
-        View mView = ChatWindowActivity.instance().getLayoutInflater().inflate(R.layout.dummy_dialogue,null);
+        View mView = ChatWindowActivity.instance().getLayoutInflater().inflate(R.layout.movemessagedialog,null);
         Button btn_cancel = (Button)mView.findViewById(R.id.btn_cancel);
         Button btn_option = (Button)mView.findViewById(R.id.btn_okay);
         TextView txt_title = (TextView)mView.findViewById(R.id.txt_movetotitle);
