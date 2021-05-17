@@ -441,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             //always place new sms at top i.e index 0
+            String messagetodisplay = "Message from : " + mySmsMessage.getAddress() + "\n" + sms_message_str;
             sms_adapter.insert(0, sms_message_str);
             sms_adapter.notifyDataSetChanged();
         } catch (Exception e) {
