@@ -79,7 +79,6 @@ public class NewSmsMessageRunnable implements Runnable{
         if(!getContactName(context, address).equals(address)){
             Log.d(TAG, String.format("NewSmsMessageRunnable: run(): sender '%s' is in our address book named '%s', hence declaring as HAM",
                     address, getContactName(context, address)));
-            values.put(SpamBusterContract.TABLE_ALL.COLUMN_SPAM, HAM);
             message_is_spam = false;
         }
         else {
@@ -103,8 +102,8 @@ public class NewSmsMessageRunnable implements Runnable{
             Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + new SBNetworkUtility().checkNetwork(context));
             int prediction = -1;
 
-            //if message has the word OTP in it, then declare it as HAM
-            if(MySmsMessage.isMessageOTP(sms_body)) {
+            //if message has the word OTP in it, then declare it as HAM   ||   is message is from known person
+            if(MySmsMessage.isMessageOTP(sms_body) || message_is_spam == false) {
                 http_req_success = true;
                 message_is_spam = false;
                 prediction = 0;
@@ -126,6 +125,7 @@ public class NewSmsMessageRunnable implements Runnable{
                 http_req_success = true;
                 message_is_spam = true;
             } else if (prediction == 0) {
+                Log.d(TAG, "NewSmsMessageRunnable: run(): message is HAM");
                 http_req_success = true;
                 message_is_spam = false;
             } else {
