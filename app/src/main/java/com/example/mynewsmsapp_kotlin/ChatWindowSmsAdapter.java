@@ -108,7 +108,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
                 spam_status = "UNCLASSIFIED";
             }
             Log.d(TAG, String.format(" click at position: %d,   itemID : %s ,   spam = %s\n", position, tableallID, spam));
-            Toast.makeText(context, String.format(" click at position: %d,   itemID : %s, it is %s", position, tableallID, spam_status), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, String.format(" click at position: %d,   itemID : %s, it is %s", position, tableallID, spam_status), Toast.LENGTH_LONG).show();
 
             //show dialog only if SPAM or HAM,  and not UNCLASSIFIED (maybe later we can put that)
             if(!spam.equals(UNCLASSIFIED)) {
@@ -184,13 +184,21 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(ChatWindowActivity.instance(), "Message with id:" + id + " has been deleted successfully!", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(ChatWindowActivity.instance(), "Message with id:" + id + " has been deleted successfully!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatWindowActivity.instance(), "Message has been deleted successfully!", Toast.LENGTH_SHORT).show();
                                 removeMessage(getLayoutPosition());
                             }
                         });
                     }
                     else{
                         Log.d(TAG, "SmsViewHolder: run(): Could not delete message with id:" + id);
+                        Handler handler = ChatWindowActivity.instance().getHandler();
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(ChatWindowActivity.instance(), "Could not delete the message", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }).start();

@@ -192,9 +192,12 @@ public class ChatWindowActivity extends AppCompatActivity {
                         calendar.setTimeInMillis(milli_seconds);
                         String printable_date = formatter.format(calendar.getTime());
                         @SuppressLint("DefaultLocale")
-                        String str = String.format("itemID = %d\ncorressinboxid: %s\nSender: %s\nReceived at: %s\nMessage: %s,\nSpam: %s\n",
-                                itemId, corress_inbox_id, MainActivity.getContactName(activity, sms_address), printable_date,
-                                sms_body, spam_str);
+//                        String str = String.format("itemID = %d\ncorressinboxid: %s\nSender: %s\nReceived at: %s\nMessage: %s,\nSpam: %s\n",
+//                                itemId, corress_inbox_id, MainActivity.getContactName(activity, sms_address), printable_date,
+//                                sms_body, spam_str);
+                        String str = String.format("%s                         %s\n\n%s\n",
+                                 printable_date, spam_str, sms_body);
+
 //                        String str = String.format("ItemID = " + itemId + "\ncorress_inbox_id = " +
 //                                corress_inbox_id + "\n SMS From: " + MainActivity.getContactName(activity, sms_address) +
 //                                "\n Recieved at: " + printable_date + "\n" + sms_body);

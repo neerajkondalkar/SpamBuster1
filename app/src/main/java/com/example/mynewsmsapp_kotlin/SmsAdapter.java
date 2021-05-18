@@ -116,7 +116,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         public void onClick(View v) {
             int position = getLayoutPosition();
             String person_name = MainActivity.getContactName(context, sms_messages_list.get(position));
-            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "Position : " + position + " - " + sms_messages_list.get(position) + " alias " + person_name, Toast.LENGTH_SHORT).show();
             Intent start_chat_windows_activity = new Intent(MainActivity.instance(), ChatWindowActivity.class);
             start_chat_windows_activity.putExtra("address", sms_messages_list.get(position));
             context.startActivity(start_chat_windows_activity);
@@ -125,7 +125,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
         @Override
         public boolean onLongClick(View v) {
             int position = getLayoutPosition();
-            Toast.makeText(context, String.format("long pressed on position:%d where address is %s", position, map_position_to_address.get(position)), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, String.format("long pressed on position:%d where address is %s", position, map_position_to_address.get(position)), Toast.LENGTH_SHORT).show();
             showDialog(map_position_to_address.get(position));
             return true;
         }

@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
 //    ----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    //reads all sms from database and display all the sms using the array_adapter
+    //reads all addresses from database and display  the persons list
     public void refreshSmsInbox() {
 
         //DEBUG code start
