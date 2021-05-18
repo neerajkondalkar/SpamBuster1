@@ -132,7 +132,7 @@ public class ChatWindowSmsAdapter extends RecyclerView.Adapter<ChatWindowSmsAdap
         Button btn_option = (Button)mView.findViewById(R.id.btn_okay);
         TextView txt_title = (TextView)mView.findViewById(R.id.txt_movetotitle);
         Button btn_delete = (Button)mView.findViewById(R.id.btn_delete);
-        txt_title.setText(String.format("Move message id: %s to %s ?", tableallid, option));
+        txt_title.setText(String.format("Move message to %s ?", option));
         alert.setView(mView);
         final AlertDialog alertDialog = alert.create();
         alertDialog.setCanceledOnTouchOutside(false);
