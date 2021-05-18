@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class SmsBroadcastReceiver extends BroadcastReceiver {
 
@@ -55,6 +56,10 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 String sms_body = "";
                 String address="";
                 long timestampMillis=0;
+                long date_sent = 0;
+                Date dateObj = new Date();
+                //This method returns the time in millis
+                long date = 0;
                 int protocol_id=0;
 
 //                Log.d(TAG, TAG_onReceive + " sms_message_str = " + sms_message_str);
@@ -84,7 +89,9 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, TAG_onReceive + "address = " + address);
 
                     timestampMillis = sms_message.getTimestampMillis();
-                    Log.d(TAG, TAG_onReceive + " timestampmillis = " + timestampMillis);
+                    Log.d(TAG, TAG_onReceive + "(date_sent) timestampmillis = " + timestampMillis);
+                    date_sent = timestampMillis;
+                    date = dateObj.getTime();
 
                     protocol_id = sms_message.getProtocolIdentifier();
                     Log.d(TAG, "SmsBroadcastReceiver: onReceive(): protocol identifier = " + Integer.toString(protocol_id));
@@ -92,11 +99,18 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     Calendar calendar = Calendar.getInstance();
                     DateFormat formatter;
                 formatter = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+
+                String printable_datesent = "";
+                calendar.setTimeInMillis(date_sent);
+                printable_datesent = formatter.format(calendar.getTime());
+
                 String printable_date = "";
-                    calendar.setTimeInMillis(timestampMillis);
-                    printable_date = formatter.format(calendar.getTime());
+                calendar.setTimeInMillis(date);
+                printable_date = formatter.format(calendar.getTime());
+
                     sms_message_str = "SMS from: " + MainActivity.getContactName(context, address) + "\n";
-                    sms_message_str = "Received at : " + printable_date + "\n";
+                    sms_message_str += "sent at : " + printable_datesent + "\n";
+                    sms_message_str +=  "received at : " + printable_date + "\n";
                     sms_message_str += sms_body;
                     Log.d(TAG, TAG_onReceive + "sms_message_str = " + sms_message_str);
                     sender_number = address; // for Toast.makeText()   to show sender number or name
