@@ -102,7 +102,7 @@ public class NewSmsMessageRunnable implements Runnable{
             Log.d(TAG, "NewSmsMessageRunnable: run(): checking for internet connection... " + new SBNetworkUtility().checkNetwork(context));
             int prediction = -1;
 
-            //if message has the word OTP in it, then declare it as HAM
+            //if message has the word OTP in it, then declare it as HAM   ||   is message is from known person
             if(MySmsMessage.isMessageOTP(sms_body) || message_is_spam == false) {
                 http_req_success = true;
                 message_is_spam = false;
