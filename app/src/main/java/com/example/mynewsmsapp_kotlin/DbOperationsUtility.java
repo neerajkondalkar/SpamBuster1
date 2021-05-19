@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.example.mynewsmsapp_kotlin.NewSmsMessageRunnable.SPAM;
 
@@ -209,7 +211,22 @@ public class DbOperationsUtility {
         SpamBusterdbHelper spamBusterdbHelper = new SpamBusterdbHelper(context);
         SQLiteDatabase db = spamBusterdbHelper.getWritableDatabase();
         ContentResolver contentResolver = context.getContentResolver();
-        String whereClause = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '" + address + "'";
+        //if it is a phone number (all digits), then it means we have possible +() before it which have been stripped out earlier
+        Pattern pattern = Pattern.compile("^\\d{10}", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(address);
+        boolean matchFound = matcher.find();
+        String whereClause;
+        //we have to keep in mind that there might be some number +91 before the address in the database
+        if (matchFound) {
+            Log.d(TAG, "DbOperationsUtility: deleteConversation(): it is a phone number ");
+            whereClause = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '%" + address + "'";
+        }
+        //if not a number, address should be exactly matching
+        else {
+            Log.d(TAG, "DbOperationsUtility: deleteConversation(): not a phone number");
+            whereClause = SpamBusterContract.TABLE_ALL.COLUMN_SMS_ADDRESS + " LIKE '" + address + "'";
+        }
+
 //        String[] whereArgs = new String[] {address};
         String [] whereArgs = null;
         Log.d(TAG, "DbOperationsUtility: deleteConversation(): deleting conversation of " + address + " from TABLEALL");
