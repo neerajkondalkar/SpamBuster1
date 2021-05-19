@@ -84,9 +84,7 @@ public class PredictionProbingRunnable implements Runnable {
 
             for(int i=0; i<id.length; i++){
                 JSONObject jo = new JSONObject();
-//                Integer idint = Integer.parseInt(id) + i;
                 try {
-//                    jo.put("id", String.valueOf(idint));
                     jo.put("id", id[i]);
                     jo.put("message_body", message_body[i]);
                     ja.put(jo);
@@ -139,7 +137,6 @@ public class PredictionProbingRunnable implements Runnable {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                // System.out.println(response.toString());
                 System.out.println("[MY_DEBUG] Complete response:");
                 System.out.println("[MY_DEBUG] " + response.toString());
                 JSONObject obj = null;
