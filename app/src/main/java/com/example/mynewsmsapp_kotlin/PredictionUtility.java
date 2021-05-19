@@ -155,21 +155,17 @@ public class PredictionUtility {
 
                 for(int i=0; i<result_ja.length(); i++){
                     JSONObject tempjo = (JSONObject) result_ja.get(i);
-//                    Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s\n", i, tempjo.toString()));
                     try{
 //                        Log.d(TAG, " [API] PredictionUtility: makePrediction(): extract ID and spam prediction from the JSON object");
 //                        Log.d(TAG, String.format(" [API] PredictionUtility: makePrediction(): [%d]  %s  -   %s\n", i, tempjo.get("id").toString(), tempjo.get("spam").toString()));
                         if(tempjo.get("spam").toString().equals("1")){
                             result_map.put(tempjo.get("id").toString(), 1);
-//                            return 1;
                         }
                         else if(tempjo.get("spam").toString().equals("0")){
                             result_map.put(tempjo.get("id").toString(), 0);
-//                            return 0;
                         }
                         else{
                             result_map.put(tempjo.getString("id"), -1);
-//                            return -1;
                         }
 
                     }
