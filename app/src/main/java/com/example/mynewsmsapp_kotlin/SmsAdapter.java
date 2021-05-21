@@ -21,6 +21,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.example.mynewsmsapp_kotlin.MainActivity.all_list;
+import static com.example.mynewsmsapp_kotlin.MainActivity.inbox_list;
+import static com.example.mynewsmsapp_kotlin.MainActivity.spam_list;
+
+
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
     private static final String TAG = " [MY_DEBUG] " + SmsAdapter.class.getSimpleName();
     public static HashMap<String, Integer> map_address_to_position = new HashMap<>();
@@ -71,7 +76,11 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.SmsViewHolder>{
 
     public void removePerson(int position){
         Log.d(TAG, "SmsAdapter: removePerson(): removing the person'conversation at position : " + position);
+        String personremoved = sms_messages_list.get(position);
         sms_messages_list.remove(position);
+        all_list.remove(personremoved);
+        inbox_list.remove(personremoved);
+        spam_list.remove(personremoved);
         refreshMapAddressPosition();
         notifyDataSetChanged();
     }
